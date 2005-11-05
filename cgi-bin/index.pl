@@ -53,22 +53,24 @@ if ($crimp->{HttpQuery}) { $crimp->{HttpQuery} = join '', '?', $crimp->{HttpQuer
 
 
 ####################################################################
-#this is a server beep (used for testing - only works where `beep` has been installed)
+# this is a server beep (used for testing)
+# Turns local and remote IP's into a tune
+# gentoo users > emerge beep
+
 $RemoteHost  = $ENV{'REMOTE_ADDR'};
-#$RemoteHost  = "0.255.128.168";
 $ServerHost  = $ENV{'SERVER_ADDR'};
 ($beep[4],$beep[3],$beep[2],$beep[1]) = split(/\./,$ServerHost);
 ($beep[5],$beep[6],$beep[7],$beep[8]) = split(/\./,$RemoteHost);
 
-
-#$tune ="beep";
 for ($i=1;$i<=8;$i++){
 $note =($beep[$i]+25)*10;
 $tune = "$tune -f $note -l 100 ";
 if ($i < 8){$tune = "$tune -n ";}
 }
-#$BEEP = `beep $tune`;
-#$BEEP = `beep`;
+
+# to activate, uncomment below
+# $BEEP = `beep $tune`;
+
 ####################################################################
 
 &printdebug("CRIMP [Content Redirection Internet Management Program] (Debug View)");
