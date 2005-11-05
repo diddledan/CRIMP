@@ -1,72 +1,34 @@
-#
-
-my $new_content="";
-
-
-
 @HttpRequest = split(/\//,$crimp->{HttpRequest});
-$a=0;
 
 foreach $HttpRequest (@HttpRequest){
-#printdebug "$crimp->{HttpRequest} :: $HttpRequest :: $crimp->{UserConfig}<br>";
-if ($crimp->{UserConfig} ne "/$HttpRequest"){$path = "$path/$HttpRequest";}
-$a++;
+    #printdebug "$crimp->{HttpRequest} :: $HttpRequest :: $crimp->{UserConfig}<br>";
+    if ($crimp->{UserConfig} ne "/$HttpRequest"){$path = "$path/$HttpRequest";}
 }
 
+if ($path eq '') { $path = '/index.html'; }
 
-
-
-if ($crimp->{DisplayHtml} ne "" ){&printdebug("Module 'ContentDirectory'","warn",
-		"DisplayHtml has already been filled with content"
-	);
-}
-else{
-
-
-
-#check for directory here if it is then use &$path
-sysopen (FILE,"$crimp->{ContentDirectory}$path", O_RDONLY) or die @_;
-@display_content=<FILE>;
-#$SIZE=@LINES;
-$status = "pass";
-close(FILE);
-
-
-####
-foreach $display_content(@display_content) {
-#printdebug ("parsing template $a ");
-$a++;
-
-#chop($template_content) if $line =~ /\n$/;
-
-#
-
-#while ($display_content =~ /<!--PAGE_CONTENT-->/gi){
-#printdebug ("Putting Page into Template");
-#$template_content =~ s//$crimp->{DisplayHtml}/g;;
-#}
-
-
-$new_content= "$new_content$display_content\n\n";
+if ($crimp->{DisplayHtml} ne "" ){
+    &printdebug("Module 'ContentDirectory'","warn", "DisplayHtml has already been filled with content");
+}else{
+    #check for directory here if it is then use $path
+    #make sure the requested file is _NOT_ a directory (Fremen)
+    if ( -d join('', $crimp->{ContentDirectory}, $path) ) { &printdebug("Module 'ContentDirectory'", 'fail', "$crimp->{ContentDirectory}$path is a directory. I cannot open this."); }
+    sysopen (FILE,"$crimp->{ContentDirectory}$path",O_RDONLY) or &printdebug("Module 'ContentDirectory'", 'fail', "Couldn't open file for reading", "file: $crimp->{ContentDirectory}$path", "error: $!");
+    @display_content=<FILE>;
+    close(FILE);
     
+    my $new_content='';
+    
+    ####
+    foreach $display_content(@display_content) {
+        $new_content= "$new_content$display_content\n\n";
+    }
+    
+    $crimp->{DisplayHtml} = $new_content;
+    
+    ####
+    &printdebug("Module 'ContentDirectory'","pass","Started With: $crimp->{ContentDirectory}");
+    #$crimp->{DisplayHtml}=@display_content;
 }
-
-
-$crimp->{DisplayHtml} = $new_content;
-####
-
-
-
-
-
-
-
-&printdebug("Module 'ContentDirectory'","pass","Started With: $crimp->{ContentDirectory}");
-
-#$crimp->{DisplayHtml}=@display_content;
-
-}
-
-
 
 1;
