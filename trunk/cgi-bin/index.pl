@@ -2,7 +2,7 @@
 
 
 # Crimp
-# Author: Martin Guppy <deadpan110@yooniks.com>
+# Author: Martin Guppy <deadpan110@gmail.com>
 # Version: 1.0
 # Home/Docs/Licensing: http://ind-network.co.uk/apps/crimp/
 
