@@ -189,13 +189,14 @@ if (($crimp->{ExitCode} ne "200")&&($crimp->{DisplayHtml} ne "")){
 #This is where we finish the document or file
 print $query->header('text/html',$crimp->{ExitCode});
 &printdebug("Crimp Exit","pass","Error code: $crimp->{ExitCode}");
+if ($crimp->{DebugMode} eq "on"){
+    $crimp->{DisplayHtml} =~ s/<!--DEBUG-->/$PRINT_DEBUG/g;;
+}
 print "$crimp->{DisplayHtml}";
 
 ####################################################################
 
-if ($crimp->{DebugMode} eq "on"){
-    print "<br />$PRINT_DEBUG";
-}
+
 
 #foreach $item (keys %ENV) { print "$item = $ENV{$item}\n<br>";}
 
