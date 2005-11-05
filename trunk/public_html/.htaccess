@@ -1,0 +1,4 @@
+Options -Indexes
+
+ErrorDocument 403 /cgi-bin/index.pl 
+ErrorDocument 404 /cgi-bin/index.pl 
