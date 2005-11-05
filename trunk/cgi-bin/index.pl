@@ -46,11 +46,11 @@ $crimp = {
     HttpRequest =>  "$ENV{'REDIRECT_URL'}",
     HttpQuery =>  "$ENV{'REDIRECT_QUERY_STRING'}",
     ExitCode => "500",
-    DebugMode => "off",
+    DebugMode => "off"
 };
 
+#use join here as it's the most efficient method of concatonating strings (Fremen)
 if ($crimp->{HttpQuery}) { $crimp->{HttpQuery} = join '', '?', $crimp->{HttpQuery}; }
-
 
 ####################################################################
 # this is a server beep (used for testing)
@@ -92,7 +92,7 @@ if ($i < 8){$tune = "$tune -n ";}
 );
 
 if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
-    $crimp = {DebugMode => 'on',};
+    $crimp = {DebugMode => 'on'};
     printdebug(
         "Crimp Files not found",
         "warn",
