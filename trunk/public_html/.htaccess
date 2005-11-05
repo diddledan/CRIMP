@@ -1,4 +1,12 @@
-Options -Indexes
+Options +FollowSymLinks -Indexes
 
-ErrorDocument 403 /cgi-bin/index.pl 
-ErrorDocument 404 /cgi-bin/index.pl 
+ErrorDocument 403 /cgi-bin/index.pl
+ErrorDocument 404 /cgi-bin/index.pl
+
+<ifModule mod_rewrite.c>
+rewriteengine on
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /cgi-bin/index.pl [L,QSA]
+</ifModule>
