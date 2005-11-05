@@ -107,7 +107,11 @@ $Config = Config::Tiny->read( 'crimp.ini' );
 
 #switch to debug mode if set in crimp.ini
 if ($crimp->{DebugMode} ne "on"){
-    $crimp->{DebugMode}=$Config->{_}->{DebugMode};
+    if (($query->param('debug') eq 'on') && ($Config->{_}->{DebugMode} eq 'page')) {
+        $crimp->DebugMode = 'on';
+    } else {
+        $crimp->{DebugMode}=$Config->{_}->{DebugMode};
+    }
 }
 
 #set default values
