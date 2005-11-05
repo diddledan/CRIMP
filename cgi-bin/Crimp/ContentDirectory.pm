@@ -12,8 +12,10 @@ if ($crimp->{DisplayHtml} ne "" ){
 }else{
     #check for directory here if it is then use $path
     #make sure the requested file is _NOT_ a directory (Fremen)
-    if ( -d join('', $crimp->{ContentDirectory}, $path) ) { &printdebug("Module 'ContentDirectory'", 'fail', "$crimp->{ContentDirectory}$path is a directory. I cannot open this."); }
-    sysopen (FILE,"$crimp->{ContentDirectory}$path",O_RDONLY) or &printdebug("Module 'ContentDirectory'", 'fail', "Couldn't open file for reading", "file: $crimp->{ContentDirectory}$path", "error: $!");
+    my $requested = join('', $crimp->{ContentDirectory}, $path);
+    if ( !-e $requested ) { $crimp->{ExitCode} = "404"; &printdebug("Module 'ContentDirectory'", 'fail', "$requested does not exist. Please check the URL and try again."); }
+    if ( -d $requested ) { &printdebug("Module 'ContentDirectory'", 'fail', "$requested is a directory. I cannot open this."); }
+    sysopen (FILE,$requested,O_RDONLY) or &printdebug("Module 'ContentDirectory'", 'fail', "Couldn't open file for reading", "file: $requested", "error: $!");
     @display_content=<FILE>;
     close(FILE);
     
