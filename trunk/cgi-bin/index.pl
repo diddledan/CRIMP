@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!perl
 # CRIMP - Content Redirection Internet Management Program
 # Authors: The CRIMP team
 # Project Leads: Martin "Deadpan110" Guppy <deadpan110@sourceforge.net>,
@@ -18,8 +18,8 @@ package Crimp;
 # <[file] or [directory] = "[local server path to file/directory]"
 # [OPTIONS GO HERE]
 # ie: *.exe's are located on a number of remote servers
-#		try a random server to redirect to 
-#</[file] or [directory]>
+#   try a random server to redirect to 
+# </[file] or [directory]>
 # also enable file to contain # comments
 #
 #Produce apache style logs
@@ -53,7 +53,7 @@ if ($crimp->{HttpQuery}) { $crimp->{HttpQuery} = join '', '?', $crimp->{HttpQuer
 
 
 ####################################################################
-#this is a server beep (used for testing)
+#this is a server beep (used for testing - only works where `beep` has been installed)
 $RemoteHost  = $ENV{'REMOTE_ADDR'};
 #$RemoteHost  = "0.255.128.168";
 $ServerHost  = $ENV{'SERVER_ADDR'};
@@ -94,7 +94,9 @@ if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
     printdebug(
         "Crimp Files not found",
         "warn",
-        "Please check the following files exist in the crimp directory"
+        "Please check the following files exist in the crimp directory",
+        "crimp.ini",
+        "Config/Tiny.pm"
     );
 }
 
@@ -122,10 +124,10 @@ if ($crimp->{DebugMode} ne "on"){
 #start with requested and work backwards to root until match found
 #ie /home/news/index.html
 #   /home/news
-#	/home
+#   /home
 
 @HttpRequest = split(/\//,$crimp->{HttpRequest});
-
+my $tempstr = '';
 foreach $HttpRequest (@HttpRequest){
     if ($HttpRequest ne "") {
         $tempstr = "$tempstr/$HttpRequest";
@@ -168,10 +170,10 @@ foreach $IniCommands (@IniCommands){
         if ( !-e "Crimp/$IniCommands.pm"){
             printdebug("Module '$IniCommands' not found","warn","Check 'crimp.ini' for the following:","$IniCommands = $crimp->{$IniCommands}");
         }else{
-            #	printdebug("Module '$IniCommands' loading","pass","click here to get this file");
+            #printdebug("Module '$IniCommands' loading","pass","click here to get this file");
             require "Crimp/$IniCommands.pm";
         }
-    }	
+    }
 }
 
 ####################################################################
@@ -184,7 +186,7 @@ if (($crimp->{ExitCode} ne "200")&&($crimp->{DisplayHtml} ne "")){
 
 #This is where we finish the document or file
 print $query->header('text/html',$crimp->{ExitCode});
-printdebug("Crimp Exit","pass","Error code: $crimp->{ExitCode}");
+&printdebug("Crimp Exit","pass","Error code: $crimp->{ExitCode}");
 print "$crimp->{DisplayHtml}";
 
 ####################################################################
@@ -203,12 +205,10 @@ sub printdebug(){
     my $solut="";
     my $mssge=shift(@_);
     my $stats=shift(@_);
-    my $extra=shift(@_);
 
     #print "$Config->{_}->{Debug};";
-    while ($extra){
+    while (my $extra = shift){
         $solut="$solut<br />&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>";
-        $extra=shift(@_);
     }
 
     if ($stats eq "pass"){$stats="<pre><span style='color: #fff;'>[<span style='color: #0f0;'>PASS</span>]</span></pre>"}
@@ -222,7 +222,10 @@ sub printdebug(){
     #
     #<table width='100%' border='0' cellspacing='0' cellpadding='0'><tr bgcolor='#CCCCCC'><td align='left' valign='top'><h6><font face='Verdana, Arial, Helvetica, sans-serif' size='1'>Powered by Crimp &copy;2004 IND-Web.com</font></h6><td align='right' valign='top'><font face='Verdana, Arial, Helvetica, sans-serif' size='1'><b>admin</b></font></td></tr><tr bgcolor='#000000'><td colspan='2'>$PRINT_DEBUG</td></tr></table>
     if ($quits){
-        crimp_display("debug");
+        print $query->header('text/html',$crimp->{ExitCode});
+        print $PRINT_DEBUG;
+        exit;
+        #crimp_display("debug");
         #print "META <meta http-equiv='refresh' content='30;URL=../cgi-bin/crimp.pl?mode=config'>";
         #print "<table width='100%' border='0' cellspacing='0' cellpadding='0'><tr bgcolor='#CCCCCC'><td align='left' valign='top'><h6><font face='Verdana, Arial, Helvetica, sans-serif' size='1'>Powered by Crimp &copy;2004 IND-Web.com</font></h6><td align='right' valign='top'><font face='Verdana, Arial, Helvetica, sans-serif' size='1'><b>admin</b></font></td></tr><tr bgcolor='#000000'><td colspan='2'>$PRINT_DEBUG</td></tr></table>";
     }
