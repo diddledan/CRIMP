@@ -34,13 +34,27 @@ $req->header('Accept' => '*/*');
 $res = $ua->request($req);
 
 if ($res->is_success) {
-  #printdebug("File exists on remote server");
-  &printdebug("Module 'VirtualRedirect'","pass","Started With: $crimp->{VirtualRedirect}","Fetching the following content:","$crimp->{VirtualRedirect}$path$crimp->{HttpQuery}");
-  $crimp->{DisplayHtml}=$res->content;
-  #print $res->content;
-} else {
-  &printdebug("Module 'VirtualRedirect'","warn","Started With: $crimp->{VirtualRedirect}","Fetching the following content:","$crimp->{VirtualRedirect}$path$crimp->{HttpQuery}","connection error");
-  $crimp->{DisplayHtml}="<span style='color: f00;'>Connection error</span>";
+#printdebug("File exists on remote server");
+
+
+
+&printdebug("Module 'VirtualRedirect'","pass","Started With: $crimp->{VirtualRedirect}","Fetching the following content:","$crimp->{VirtualRedirect}$path$crimp->{HttpQuery}","REM: This url needs fixing by removing config entry from url");
+
+$crimp->{DisplayHtml}= $res->content;
+
+
+####################################################################
+# not working yet... should correct links and images here
+# Change ServerName to ServerName/Userconfig
+$testing="$crimp->{ServerName}$crimp->{UserConfig}";
+&printdebug("Correct Links","warn","Work in progress","Change all occurences of $crimp->{ServerName} to $crimp->{ServerName}$crimp->{UserConfig}");
+$crimp->{DisplayHtml} =~ s/$crimp->{ServerName}/$testing/gi;
+####################################################################
+
+
+#$new_content =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
+
+
 }
 
 #on success
