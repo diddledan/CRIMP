@@ -23,7 +23,7 @@ if ($crimp->{DisplayHtml} ne "" ){
     
     ####
     foreach $display_content(@display_content) {
-        $new_content= "$new_content$display_content\n\n";
+        $new_content= "$new_content$display_content";
     }
     
     $crimp->{DisplayHtml} = $new_content;
