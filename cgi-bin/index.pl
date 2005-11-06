@@ -35,18 +35,53 @@ my $query = new CGI;
 #our &printdebug;
 #die;
 
+&printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)');
+&printdebug('Details', '', 'Authors: The CRIMP Team', 'Version: 1.0', 'http://crimp.sourceforge.net/');
+
+########################
+# BEGIN plguin parsing #
+opendir(DIR, 'Crimp') or &printdebug('Plugins DIR', 'fail', "Could not open the plugins' dir for reading $!");
+rewinddir(DIR);
+my @plugins = readdir(DIR);
+closedir(DIR);
+
+my $inicmds = '';
+foreach $plugin (@plugins) {
+  # is the file we found a 'dot' file (.something - meaning hidden)?
+  # if not, check it ends in '.pm'
+  if ( ( $plugin{1} ne '.' ) && ( $plugin =~ m/[[\.][p][m]]?$/ ) ) {
+    #remove the extension
+    $plugin =~ s/[[\.][p][m]]?$//;
+    #add it to the list
+    $inicmds = join ';', $inicmds, $plugin;
+  }
+}
+
+#move DocumentTemplate to the end so that it is always called last (nasty hack I know)
+$inicmds =~ s/DocumentTemplate;//gi;
+$inicmds = join ';', $inicmds, 'DocumentTemplate';
+#remove extra semi-colon(s) from the beginning of the list
+$inicmds =~ s/^\;*//;
+#make sure that only one semi-colon seperates each plugin
+$inicmds =~ s/\;+/\;/g;
+
+if ( $inicmds eq '' ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
+else { &printdebug('Available Plugins', 'pass', $inicmds); }
+# END plugin parsing #
+######################
+
 #DocumentTemplate;ContentDirectory;ContentType
 our $crimp;
 $crimp = {
-    IniCommands => "FrameRedirect;VirtualRedirect;ContentType;ContentDirectory;DocumentTemplate",
+    IniCommands => $inicmds,
     RemoteHost => "$ENV{'REMOTE_ADDR'}",
     ServerName =>  "$ENV{'SERVER_NAME'}",
     ServerSoftware =>  "$ENV{'SERVER_SOFTWARE'}",
     UserAgent =>  "$ENV{'HTTP_USER_AGENT'}",
     HttpRequest =>  "$ENV{'REDIRECT_URL'}",
     HttpQuery =>  "$ENV{'REDIRECT_QUERY_STRING'}",
-    ExitCode => "500",
-    DebugMode => "off"
+    ExitCode => '500',
+    DebugMode => 'off'
 };
 
 #use join here as it's the most efficient method of concatonating strings (Fremen)
@@ -73,19 +108,16 @@ if ($i < 8){$tune = "$tune -n ";}
 
 ####################################################################
 
-&printdebug("CRIMP [Content Redirection Internet Management Program] (Debug View)");
-&printdebug("Details", "", "Authors: The CRIMP Team", "Version: 1.0", "http://crimp.sourceforge.net/");
-
 &printdebug(
-    "System Variables",
-    "pass",
+    'System Variables',
+    'pass',
     "ServerName: $crimp->{ServerName}",
     "ServerSoftware: $crimp->{ServerSoftware}"
 );
 
 &printdebug(
-    "User Variables",
-    "pass",
+    'User Variables',
+    'pass',
     "RemoteHost: $crimp->{RemoteHost}",
     "UserAgent: $crimp->{UserAgent}",
     "HttpRequest: $crimp->{HttpRequest}"
@@ -94,11 +126,11 @@ if ($i < 8){$tune = "$tune -n ";}
 if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
     $crimp = {DebugMode => 'on'};
     printdebug(
-        "Crimp Files not found",
-        "warn",
-        "Please check the following files exist in the crimp directory",
-        "crimp.ini",
-        "Config/Tiny.pm"
+        'Crimp Files not found',
+        'fail',
+        'Please check the following files exist in the crimp directory',
+        'crimp.ini',
+        'Config/Tiny.pm'
     );
 }
 
@@ -106,7 +138,7 @@ our $Config = Config::Tiny->new();
 $Config = Config::Tiny->read( 'crimp.ini' );
 
 #switch to debug mode if set in crimp.ini
-if ($crimp->{DebugMode} ne "on"){
+if ($crimp->{DebugMode} ne 'on'){
     if (($query->param('debug') eq 'on') && ($Config->{_}->{DebugMode} eq 'page')) {
         $crimp->{DebugMode} = 'on';
     } else {
@@ -135,7 +167,7 @@ if ($crimp->{DebugMode} ne "on"){
 @HttpRequest = split(/\//,$crimp->{HttpRequest});
 my $tempstr = '';
 foreach $HttpRequest (@HttpRequest){
-    if ($HttpRequest ne "") {
+    if ($HttpRequest ne '') {
         $tempstr = "$tempstr/$HttpRequest";
     }
 
@@ -144,13 +176,13 @@ foreach $HttpRequest (@HttpRequest){
     }
 }
 
-if ($crimp->{UserConfig} eq ""){
-    $crimp->{UserConfig}="/";
+if ($crimp->{UserConfig} eq ''){
+    $crimp->{UserConfig}='/';
 }
 
 &printdebug(
-    "'crimp.ini' Variables",
-    "pass",
+    '\'crimp.ini\' Variables',
+    'pass',
     "UserConfig: $crimp->{UserConfig}",
 );
 
@@ -159,25 +191,25 @@ if ($crimp->{UserConfig} eq ""){
 
 @IniCommands = split(/\;/,$crimp->{IniCommands});
 
-foreach $IniCommands (@IniCommands){
-    if (!$crimp->{$IniCommands}) {
-        if ($Config->{$crimp->{UserConfig}}->{$IniCommands}) {
-            $crimp->{$IniCommands}=$Config->{$crimp->{UserConfig}}->{$IniCommands};
+foreach $IniCommand (@IniCommands){
+    if (!$crimp->{$IniCommand}) {
+        if ($Config->{$crimp->{UserConfig}}->{$IniCommand}) {
+            $crimp->{$IniCommand}=$Config->{$crimp->{UserConfig}}->{$IniCommand};
         } else {
-            if ($Config->{_}->{$IniCommands}) {
-                $crimp->{$IniCommands}=$Config->{_}->{$IniCommands};
+            if ($Config->{_}->{$IniCommand}) {
+                $crimp->{$IniCommand}=$Config->{_}->{$IniCommand};
             }
         }
     }
     #print "$IniCommands $crimp->{$IniCommands}<br>";
 
     #Load Module
-    if ($crimp->{$IniCommands} ne ""){
-        if ( !-e "Crimp/$IniCommands.pm"){
-            printdebug("Module '$IniCommands' not found","warn","Check 'crimp.ini' for the following:","$IniCommands = $crimp->{$IniCommands}");
+    if ($crimp->{$IniCommand} ne ''){
+        if ( !-e "Crimp/$IniCommand.pm"){
+            printdebug("Module '$IniCommand' not found",'warn',"Check 'crimp.ini' for the following:","$IniCommand = $crimp->{$IniCommand}");
         }else{
             #printdebug("Module '$IniCommands' loading","pass","click here to get this file");
-            require "Crimp/$IniCommands.pm";
+            require "Crimp/$IniCommand.pm";
         }
     }
 }
@@ -186,17 +218,17 @@ foreach $IniCommands (@IniCommands){
 ## The End ##
 ############
 
-if (($crimp->{ExitCode} ne "200")&&($crimp->{DisplayHtml} ne "")){
-    $crimp->{ExitCode} = "200";
+if (($crimp->{ExitCode} ne '200')&&($crimp->{DisplayHtml} ne '')){
+    $crimp->{ExitCode} = '200';
 }
 
 #This is where we finish the document or file
 print $query->header('text/html',$crimp->{ExitCode});
-&printdebug("Crimp Exit","pass","Error code: $crimp->{ExitCode}");
-if ($crimp->{DebugMode} eq "on"){
+&printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
+if ($crimp->{DebugMode} eq 'on'){
     $crimp->{DisplayHtml} =~ s/<!--DEBUG-->/$PRINT_DEBUG/g;;
 }
-print "$crimp->{DisplayHtml}";
+print $crimp->{DisplayHtml};
 
 ####################################################################
 
