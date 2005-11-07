@@ -120,7 +120,8 @@ if ($i < 8){$tune = "$tune -n ";}
     'pass',
     "RemoteHost: $crimp->{RemoteHost}",
     "UserAgent: $crimp->{UserAgent}",
-    "HttpRequest: $crimp->{HttpRequest}"
+    "HttpRequest: $crimp->{HttpRequest}",
+    "HttpQuery: $crimp->{HttpQuery}"
 );
 
 if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
