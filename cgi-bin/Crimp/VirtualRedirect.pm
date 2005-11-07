@@ -11,7 +11,7 @@ if ($crimp->{DisplayHtml} ne "" ){
 my $path = '';
 foreach $HttpRequest (@HttpRequest){
   #print "$crimp->{HttpRequest} :: $HttpRequest :: $crimp->{UserConfig}<br>";
-  if ($crimp->{UserConfig} ne "/$HttpRequest"){$path = "$path/$HttpRequest";}
+  if ($crimp->{UserConfig} ne "$HttpRequest"){$path = "$path/$HttpRequest";}
 }
 
 #print "path : $path<br>";
@@ -46,9 +46,14 @@ $crimp->{DisplayHtml}= $res->content;
 ####################################################################
 # not working yet... should correct links and images here
 # Change ServerName to ServerName/Userconfig
-$testing="$crimp->{ServerName}$crimp->{UserConfig}";
 &printdebug("Correct Links","warn","Work in progress","Change all occurences of $crimp->{ServerName} to $crimp->{ServerName}$crimp->{UserConfig}");
-$crimp->{DisplayHtml} =~ s/$crimp->{ServerName}/$testing/gi;
+#foreach $display_content($crimp->{DisplayHtml}) {
+#$a++;
+$changeto="$crimp->{ServerName}$crimp->{UserConfig}";
+$crimp->{DisplayHtml} =~ s/$crimp->{ServerName}/$changeto/gi;
+#$new_content= "$new_content$display_content\n\n";
+#}
+#&printdebug("Correct Links","pass","Change Links and Locations","Changed $count occurences of $crimp->{ServerName} to $crimp->{ServerName}$crimp->{UserConfig}");
 ####################################################################
 
 #$new_content =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
