@@ -1,0 +1,23 @@
+Welcome to CRIMP
+
+Configuration is all done in the cgi-bin/crimp.ini file
+
+
+MODULES
+-------
+
+ContentDatabase
+This module must be configured with a database on an accessible server.
+You can use any database that perl supports via the DBI module. The most
+common database you'll use is mysql. A ContentDatabase provided section
+must have certain options in the crimp.ini.
+
+Example of required crimp.ini settings for ContentDatabase module:
+  [/db]
+  ContentDatabase = on
+  DBType = mysql
+  DBName = test
+  DBTable = test
+  DBHost = localhost
+  DBUserName = test
+  DBUserPass = test
