@@ -28,20 +28,20 @@ if ($use_proxy){
 $ua->agent("Mozilla/4.0 (crimp user $crimp->{RemoteHost}\@$crimp->{ServerName})"); # pretend we are very capable browser
 $ua->timeout("30");
 
-#$crimp->{HttpRequest}
-$req = HTTP::Request->new(GET => "$crimp->{VirtualRedirect}$path$crimp->{HttpQuery}");
+#create a variable to hold the url we want to retreive, so that it can be
+#recalled later faster than recreating it each time
+#(use a join here as it's faster)
+$urltoget = join '',$crimp->{VirtualRedirect},$path,$crimp->{HttpQuery};
+$req = HTTP::Request->new(GET => $urltoget);
 $req->header('Accept' => '*/*');
 $res = $ua->request($req);
 
 if ($res->is_success) {
 #printdebug("File exists on remote server");
 
-
-
-&printdebug("Module 'VirtualRedirect'","pass","Started With: $crimp->{VirtualRedirect}","Fetching the following content:","$crimp->{VirtualRedirect}$path$crimp->{HttpQuery}","REM: This url needs fixing by removing config entry from url");
+&printdebug("Module 'VirtualRedirect'","pass","Started With: $crimp->{VirtualRedirect}","Fetching the following content:",$urltoget);
 
 $crimp->{DisplayHtml}= $res->content;
-
 
 ####################################################################
 # not working yet... should correct links and images here
@@ -51,10 +51,12 @@ $testing="$crimp->{ServerName}$crimp->{UserConfig}";
 $crimp->{DisplayHtml} =~ s/$crimp->{ServerName}/$testing/gi;
 ####################################################################
 
-
 #$new_content =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
 
-
+} else {
+  # the LWP::UserAgent couldn't get the document - let's tell the user why
+  $crimp->{DisplayHtml} = '<span style="color: #f00;">Connection error</span>';
+  &printdebug('Module \'VirtualRedirect\'', 'warn', "Could not get '$urltoget'", $res->status_line);
 }
 
 #on success
