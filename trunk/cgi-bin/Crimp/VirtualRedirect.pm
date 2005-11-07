@@ -11,8 +11,10 @@ if ($crimp->{DisplayHtml} ne "" ){
 my $path = '';
 foreach $HttpRequest (@HttpRequest){
   #print "$crimp->{HttpRequest} :: $HttpRequest :: $crimp->{UserConfig}<br>";
-  if ($crimp->{UserConfig} ne "$HttpRequest"){$path = "$path/$HttpRequest";}
+  if ($crimp->{UserConfig} ne "/$HttpRequest"){$path = join '/', $path, $HttpRequest;}
 }
+#strip off preceeding slashes, as these should be defined in the crimp.ini file
+$path =~ s|^/*||;
 
 #print "path : $path<br>";
 #print "<BASE href='http://test.co.uk$crimp->{UserConfig}'>";
@@ -46,6 +48,32 @@ $crimp->{DisplayHtml}= $res->content;
 ####################################################################
 # not working yet... should correct links and images here
 # Change ServerName to ServerName/Userconfig
+eval {require HTML::TokeParser;};
+if (!$@) {
+  my $token_parser = HTML::TokeParser->new(\$crimp->{DisplayHtml});
+  my @image_urls;
+  while (my $token = $token_parser->get_tag('img')) {
+    my $url = $token->[1]{src} || next;
+    if (!($url =~ m|^http[s]?://|i)) { push @image_urls, $url; }
+  }
+  my $i = 0;
+  my $url = $crimp->{VirtualRedirect};
+  $url =~ m|(^http[s]?://.+?/)|i;
+  $url = $1;
+  for $image_url (@image_urls) {
+    my $newimageurl = join '', $url, $image_url;
+    $newimageurl =~ s|^(http[s]?://)||i;
+    my $newimageproto = $1;
+    $newimageurl =~ s|/{2,}|/|g;
+    $crimp->{DisplayHtml} =~ s/$image_url/$newimageproto$newimageurl/g;
+    $i++;
+  }
+  &printdebug('Correcting Images', 'pass', "Using $url for image urls", "Converted $i image tags to point to the correct web location");
+} else {
+  &printdebug('Correcting Images', 'warn', 'Couldn\'t correct the image urls of this page:', $@, 'Make sure you have installed the HTML::TokeParser module');
+}
+
+
 &printdebug("Correct Links","warn","Work in progress","Change all occurences of $crimp->{ServerName} to $crimp->{ServerName}$crimp->{UserConfig}");
 #foreach $display_content($crimp->{DisplayHtml}) {
 #$a++;
