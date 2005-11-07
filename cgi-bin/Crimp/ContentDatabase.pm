@@ -16,7 +16,8 @@ my $path = '';
 foreach $HttpRequest (@HttpRequest){
   if ($crimp->{UserConfig} ne "/$HttpRequest") { $path = join '/', $path, $HttpRequest; }
 }
-$path =~ s|^/||;
+#strip all preceeding slashes (/)
+$path =~ s|^/+||;
 #make sure the path is _ALWAYS_ set - 'root' = the base page for the section
 if ($path eq '') { $path = 'root'; }
 
