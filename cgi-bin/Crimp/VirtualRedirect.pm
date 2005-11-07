@@ -61,8 +61,8 @@ if (!$@) {
   $url =~ m|(^http[s]?://.+?/)|i;
   $url = $1;
   for $image_url (@image_urls) {
-    if (index($image_url, '/') != 1) { $url2 = $crimp->{VirtualRedirect}; }
-    else { $url2 = $url; }
+    if ($image_url =~ m|^/|) { $url2 = $url; }
+    else { $url2 = join '', $crimp->{VirtualRedirect}, $path, '/'; }
     my $newimageurl = join '', $url2, $image_url;
     $newimageurl =~ s|^(http[s]?://)||i;
     my $newimageproto = $1;
