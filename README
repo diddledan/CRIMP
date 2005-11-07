@@ -10,7 +10,13 @@ ContentDatabase
 This module must be configured with a database on an accessible server.
 You can use any database that perl supports via the DBI module. The most
 common database you'll use is mysql. A ContentDatabase provided section
-must have certain options in the crimp.ini.
+must have certain options in the crimp.ini. The database must have a
+'path' field of a textual type, and a 'content' field of a textual type
+that can hold all of your page's data. The 'path' field will contain
+the relative path (minus any preceeding slashes or dots, eg ./) of the
+page you want to display, or 'root' for the base file. The 'root' page
+will display (for our example configuration below) for either /db, /db/
+or /db/root.
 
 Example of required crimp.ini settings for ContentDatabase module:
   [/db]
