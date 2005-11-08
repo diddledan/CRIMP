@@ -53,9 +53,10 @@ $crimp->{DisplayHtml}= $res->content;
 eval {require HTML::TokeParser;};
 if (!$@) {
   # check that the path doesn't contain any filenames (directories only please)
-  if ($path =~ m|/[\w\-_\.]+$|) {
-    $path = s|/[\w\-_\.]+$|/|;
+  if ($path =~ m!/?[\w\-_\.]+$!) {
+    $path = s!/?[\w\-_\.]+$!/!;
   }
+  if ($path eq '') { $path = '/'; }
   my $token_parser = HTML::TokeParser->new(\$crimp->{DisplayHtml});
   my @image_urls;
   my @link_urls;
@@ -78,7 +79,7 @@ if (!$@) {
   $url = $1;
   for $image_url (@image_urls) {
     my $url2 = '';
-    if ($image_url =~ m|^/|) { $url2 = $url; }
+    if ($image_url =~ m|^/.+|) { $url2 = $url; }
     else { $url2 = join '', $crimp->{VirtualRedirect}, $path, '/'; }
     my $newimageurl = join '', $url2, $image_url;
     $newimageurl =~ s|^(http[s]?://)||i;
@@ -89,13 +90,20 @@ if (!$@) {
   }
   &printdebug('Correcting Images', 'pass', "Using $url for image urls", "Converted $i image tags to point to the correct web location");
   
-  my $proto = 'http://';
-  if ($ENV{'SERVER_PORT'} eq '443') { $proto = 'https://'; }
-  $url = join '', $proto, $crimp->{ServerName}, '/';
+  #my $proto = 'http://';
+  #if ($ENV{'SERVER_PORT'} eq '443') { $proto = 'https://'; }
+  #$url = join '', $proto, $crimp->{ServerName}, '/';
   my $j = 0;
   for $link_url (@link_urls) {
     if ($link_url eq '/') {
-      $crimp->{DisplayHtml} =~ s|(href=['"]{1})/(['"]{1})|\1/\2|g;
+      $crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?/)|;
+      my $baseurl = $1;
+      if ($crimp->{VirtualRedirect} =~ m/^$baseurl$/) {
+        $newlinkurl = $crimp->{UserConfig};
+      } else {
+        $newlinkurl = $baseurl;
+      }
+      $crimp->{DisplayHtml} =~ s|(href=['"]{1})/(['"]{1})|\1$newlinkurl\2|g;
     } else {
       my $newlinkurl = '';
       if ($link_url =~ m|^/.+|) {
@@ -111,7 +119,9 @@ if (!$@) {
       $newlinkurl =~ s!^((((f|ht){1}tp[s]?)|(irc)?)://)!!i;
       my $newlinkproto = $1;
       $newlinkurl =~ s|/{2,}|/|g;
-      $crimp->{DisplayHtml} =~ s/$link_url/$newlinkproto$newlinkurl/g;
+      $newlinkurl = join '', $newlinkproto, $newlinkurl;
+      &printdebug('Converting Link', 'pass', "$link_url = $newlinkurl");
+      $crimp->{DisplayHtml} =~ s/$link_url/$newlinkurl/g;
     }
     $j++;
   }
