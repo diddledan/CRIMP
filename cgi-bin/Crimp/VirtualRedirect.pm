@@ -120,7 +120,6 @@ if (!$@) {
       my $newlinkproto = $1;
       $newlinkurl =~ s|/{2,}|/|g;
       $newlinkurl = join '', $newlinkproto, $newlinkurl;
-      &printdebug('Converting Link', 'pass', "$link_url = $newlinkurl");
       $crimp->{DisplayHtml} =~ s/$link_url/$newlinkurl/g;
     }
     $j++;
