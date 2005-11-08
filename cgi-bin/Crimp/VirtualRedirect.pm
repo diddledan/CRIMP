@@ -108,7 +108,7 @@ if (!$@) {
       my $newlinkurl = '';
       if ($link_url =~ m|^/.+|) {
         $crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?/)|;
-        if ($crimp->{VirtualRedirect} =~ m/^$1$/) {
+        if ($crimp->{VirtualRedirect} eq $1) {
           $newlinkurl = join '', $crimp->{UserConfig}, $link_url;
         } else {
           $newlinkurl = join '', $crimp->{VirtualRedirect}, $path, $link_url;
