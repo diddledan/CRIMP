@@ -1,8 +1,19 @@
 /* main debug table */
-.crimpDebug {
+table.crimpDebug {
 	background-color: #000;
 	width: 100%;
 	border-collapse: collapse;
+}
+/* preformatted blocks */
+/* This was originally added for compatability with the
+   XYZ Network site, where the pre blocks already had
+   formatting applied. This is actually quite common,
+   so I left this in when adding to the cvs repo.
+*/
+pre.crimpDebug {
+	background-color: #000;
+	border-width: 0px;
+	border-color: #000;
 }
 /* message box */
 .crimpDebugMsg {
