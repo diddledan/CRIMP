@@ -227,6 +227,7 @@ if (($crimp->{ExitCode} ne '200')&&($crimp->{DisplayHtml} ne '')){
 print $query->header('text/html',$crimp->{ExitCode});
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
+    $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, '</table>';
     $crimp->{DisplayHtml} =~ s/<!--DEBUG-->/$PRINT_DEBUG/g;;
 }
 print $crimp->{DisplayHtml};
@@ -245,23 +246,24 @@ sub printdebug(){
     my $solut="";
     my $mssge=shift(@_);
     my $stats=shift(@_);
+    my $fatal = 0;
 
     #print "$Config->{_}->{Debug};";
-    while (my $extra = shift){
+    while (my $extra = shift) {
         $solut="$solut<br />&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>";
     }
 
-    if ($stats eq "pass"){$stats="<pre><span style='color: #fff;'>[<span style='color: #0f0;'>PASS</span>]</span></pre>"}
-    if ($stats eq "warn"){$stats="<pre><span style='color: #fff;'>[<span style='color: #fc3;'>WARN</span>]</span></pre>"}
-    if ($stats eq "exit"){$stats="<pre><span style='color: #fff;'>[<span style='color: #33f;'>EXIT</span>]</span></pre>";$quits=1;}
-    if ($stats eq "fail"){$stats="<pre><span style='color: #fff;'>[<span style='color: #f00;'>FAIL</span>]</span></pre>";$quits=1;}
+    if ($stats eq 'pass') { $stats='[<span style="color: #0f0;">PASS</span>]' }
+    if ($stats eq 'warn') { $stats='[<span style="color: #fc3;">WARN</span>]' }
+    if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $fatal = 1; }
+    if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]'; $fatal = 1; }
 
-    if ($solut ne ""){$mssge="<b>&#149;</b> $mssge $solut"}
+    if ($solut ne '') { $mssge="<b>&#149;</b> $mssge $solut" }
 
-    $PRINT_DEBUG = "$PRINT_DEBUG<table style='width: 100%; border:0; border-collapse: collapse; background-color: #000;'><tr><td style='text-align: left; vertcal-align: top; color: #fff;'><pre>$mssge</pre></td><td style='text-align :right; vertical-align: top;'>$stats</td></tr></table>";
+    $PRINT_DEBUG = "$PRINT_DEBUG<tr><td class='crimpDebugMsg'><pre class='crimpDebug'>$mssge</pre></td><td class='crimpDebugStatus'><pre class='crimpDebug'><span style='color: #fff;'>$stats</span></pre></td></tr>";
     #
     #<table width='100%' border='0' cellspacing='0' cellpadding='0'><tr bgcolor='#CCCCCC'><td align='left' valign='top'><h6><font face='Verdana, Arial, Helvetica, sans-serif' size='1'>Powered by Crimp &copy;2004 IND-Web.com</font></h6><td align='right' valign='top'><font face='Verdana, Arial, Helvetica, sans-serif' size='1'><b>admin</b></font></td></tr><tr bgcolor='#000000'><td colspan='2'>$PRINT_DEBUG</td></tr></table>
-    if ($quits){
+    if ($fatal){
         print $query->header('text/html',$crimp->{ExitCode});
         print $PRINT_DEBUG;
         exit;
