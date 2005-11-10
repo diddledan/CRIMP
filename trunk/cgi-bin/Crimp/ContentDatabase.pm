@@ -7,6 +7,22 @@ $db_host = $Config->{$crimp->{UserConfig}}->{DBHost};
 $db_user = $Config->{$crimp->{UserConfig}}->{DBUserName};
 $db_pass = $Config->{$crimp->{UserConfig}}->{DBUserPass};
 
+# this sub is for creating a link that references to the correct location on the web
+# for a virtual directory's sub elements. This was developed so that the perl code
+# in the database can create links to other sections within the database.
+# You pass to it a relative url (eg. fremen/blog) and it outputs the full _local_ url
+# to that resource (eg. /crimp/virtual/dir/fremen/blog).
+sub makelink {
+	#get relative url
+	my $link = shift;
+	#join it with the url to the root of the section
+	$link = join '/', $crimp->{UserConfig}, $link;
+	#remove double+ slashes that may have creeped in
+	$link =~ s!/{2,}!/!g;
+	#return it to the calling code
+	return $link;
+}
+
 #connect to the database
 my $dbh = DBI->connect("DBI:$db_type:database=$db_db:host=$db_host", $db_user, $db_pass, {'RaiseError' => 1, 'PrintError' => 0});
 
