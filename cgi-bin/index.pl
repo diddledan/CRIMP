@@ -49,21 +49,25 @@ my $inicmds = '';
 foreach $plugin (@plugins) {
   # is the file we found a 'dot' file (.something - meaning hidden)?
   # if not, check it ends in '.pm'
-  if ( ( $plugin{1} ne '.' ) && ( $plugin =~ m/[[\.][p][m]]?$/ ) ) {
+  if ( ( !( $plugin =~ m/^\.+/ ) ) && ( $plugin =~ m/(\.pm){1}$/ ) ) {
     #remove the extension
-    $plugin =~ s/[[\.][p][m]]?$//;
+    $plugin =~ s/(\.pm){1}$//;
     #add it to the list
     $inicmds = join ';', $inicmds, $plugin;
   }
 }
 
-#move DocumentTemplate to the end so that it is always called last (nasty hack I know)
-$inicmds =~ s/DocumentTemplate;//gi;
-$inicmds = join ';', $inicmds, 'DocumentTemplate';
+if ($inicmds =~ m/DocumentTemplate;/) {
+	#move DocumentTemplate to the end so that it is always called last (nasty hack I know)
+	$inicmds =~ s/DocumentTemplate;//gi;
+	$inicmds = join ';', $inicmds, 'DocumentTemplate';
+}
 #remove extra semi-colon(s) from the beginning of the list
-$inicmds =~ s/^\;*//;
+$inicmds =~ s/^;*//;
+#remove any trailing semi-colons
+$inicmds =~ s/;*$//;
 #make sure that only one semi-colon seperates each plugin
-$inicmds =~ s/\;+/\;/g;
+$inicmds =~ s/;+/;/g;
 
 if ( $inicmds eq '' ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
 else { &printdebug('Available Plugins', 'pass', $inicmds); }
@@ -73,13 +77,15 @@ else { &printdebug('Available Plugins', 'pass', $inicmds); }
 #DocumentTemplate;ContentDirectory;ContentType
 our $crimp;
 $crimp = {
+	#removed the quotes around the $ENV entries to speed up processing time.
     IniCommands => $inicmds,
-    RemoteHost => "$ENV{'REMOTE_ADDR'}",
-    ServerName =>  "$ENV{'SERVER_NAME'}",
-    ServerSoftware =>  "$ENV{'SERVER_SOFTWARE'}",
-    UserAgent =>  "$ENV{'HTTP_USER_AGENT'}",
-    HttpRequest =>  "$ENV{'REDIRECT_URL'}",
-    HttpQuery =>  "$ENV{'REDIRECT_QUERY_STRING'}",
+    RemoteHost => $ENV{'REMOTE_ADDR'},
+    ServerName =>  $ENV{'SERVER_NAME'},
+    ServerSoftware =>  $ENV{'SERVER_SOFTWARE'},
+    UserAgent =>  $ENV{'HTTP_USER_AGENT'},
+    HttpRequest =>  $ENV{'REDIRECT_URL'},
+    HttpQuery =>  $ENV{'REDIRECT_QUERY_STRING'},
+    ContentType => 'text/html',
     ExitCode => '500',
     DebugMode => 'off'
 };
@@ -105,7 +111,6 @@ if ($i < 8){$tune = "$tune -n ";}
 
 # to activate, uncomment below
 # $BEEP = `beep $tune`;
-
 ####################################################################
 
 &printdebug(
@@ -224,7 +229,7 @@ if (($crimp->{ExitCode} ne '200')&&($crimp->{DisplayHtml} ne '')){
 }
 
 #This is where we finish the document or file
-print $query->header('text/html',$crimp->{ExitCode});
+print $query->header($crimp->{ContentType},$crimp->{ExitCode});
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, '</table>';
