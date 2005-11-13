@@ -41,107 +41,99 @@ $req->header('Accept' => '*/*');
 $res = $ua->request($req);
 
 if ($res->is_success) {
-#printdebug("File exists on remote server");
-
-&printdebug("Module 'VirtualRedirect'","pass","Started With: $crimp->{VirtualRedirect}","Fetching the following content:",$urltoget);
-
-$crimp->{DisplayHtml}= $res->content;
-
-####################################################################
-# not working yet... should correct links and images here
-# Change ServerName to ServerName/Userconfig
-eval {require HTML::TokeParser;};
-if (!$@) {
-  # check that the path doesn't contain any filenames (directories only please)
-  if ($path =~ m!/?[\w\-_\.]+$!) {
-    $path = s!/?[\w\-_\.]+$!/!;
-  }
-  if ($path eq '') { $path = '/'; }
-  my $token_parser = HTML::TokeParser->new(\$crimp->{DisplayHtml});
-  my @image_urls;
-  my @link_urls;
-  my %seenimgs = {};
-  while (my $token = $token_parser->get_tag('img')) {
-    my $url = $token->[1]{'src'} || next;
-    if (!($url =~ m|^http[s]?://|i)) { push(@image_urls, $url) unless ($seenimgs{$url}++); }
-  }
-  my %seenlinks = {};
-  #reset token_parser
-  $token_parser = HTML::TokeParser->new(\$crimp->{DisplayHtml});
-  while (my $token = $token_parser->get_tag('a')) {
-    my $url = $token->[1]{'href'} || next;
-    if (!($url =~ m|^.+?:(//)?|i)) { push(@link_urls, $url) unless ($seenlinks{$url}++); }
-  }
-  
-  my $i = 0;
-  my $url = $crimp->{VirtualRedirect};
-  $url =~ m|(^http[s]?://.+?/)|i;
-  $url = $1;
-  for $image_url (@image_urls) {
-    my $url2 = '';
-    if ($image_url =~ m|^/.+|) { $url2 = $url; }
-    else { $url2 = join '', $crimp->{VirtualRedirect}, $path, '/'; }
-    my $newimageurl = join '', $url2, $image_url;
-    $newimageurl =~ s|^(http[s]?://)||i;
-    my $newimageproto = $1;
-    $newimageurl =~ s|/{2,}|/|g;
-    $crimp->{DisplayHtml} =~ s/$image_url/$newimageproto$newimageurl/g;
-    $i++;
-  }
-  &printdebug('Correcting Images', 'pass', "Using $url for image urls", "Converted $i image tags to point to the correct web location");
-  
-  #my $proto = 'http://';
-  #if ($ENV{'SERVER_PORT'} eq '443') { $proto = 'https://'; }
-  #$url = join '', $proto, $crimp->{ServerName}, '/';
-  my $j = 0;
-  for $link_url (@link_urls) {
-    if ($link_url eq '/') {
-      $crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?/)|;
-      my $baseurl = $1;
-      if ($crimp->{VirtualRedirect} =~ m/^$baseurl$/) {
-        $newlinkurl = $crimp->{UserConfig};
-      } else {
-        $newlinkurl = $baseurl;
-      }
-      $crimp->{DisplayHtml} =~ s|(href=['"]{1})/(['"]{1})|\1$newlinkurl\2|g;
-    } else {
-      my $newlinkurl = '';
-      if ($link_url =~ m|^/.+|) {
-        $crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?/)|;
-        if ($crimp->{VirtualRedirect} eq $1) {
-          $newlinkurl = join '', $crimp->{UserConfig}, $link_url;
-        } else {
-          $newlinkurl = join '', $crimp->{VirtualRedirect}, $path, $link_url;
-        }
-      } elsif (!($link_url =~ m|^.+?:(//)?|)) {
-          $newlinkurl = join '', $crimp->{VirtualRedirect}, $path, '/', $link_url;
-      } else { $newlinkurl = $link_url; }
-      $newlinkurl =~ s!^((((f|ht){1}tp[s]?)|(irc)?)://)!!i;
-      my $newlinkproto = $1;
-      $newlinkurl =~ s|/{2,}|/|g;
-      $newlinkurl = join '', $newlinkproto, $newlinkurl;
-      $crimp->{DisplayHtml} =~ s/$link_url/$newlinkurl/g;
-    }
-    $j++;
-  }
-  &printdebug('Correcting Links', 'pass', "Successfuly converted $j links to point to the right place.");
-  #foreach $item (keys %ENV) { &printdebug("$item = $ENV{$item}"); }
-} else {
-  &printdebug('Correcting Images and Links', 'warn', 'Couldn\'t correct the image and link urls of this page:', $@, 'Make sure you have installed the HTML::TokeParser module');
-}
-
-
-#&printdebug('Correct Links','warn','Work in progress',"Change all occurences of $crimp->{ServerName} to $crimp->{ServerName}$crimp->{UserConfig}");
-#foreach $display_content($crimp->{DisplayHtml}) {
-#$a++;
-#$changeto="$crimp->{ServerName}$crimp->{UserConfig}";
-#$crimp->{DisplayHtml} =~ s/$crimp->{ServerName}/$changeto/gi;
-#$new_content= "$new_content$display_content\n\n";
-#}
-#&printdebug("Correct Links","pass","Change Links and Locations","Changed $count occurences of $crimp->{ServerName} to $crimp->{ServerName}$crimp->{UserConfig}");
-####################################################################
-
-#$new_content =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
+	#printdebug("File exists on remote server");
+	
+	&printdebug("Module 'VirtualRedirect'","pass","Started With: $crimp->{VirtualRedirect}","Fetching the following content:",$urltoget);
+	
+	$crimp->{DisplayHtml}= $res->content;
+	
+	#################################
+	# BEGIN LINK / IMAGE CORRECTION #
+	
+	eval {require HTML::TokeParser;};
+	if (!$@) {
+	  # check that the path doesn't contain any filenames (directories only please)
+	  if ($path =~ m!/?[\w\-_\.]+$!) {
+	    $path = s!/?[\w\-_\.]+$!/!;
+	  }
+	  if ($path eq '') { $path = '/'; }
+	  my $token_parser = HTML::TokeParser->new(\$crimp->{DisplayHtml});
+	  my @image_urls;
+	  my @link_urls;
+	  my %seenimgs = {};
+	  while (my $token = $token_parser->get_tag('img')) {
+	    my $url = $token->[1]{'src'} || next;
+	    if (!($url =~ m|^http[s]?://|i)) { push(@image_urls, $url) unless ($seenimgs{$url}++); }
+	  }
+	  my %seenlinks = {};
+	  #reset token_parser
+	  $token_parser = HTML::TokeParser->new(\$crimp->{DisplayHtml});
+	  while (my $token = $token_parser->get_tag('a')) {
+	    my $url = $token->[1]{'href'} || next;
+	    if (!($url =~ m|^.+?:(//)?|i)) { push(@link_urls, $url) unless ($seenlinks{$url}++); }
+	  }
+	  
+	  my $i = 0;
+	  my $url = $crimp->{VirtualRedirect};
+	  $url =~ m|(^http[s]?://.+?/)|i;
+	  $url = $1;
+	  for $image_url (@image_urls) {
+	    my $url2 = '';
+	    if ($image_url =~ m|^/.+|) { $url2 = $url; }
+	    else { $url2 = join '', $crimp->{VirtualRedirect}, $path, '/'; }
+	    my $newimageurl = join '', $url2, $image_url;
+	    $newimageurl =~ s|^(http[s]?://)||i;
+	    my $newimageproto = $1;
+	    $newimageurl =~ s|/{2,}|/|g;
+	    $crimp->{DisplayHtml} =~ s/$image_url/$newimageproto$newimageurl/g;
+	    $i++;
+	  }
+	  &printdebug('Correcting Images', 'pass', "Using $url for image urls", "Converted $i image tags to point to the correct web location");
+	  
+	  #my $proto = 'http://';
+	  #if ($ENV{'SERVER_PORT'} eq '443') { $proto = 'https://'; }
+	  #$url = join '', $proto, $crimp->{ServerName}, '/';
+	  my $j = 0;
+	  for $link_url (@link_urls) {
+	    if ($link_url eq '/') {
+	      $crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?/)|;
+	      my $baseurl = $1;
+	      if ($crimp->{VirtualRedirect} =~ m/^$baseurl$/) {
+	        $newlinkurl = $crimp->{UserConfig};
+	      } else {
+	        $newlinkurl = $baseurl;
+	      }
+	      $crimp->{DisplayHtml} =~ s|(href=['"]{1})/(['"]{1})|\1$newlinkurl\2|g;
+	    } else {
+	      my $newlinkurl = '';
+	      if ($link_url =~ m|^/.+|) {
+	        $crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?/)|;
+	        if ($crimp->{VirtualRedirect} eq $1) {
+	          $newlinkurl = join '', $crimp->{UserConfig}, $link_url;
+	        } else {
+	          $newlinkurl = join '', $crimp->{VirtualRedirect}, $path, $link_url;
+	        }
+	      } elsif (!($link_url =~ m|^.+?:(//)?|)) {
+	          $newlinkurl = join '', $crimp->{VirtualRedirect}, $path, '/', $link_url;
+	      } else { $newlinkurl = $link_url; }
+	      $newlinkurl =~ s!^((((f|ht){1}tp[s]?)|(irc)?)://)!!i;
+	      my $newlinkproto = $1;
+	      $newlinkurl =~ s|/{2,}|/|g;
+	      $newlinkurl = join '', $newlinkproto, $newlinkurl;
+	      $crimp->{DisplayHtml} =~ s/$link_url/$newlinkurl/g;
+	    }
+	    $j++;
+	  }
+	  &printdebug('Correcting Links', 'pass', "Successfuly converted $j links to point to the right place.");
+	  #foreach $item (keys %ENV) { &printdebug("$item = $ENV{$item}"); }
+	} else {
+	  &printdebug('Correcting Images and Links', 'warn', 'Couldn\'t correct the image and link urls of this page:', $@, 'Make sure you have installed the HTML::TokeParser module');
+	}
+	
+	# END LINK / IMAGE CORRECTION #
+	###############################
+	
+	#$new_content =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
 
 } else {
   # the LWP::UserAgent couldn't get the document - let's tell the user why
