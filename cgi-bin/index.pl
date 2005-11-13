@@ -86,6 +86,7 @@ $crimp = {
     HttpRequest =>  $ENV{'REDIRECT_URL'},
     HttpQuery =>  $ENV{'REDIRECT_QUERY_STRING'},
     ContentType => 'text/html',
+    PageTitle => 'CRIMP',
     ExitCode => '500',
     DebugMode => 'off'
 };
