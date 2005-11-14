@@ -18,7 +18,7 @@ if (($crimp->{ContentType} ne 'text/html') || ($crimp->{ContentType} ne 'text/xh
 	}
 	
 	#printdebug ("Putting Page into Template");
-	$new_content =~ s/<!--TITLE-->/$crimp->{PageTitle}/gi;
+	$new_content =~ s/<!--TITLE-->/$crimp->{PageTitle} - $Config->{_}->{SiteTitle}/gi;
 	$new_content =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
 	
 	$crimp->{DisplayHtml} = $new_content;
