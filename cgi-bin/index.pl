@@ -1,8 +1,8 @@
 #!perl
 # CRIMP - Content Redirection Internet Management Program
 # Authors: The CRIMP team
-# Project Leads: Martin "Deadpan110" Guppy <deadpan110@sourceforge.net>,
-#                Daniel "Fremen" Llewellyn <diddledan@sourceforge.net>
+# Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
+#                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # Version: 1.0
 # Home/Docs/Licensing: http://crimp.sourceforge.net/
 
