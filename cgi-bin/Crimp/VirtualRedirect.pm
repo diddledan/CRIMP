@@ -43,9 +43,17 @@ $res = $ua->request($req);
 if ($res->is_success) {
 	#printdebug("File exists on remote server");
 	
-	&printdebug("Module 'VirtualRedirect'","pass","Started With: $crimp->{VirtualRedirect}","Fetching the following content:",$urltoget);
+	&printdebug('Module \'VirtualRedirect\'','pass',"Started With: $crimp->{VirtualRedirect}",'Fetching the following content:',$urltoget);
 	
-	$crimp->{DisplayHtml}= $res->content;
+	$crimp->{DisplayHtml} = $res->content;
+	#get the page title
+	$crimp->{DisplayHtml} =~ s!<title>(.*?)</title>!!is;
+	$crimp->{PageTitle} = $1;
+	#remove the headers
+	$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||is;
+	$crimp->{DisplayHtml} =~ s!<html>.*?<body>!!is;
+	#remove the footer
+	$crimp->{DisplayHtml} =~ s!</body>.*!!is;
 	
 	#################################
 	# BEGIN LINK / IMAGE CORRECTION #
