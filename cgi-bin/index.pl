@@ -234,7 +234,7 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode});
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, '</table>';
-    $crimp->{DisplayHtml} =~ s|(</body>\.*?)|$PRINT_DEBUG\1|sg;;
+    $crimp->{DisplayHtml} =~ s|(</body>\.*)|$PRINT_DEBUG\1|sg;;
 }
 print $crimp->{DisplayHtml};
 
