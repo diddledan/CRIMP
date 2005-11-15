@@ -65,7 +65,7 @@ if (!$@) {
     	$content = $ref->{'content'};
     	&printdebug('Module \'ContentDatabase\'', 'pass', 'Content retreived from database and sent to the templating engine.'); 
     }
-
+    $crimp->{ExitCode} = '200';
     $crimp->{DisplayHtml} = $content;
   } else {
     $crimp->{DisplayHtml} = 'Error 404, not found.';

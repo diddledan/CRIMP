@@ -134,7 +134,7 @@ if ($res->is_success) {
 	###############################
 	
 	#$new_content =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
-
+	$crimp->{ExitCode} = '200';
 } else {
   # the LWP::UserAgent couldn't get the document - let's tell the user why
   $crimp->{DisplayHtml} = '<span style="color: #f00;">Connection error</span>';
