@@ -225,8 +225,8 @@ foreach $IniCommand (@IniCommands){
 ## The End ##
 ############
 
-if (($crimp->{ExitCode} ne '200')&&($crimp->{DisplayHtml} ne '')){
-    $crimp->{ExitCode} = '200';
+if ($crimp->{ExitCode} eq ''){
+    $crimp->{ExitCode} = '500';
 }
 
 #This is where we finish the document or file
@@ -234,7 +234,7 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode});
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, '</table>';
-    $crimp->{DisplayHtml} =~ s|(</body>\.*)|$PRINT_DEBUG\1|sg;;
+    $crimp->{DisplayHtml} =~ s|(</body>\.*)|$PRINT_DEBUG\1|s;;
 }
 print $crimp->{DisplayHtml};
 
