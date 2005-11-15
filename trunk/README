@@ -16,7 +16,15 @@ that can hold all of your page's data. The 'path' field will contain
 the relative path (minus any preceeding slashes or dots, eg ./) of the
 page you want to display, or 'root' for the base file. The 'root' page
 will display (for our example configuration below) for either /db, /db/
-or /db/root.
+or /db/root. The 'content' field must ocntain either pure (x)html or
+pure perl code with "#PERL" on the first line with no spaces beforehand.
+you cannot mix and match (x)html and perl within the same section. You
+CAN, however, use (x)html on one page, and perl code on another.
+
+
+
+EXAMPLES
+--------
 
 Example of required crimp.ini settings for ContentDatabase module:
   [/db]
@@ -27,3 +35,14 @@ Example of required crimp.ini settings for ContentDatabase module:
   DBHost = localhost
   DBUserName = test
   DBUserPass = test
+
+
+
+FAQ
+---
+
+Q. the perl code in my database is printed out as is, instead of being
+interpreted by CRIMP.
+
+A. make sure that the first line of your page(s) reads "#PERL" with nothing
+before it.
