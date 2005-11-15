@@ -46,23 +46,30 @@ eval {$sth->execute();};
 if (!$@) {
   if ($sth->rows) {
     $ref = $sth->fetchrow_hashref();
-    my $content = '';
-    #evaluate the code from the database
-    eval $ref->{'content'};
-    if (!$@) {
-      if ($content ne '') {
-        $crimp->{DisplayHtml} = $content;
-        &printdebug('Module \'ContentDatabase\'', 'pass', 'Successfully parsed the content from the database.');
-      } else {
-        $crimp->{DisplayHtml} = 'Nothing to display....';
-        &printdebug('Module \'ContentDatabase\'', 'warn', 'The code from the database failed to return any content.');
-      } 
+  	 my $content = '';
+    if (substr($ref->{'content'}, 0, 5) eq '#PERL') {
+   	#evaluate the code from the database
+    	eval $ref->{'content'};
+   	if (!$@) {
+   	  if ($content ne '') {
+   	    &printdebug('Module \'ContentDatabase\'', 'pass', 'Successfully parsed the content from the database.');
+   	  } else {
+   	    $content = 'Nothing to display....';
+   	    &printdebug('Module \'ContentDatabase\'', 'warn', 'The code from the database failed to return any content.');
+   	  }
+   	} else {
+   	  $content = 'ERROR evaluating page content';
+   	  &printdebug('Module \'ContentDatabase\'', 'warn', 'Errors running the script from the database for this page:', $@);
+   	}
     } else {
-      $crimp->{DisplayHtml} = 'ERROR evaluating page content';
-      &printdebug('Module \'ContentDatabase\'', 'warn', 'Errors running the script from the database for this page:', $@);
+    	$content = $ref->{'content'};
+    	&printdebug('Module \'ContentDatabase\'', 'pass', 'Content retreived from database and sent to the templating engine.'); 
     }
+
+    $crimp->{DisplayHtml} = $content;
   } else {
     $crimp->{DisplayHtml} = 'Error 404, not found.';
+    $crimp->{ExitCode} = '404';
     &printdebug('Module \'ContentDatabase\'', 'warn', 'The database returned no results, hence we are at a 404 state.');
   }
 } else {
