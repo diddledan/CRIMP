@@ -38,7 +38,7 @@ $path =~ s|^/+||;
 if ($path eq '') { $path = 'root'; }
 
 #prepare the query
-$sth = $dbh->prepare("SELECT content FROM `$db_table` WHERE path='$path' LIMIT 1");
+$sth = $dbh->prepare("SELECT content,title FROM `$db_table` WHERE path='$path' LIMIT 1");
 #execute the query in an eval block so that we can catch any errors
 eval {$sth->execute();};
 
@@ -66,6 +66,7 @@ if (!$@) {
     	&printdebug('Module \'ContentDatabase\'', 'pass', 'Content retreived from database and sent to the templating engine.'); 
     }
     $crimp->{ExitCode} = '200';
+    $crimp->{PageTitle} = $ref->{'title'};
     $crimp->{DisplayHtml} = $content;
   } else {
     $crimp->{DisplayHtml} = 'Error 404, not found.';
