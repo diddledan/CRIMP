@@ -1,5 +1,5 @@
 #only parse the template if this is an html or xhtml page
-if (($crimp->{ContentType} ne 'text/html') || ($crimp->{ContentType} ne 'text/xhtml+xml')) {
+if (($crimp->{ContentType} eq 'text/html') || ($crimp->{ContentType} eq 'text/xhtml+xml')) {
 	@HttpRequest = split(/\//,$crimp->{HttpRequest});
 	foreach $HttpRequest (@HttpRequest){
 	  #print "$crimp->{HttpRequest} :: $HttpRequest :: $crimp->{UserConfig}<br>";
