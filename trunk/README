@@ -3,16 +3,29 @@ Welcome to CRIMP
 Configuration is all done in the cgi-bin/crimp.ini file
 
 
+-------
 MODULES
 -------
+
+ContentDirectory
+This module is configured with the path to the directory which contains
+the content that you want to be visible within the section. The default
+is ../content. Paths must either be absolute or relative to the cgi-bin
+dir. The module will automatically use a file by the name of index.html
+for any directories (eg. request for / will result in the page at
+location ../content/index.html, and a request for /wibble will use
+../content/wibble/index.html if wibble is a directory, or just the file
+by the name wibble if not.).
 
 ContentDatabase
 This module must be configured with a database on an accessible server.
 You can use any database that perl supports via the DBI module. The most
 common database you'll use is mysql. A ContentDatabase provided section
 must have certain options in the crimp.ini. The database must have a
-'path' field of a textual type, and a 'content' field of a textual type
-that can hold all of your page's data. The 'path' field will contain
+'path' field of a textual type, a 'title' field which contains the page's
+title as it should appear in the <title></title> tags (minus the site
+name, as this is added automatically) and a 'content' field of a textual
+type that can hold all of your page's data. The 'path' field will contain
 the relative path (minus any preceeding slashes or dots, eg ./) of the
 page you want to display, or 'root' for the base file. The 'root' page
 will display (for our example configuration below) for either /db, /db/
@@ -22,11 +35,21 @@ you cannot mix and match (x)html and perl within the same section. You
 CAN, however, use (x)html on one page, and perl code on another.
 
 
-
+--------
 EXAMPLES
 --------
 
-Example of required crimp.ini settings for ContentDatabase module:
+Example Global Configuration:
+  DebugMode = on #can be either 'on', 'off' or 'page'
+  # path to the template which should be used for any paths that do
+  # not explicitly specify a template file.
+  DocumentTemplate = ../template/index.html 
+
+Example configuration for ContentDirectory module:
+  [/]
+  ContentDirectory = ../content
+
+Example configuration settings for ContentDatabase module:
   [/db]
   ContentDatabase = on
   DBType = mysql
@@ -37,7 +60,7 @@ Example of required crimp.ini settings for ContentDatabase module:
   DBUserPass = test
 
 
-
+---
 FAQ
 ---
 
@@ -45,4 +68,5 @@ Q. the perl code in my database is printed out as is, instead of being
 interpreted by CRIMP.
 
 A. make sure that the first line of your page(s) reads "#PERL" with nothing
-before it.
+before it (and nothing else on the same line as it will be interpreted as
+a perl comment).
