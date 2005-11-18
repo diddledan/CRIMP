@@ -1,11 +1,5 @@
 #!perl
-$ID = q$Id: index.pl,v 1.21 2005-11-18 20:32:34 ind-network Exp $;
-&printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)',
-			'',
-			'Authors: The CRIMP Team',
-			"Version: $ID",
-			'http://crimp.sourceforge.net/'
-			);
+$ID = q$Id: index.pl,v 1.22 2005-11-18 20:47:09 diddledan Exp $;
 # CRIMP - Content Redirection Internet Management Program
 # Authors: The CRIMP team
 # Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
@@ -14,6 +8,12 @@ $ID = q$Id: index.pl,v 1.21 2005-11-18 20:32:34 ind-network Exp $;
 # Home/Docs/Licensing: http://crimp.sourceforge.net/
 
 package Crimp;
+&printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)',
+			'',
+			'Authors: The CRIMP Team',
+			"Version: $ID",
+			'http://crimp.sourceforge.net/'
+			);
 #
 # default web settings are to use local files
 # with 404 error document in place
