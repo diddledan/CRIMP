@@ -1,8 +1,8 @@
-$ID = q$Id: BreadCrumbs.pm,v 1.3 2005-11-18 20:13:09 ind-network Exp $;
+$ID = q$Id: BreadCrumbs.pm,v 1.4 2005-11-18 20:14:12 ind-network Exp $;
 &printdebug('Module BreadCrumbs',
 			'',
 			'Authors: The CRIMP Team',
-			'Version: 1.0',
+			'Version: $ID',
 			'http://crimp.sourceforge.net/'
 			);
 
