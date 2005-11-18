@@ -1,3 +1,10 @@
+&printdebug('Module ContentDirectory',
+			'',
+			'Authors: The CRIMP Team',
+			'Version: 1.0',
+			'http://crimp.sourceforge.net/'
+			);
+
 @HttpRequest = split(/\//,$crimp->{HttpRequest});
 
 foreach $HttpRequest (@HttpRequest){
@@ -8,14 +15,20 @@ foreach $HttpRequest (@HttpRequest){
 if ($path eq '') { $path = '/index.html'; }
 
 if ($crimp->{DisplayHtml} ne "" ){
-    &printdebug("Module 'ContentDirectory'","warn", "DisplayHtml has already been filled with content");
+    &printdebug("","warn", "DisplayHtml has already been filled with content");
 }else{
     #check for directory here if it is then use $path
     #make sure the requested file is _NOT_ a directory (Fremen)
-    my $requested = join('', $crimp->{ContentDirectory}, $path);
-    if ( !-e $requested ) { $crimp->{ExitCode} = '404'; &printdebug("Module 'ContentDirectory'", 'warn', "$requested does not exist. Please check the URL and try again."); }
-    if ( -d $requested ) { $requested = join '/', $requested, 'index.html'; }
-    sysopen (FILE,$requested,O_RDONLY) or &printdebug("Module 'ContentDirectory'", 'fail', "Couldn't open file for reading", "file: $requested", "error: $!");
+    my $requested = join('',$crimp->{ContentDirectory}, $path);
+	if ( -d $requested ) {$requested = "$requested/index.html";}
+#my $requested = "$crimp->{HomeDirectory}$crimp->{ContentDirectory}$path";
+
+#&printdebug("$crimp->{HomeDirectory}","","$requested");
+
+   if ( !-e $requested ) {$crimp->{ExitCode} = '404'; }
+   if ( -d $requested ) { $crimp->{ExitCode} = '404'; }
+	sysopen (FILE,"$requested",O_RDONLY) || &printdebug("", 'warn', "Couldn't open file for reading", "file: $requested", "error: $!");
+	
     @display_content=<FILE>;
     close(FILE);
     
@@ -32,8 +45,14 @@ if ($crimp->{DisplayHtml} ne "" ){
 	$new_content =~ s|<!DOCTYPE.*?>||i;
 	#remove headers storing the title of the page
 	$new_content =~ s|<title>(.*?)</title>||si;
+	
 	$crimp->{PageTitle} = $1;
-	&printdebug($crimp->{PageTitle});
+	if ($crimp->{PageTitle} eq ''){
+	&printdebug("","warn","The Page has no title");
+	}else{
+	&printdebug("","pass","PageTitle: $crimp->{PageTitle}");
+	}
+	
 	#strip from <html> down to the opening <body> tag
 	$new_content =~ s|<html.*?>.*?<body>||si;
 	#remove the closing </body> tag and any cruft after - alas, that's nothing to do with the dogshow
@@ -42,8 +61,8 @@ if ($crimp->{DisplayHtml} ne "" ){
     $crimp->{DisplayHtml} = $new_content;
     
     ####
-    $crimp->{ExitCode} = '200';
-    &printdebug("Module 'ContentDirectory'","pass","Started With: $crimp->{ContentDirectory}");
+  #  $crimp->{ExitCode} = '200';
+   &printdebug("","pass","DisplayHtml filled with content: $requested");
     #$crimp->{DisplayHtml}=@display_content;
 }
 
