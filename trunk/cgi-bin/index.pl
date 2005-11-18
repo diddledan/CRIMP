@@ -1,4 +1,11 @@
 #!perl
+$ID = q$Id: index.pl,v 1.21 2005-11-18 20:32:34 ind-network Exp $;
+&printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)',
+			'',
+			'Authors: The CRIMP Team',
+			"Version: $ID",
+			'http://crimp.sourceforge.net/'
+			);
 # CRIMP - Content Redirection Internet Management Program
 # Authors: The CRIMP team
 # Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
@@ -36,8 +43,6 @@ my $query = new CGI;
 #our &printdebug;
 #die;
 
-&printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)');
-&printdebug('Details', '', 'Authors: The CRIMP Team', 'Version: 1.0', 'http://crimp.sourceforge.net/');
 
 ########################
 # BEGIN plguin parsing #
