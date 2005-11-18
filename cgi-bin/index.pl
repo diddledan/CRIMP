@@ -1,5 +1,5 @@
 #!perl
-my $ID = q$Id: index.pl,v 1.24 2005-11-18 20:54:44 ind-network Exp $;
+my $ID = q$Id: index.pl,v 1.25 2005-11-18 21:19:16 ind-network Exp $;
 # CRIMP - Content Redirection Internet Management Program
 # Authors: The CRIMP team
 # Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
@@ -11,6 +11,9 @@ package Crimp;
 &printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)',
 			'',
 			'Authors: The CRIMP Team',
+			'Project Leads:',
+			'&nbsp;&nbsp;&nbsp;Martin "Deadpan110" Guppy [deadpan110@users.sourceforge.net]',
+         '&nbsp;&nbsp;&nbsp;Daniel "Fremen" Llewellyn [diddledan@users.sourceforge.net]',
 			"Version: $ID",
 			'http://crimp.sourceforge.net/'
 			);
