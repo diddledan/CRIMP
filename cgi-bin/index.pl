@@ -1,5 +1,5 @@
 #!perl
-$ID = q$Id: index.pl,v 1.23 2005-11-18 20:52:12 ind-network Exp $;
+my $ID = q$Id: index.pl,v 1.24 2005-11-18 20:54:44 ind-network Exp $;
 # CRIMP - Content Redirection Internet Management Program
 # Authors: The CRIMP team
 # Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
