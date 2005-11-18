@@ -1,5 +1,5 @@
-$ID = q$Id: ContentDirectory.pm,v 1.9 2005-11-18 20:29:08 ind-network Exp $;
-&printdebug('Module DocumentTemplate',
+$ID = q$Id: ContentDirectory.pm,v 1.10 2005-11-18 21:03:06 ind-network Exp $;
+&printdebug('Module ContentDirectory',
 			'',
 			'Authors: The CRIMP Team',
 			"Version: $ID",
