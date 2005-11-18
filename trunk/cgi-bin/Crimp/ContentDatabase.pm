@@ -1,3 +1,11 @@
+$ID = q$Id: ContentDatabase.pm,v 1.7 2005-11-18 20:29:08 ind-network Exp $;
+&printdebug('Module ContentDatabase',
+			'',
+			'Authors: The CRIMP Team',
+			"Version: $ID",
+			'http://crimp.sourceforge.net/'
+			);
+
 use DBI;
 #get the configuration values
 $db_type = $Config->{$crimp->{UserConfig}}->{DBType};

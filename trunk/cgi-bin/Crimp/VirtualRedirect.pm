@@ -1,3 +1,11 @@
+$ID = q$Id: VirtualRedirect.pm,v 1.16 2005-11-18 20:29:08 ind-network Exp $;
+&printdebug('Module VirtualRedirect',
+			'',
+			'Authors: The CRIMP Team',
+			"Version: $ID",
+			'http://crimp.sourceforge.net/'
+			);
+
 #Crimp Module Virtual Redirect
 #our $crimp;
 
