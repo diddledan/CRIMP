@@ -30,6 +30,7 @@ use CGI::Carp qw/ fatalsToBrowser /;
 #use Fcntl; 
 
 my $query = new CGI;
+
 #print $query->header('text/html','200');
 
 #our &printdebug;
@@ -88,7 +89,9 @@ $crimp = {
     ContentType => 'text/html',
     PageTitle => 'CRIMP',
     ExitCode => '500',
-    DebugMode => 'off'
+    DebugMode => 'off',
+	HomeDirectory => '..'
+
 };
 
 #use join here as it's the most efficient method of concatonating strings (Fremen)
@@ -152,6 +155,18 @@ if ($crimp->{DebugMode} ne 'on'){
         $crimp->{DebugMode}=$Config->{_}->{DebugMode};
     }
 }
+############################################DP110
+if ($Config->{_}->{HomeDirectory} ne ''){
+	$crimp->{HomeDirectory}=$Config->{_}->{HomeDirectory};
+    }
+
+printdebug(
+        'Home Directory',
+        '',
+        'Testing',
+        $crimp->{HomeDirectory}
+    );
+#################################################
 
 #set default values
 #$crimp->{DocumentTemplate}=$Config->{_}->{DocumentTemplate};
@@ -213,9 +228,9 @@ foreach $IniCommand (@IniCommands){
     #Load Module
     if ($crimp->{$IniCommand} ne ''){
         if ( !-e "Crimp/$IniCommand.pm"){
-            printdebug("Module '$IniCommand' not found",'warn',"Check 'crimp.ini' for the following:","$IniCommand = $crimp->{$IniCommand}");
+            &printdebug("Module '$IniCommand' not found",'warn',"Check 'crimp.ini' for the following:","$IniCommand = $crimp->{$IniCommand}");
         }else{
-            #printdebug("Module '$IniCommands' loading","pass","click here to get this file");
+#            &printdebug("Module '$IniCommands' loading","pass","click here to get this file");
             require "Crimp/$IniCommand.pm";
         }
     }
@@ -226,16 +241,27 @@ foreach $IniCommand (@IniCommands){
 ############
 
 if ($crimp->{ExitCode} eq ''){
-    $crimp->{ExitCode} = '500';
+    $crimp->{ExitCode} = '200';
+}
+
+#if ($crimp->{Debug} ne 'off'){
+#    $crimp->{ExitCode} = '200';
+#}
+
+if ($crimp->{ContentType} eq ''){
+    $crimp->{ContentType} = 'text/html';
 }
 
 #This is where we finish the document or file
+#$crimp->{ExitCode} = '200';
 print $query->header($crimp->{ContentType},$crimp->{ExitCode});
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, '</table>';
     $crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;;
 }
+
+
 print $crimp->{DisplayHtml};
 
 ####################################################################
@@ -250,33 +276,46 @@ print $crimp->{DisplayHtml};
 
 sub printdebug(){
     my $solut="";
+    my $logger="";
     my $mssge=shift(@_);
     my $stats=shift(@_);
     my $fatal = 0;
 
+
+
     #print "$Config->{_}->{Debug};";
     while (my $extra = shift) {
-        $solut="$solut<br />&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>";
-    }
-
+    if ($mssge eq ''){$solut="&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>";}
+    else {$solut="$solut<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>";}
+     	$logger="$logger, $extra";
+     }
+$log_this=`echo "$mssge,$stats,$logger\n" >> /home/martin/CVS/crimp/cgi-bin/crimp.log`;
+  
     if ($stats eq 'pass') { $stats='[<span style="color: #0f0;">PASS</span>]' }
     if ($stats eq 'warn') { $stats='[<span style="color: #fc3;">WARN</span>]' }
     if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $fatal = 1; }
     if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]'; $fatal = 1; }
 
-    if ($solut ne '') { $mssge="<b>&#149;</b> $mssge $solut" }
-
+    if (($solut ne '')&&($mssge ne '')) { $mssge="<b>&#149;</b> $mssge $solut"; }
+	if ($mssge eq ''){$mssge = "$solut";}
     $PRINT_DEBUG = "$PRINT_DEBUG<tr><td class='crimpDebugMsg'><pre class='crimpDebug'>$mssge</pre></td><td class='crimpDebugStatus'><pre class='crimpDebug'><span style='color: #fff;'>$stats</span></pre></td></tr>";
+    
+    
     #
     #<table width='100%' border='0' cellspacing='0' cellpadding='0'><tr bgcolor='#CCCCCC'><td align='left' valign='top'><h6><font face='Verdana, Arial, Helvetica, sans-serif' size='1'>Powered by Crimp &copy;2004 IND-Web.com</font></h6><td align='right' valign='top'><font face='Verdana, Arial, Helvetica, sans-serif' size='1'><b>admin</b></font></td></tr><tr bgcolor='#000000'><td colspan='2'>$PRINT_DEBUG</td></tr></table>
+  
+ 
+ 
     if ($fatal){
         print $query->header('text/html',$crimp->{ExitCode});
+#        print $query->header('text/html','200');
         print $PRINT_DEBUG;
-        exit;
+#        exit;
         #crimp_display("debug");
         #print "META <meta http-equiv='refresh' content='30;URL=../cgi-bin/crimp.pl?mode=config'>";
         #print "<table width='100%' border='0' cellspacing='0' cellpadding='0'><tr bgcolor='#CCCCCC'><td align='left' valign='top'><h6><font face='Verdana, Arial, Helvetica, sans-serif' size='1'>Powered by Crimp &copy;2004 IND-Web.com</font></h6><td align='right' valign='top'><font face='Verdana, Arial, Helvetica, sans-serif' size='1'><b>admin</b></font></td></tr><tr bgcolor='#000000'><td colspan='2'>$PRINT_DEBUG</td></tr></table>";
     }
 }
 
+#print $PRINT_DEBUG;
 #REALLY THE END#
