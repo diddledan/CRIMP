@@ -1,3 +1,11 @@
+$ID = q$Id: DocumentTemplate.pm,v 1.6 2005-11-18 20:29:08 ind-network Exp $;
+&printdebug('Module DocumentTemplate',
+			'',
+			'Authors: The CRIMP Team',
+			"Version: $ID",
+			'http://crimp.sourceforge.net/'
+			);
+
 #only parse the template if this is an html or xhtml page
 if (($crimp->{ContentType} eq 'text/html') || ($crimp->{ContentType} eq 'text/xhtml+xml')) {
 	@HttpRequest = split(/\//,$crimp->{HttpRequest});
