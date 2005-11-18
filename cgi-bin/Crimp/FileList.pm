@@ -1,7 +1,8 @@
+$ID = q$Id: FileList.pm,v 1.2 2005-11-18 20:20:10 ind-network Exp $;
 &printdebug('Module FileList',
 			'',
 			'Authors: The CRIMP Team',
-			'Version: 1.0',
+			"Version: $ID",
 			'http://crimp.sourceforge.net/'
 			);
 
