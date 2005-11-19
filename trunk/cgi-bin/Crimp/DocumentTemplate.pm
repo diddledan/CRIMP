@@ -1,4 +1,4 @@
-$ID = q$Id: DocumentTemplate.pm,v 1.6 2005-11-18 20:29:08 ind-network Exp $;
+$ID = q$Id: DocumentTemplate.pm,v 1.7 2005-11-19 18:22:38 ind-network Exp $;
 &printdebug('Module DocumentTemplate',
 			'',
 			'Authors: The CRIMP Team',
@@ -31,9 +31,9 @@ if (($crimp->{ContentType} eq 'text/html') || ($crimp->{ContentType} eq 'text/xh
 	
 	$crimp->{DisplayHtml} = $new_content;
 	
-	&printdebug("Module 'DocumentTemplate'","$status","Started With: $crimp->{DocumentTemplate}");
+	&printdebug("","$status","Started With: $crimp->{DocumentTemplate}");
 } else {
-	&printdebug('Module \'DocumentTemplate\'', 'pass', "Skipped module for ContentType: $crimp->{ContentType}");
+	&printdebug('', 'pass', "Skipped module for ContentType: $crimp->{ContentType}");
 }
 
 
