@@ -1,4 +1,4 @@
-$ID = q$Id: ContentDatabase.pm,v 1.7 2005-11-18 20:29:08 ind-network Exp $;
+$ID = q$Id: ContentDatabase.pm,v 1.8 2005-11-20 23:38:33 diddledan Exp $;
 &printdebug('Module ContentDatabase',
 			'',
 			'Authors: The CRIMP Team',
@@ -60,18 +60,18 @@ if (!$@) {
     	eval $ref->{'content'};
    	if (!$@) {
    	  if ($content ne '') {
-   	    &printdebug('Module \'ContentDatabase\'', 'pass', 'Successfully parsed the content from the database.');
+   	    &printdebug('', 'pass', 'Successfully parsed the content from the database.');
    	  } else {
    	    $content = 'Nothing to display....';
-   	    &printdebug('Module \'ContentDatabase\'', 'warn', 'The code from the database failed to return any content.');
+   	    &printdebug('', 'warn', 'The code from the database failed to return any content.');
    	  }
    	} else {
    	  $content = 'ERROR evaluating page content';
-   	  &printdebug('Module \'ContentDatabase\'', 'warn', 'Errors running the script from the database for this page:', $@);
+   	  &printdebug('', 'warn', 'Errors running the script from the database for this page:', $@);
    	}
     } else {
     	$content = $ref->{'content'};
-    	&printdebug('Module \'ContentDatabase\'', 'pass', 'Content retreived from database and sent to the templating engine.'); 
+    	&printdebug('', 'pass', 'Content retreived from database and sent to the templating engine.'); 
     }
     $crimp->{ExitCode} = '200';
     $crimp->{PageTitle} = $ref->{'title'};
@@ -79,11 +79,11 @@ if (!$@) {
   } else {
     $crimp->{DisplayHtml} = 'Error 404, not found.';
     $crimp->{ExitCode} = '404';
-    &printdebug('Module \'ContentDatabase\'', 'warn', 'The database returned no results, hence we are at a 404 state.');
+    &printdebug('', 'warn', 'The database returned no results, hence we are at a 404 state.');
   }
 } else {
   $crimp->{DisplayHtml} = '<span style="color: #f00;">Database Error</span>';
-  &printdebug('Module \'ContentDatabase\'', 'warn', 'Could not query the content for this page:', $@);
+  &printdebug('', 'warn', 'Could not query the content for this page:', $@);
 }
 
 1;
