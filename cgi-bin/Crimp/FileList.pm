@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.3 2005-11-20 22:16:34 diddledan Exp $;
+$ID = q$Id: FileList.pm,v 1.4 2005-11-20 23:06:31 diddledan Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -19,15 +19,19 @@ if ($crimp->{ContentDirectory} ne '') {
 	if ($crimp->{FileList} eq 'horizontal') { $DirLayout = ' | '; }
 	
 	my $FileDir = $crimp->{ContentDirectory};
+
+	my @HttpRequest = split(/\//,$crimp->{HttpRequest});
+	my $BaseUrl = $crimp->{UserConfig};
 	
-	@HttpRequest = split(/\//,$crimp->{HttpRequest});
-	
-	foreach $HttpRequest (@HttpRequest) {
+	foreach my $HttpRequest (@HttpRequest) {
 		if (-d "$FileDir/$HttpRequest") {
-			$FileDir = "$FileDir/$HttpRequest";
+			$FileDir = join '/', $FileDir, $HttpRequest;
+			$BaseUrl = join '/', $BaseUrl, $HttpRequest;
 		}
 	}
-	
+	&printdebug('','', join(': ', 'FileDir', $FileDir));
+	&printdebug('','', join(': ', 'BaseUrl (before sanitisation)', $BaseUrl));
+
 	opendir(DIR, $FileDir) or &printdebug('', 'fail', "Could not open the current directory for reading $!");
 	rewinddir(DIR);
 	my @DirChk = readdir(DIR);
@@ -36,18 +40,22 @@ if ($crimp->{ContentDirectory} ne '') {
 		if (($DirChk ne ".")&&($DirChk ne "..")&&($DirChk ne "index.html")){
 			if (-d "$FileDir/$DirChk") {
 				$DirCount ++;
+				$newurl = join '/', $BaseUrl, $DirChk;
+				$newurl =~ s!/{2,}!/!g;
 				if ($DirCount == 1) {
-					$DirList="$DirList<a href='$crimp->{HttpRequest}/$DirChk'>$DirChk</a>";
+					$DirList="$DirList<a href='$newurl'>$DirChk</a>";
 				} else {
-					$DirList="$DirList$DirLayout<a href='$crimp->{HttpRequest}/$DirChk'>$DirChk</a>";
+					$DirList="$DirList$DirLayout<a href='$newurl'>$DirChk</a>";
 				}
 			} else {
 				$FileCount ++;
 				$DirChk =~ s/(\.html){1}$//;
+				$newurl = join '/', $BaseUrl, $DirChk;
+				$newurl =~ s!/{2,}!/!g;
 				if ($FileCount == 1) {
-					$FileList="$FileList<a href='$crimp->{HttpRequest}/$DirChk.html'>$DirChk</a>";
+					$FileList="$FileList<a href='$newurl'>$DirChk</a>";
 				} else {
-					$FileList="$FileList$DirLayout<a href='$crimp->{HttpRequest}/$DirChk.html'>$DirChk</a>";
+					$FileList="$FileList$DirLayout<a href='$newurl'>$DirChk</a>";
 				}
 			}
 		}
