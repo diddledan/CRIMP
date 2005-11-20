@@ -1,5 +1,5 @@
 #!perl
-my $ID = q$Id: index.pl,v 1.25 2005-11-18 21:19:16 ind-network Exp $;
+my $ID = q$Id: index.pl,v 1.26 2005-11-20 20:11:41 diddledan Exp $;
 # CRIMP - Content Redirection Internet Management Program
 # Authors: The CRIMP team
 # Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
@@ -54,7 +54,7 @@ rewinddir(DIR);
 my @plugins = readdir(DIR);
 closedir(DIR);
 
-my $inicmds = '';
+my @inicmds;
 foreach $plugin (@plugins) {
   # is the file we found a 'dot' file (.something - meaning hidden)?
   # if not, check it ends in '.pm'
@@ -62,24 +62,17 @@ foreach $plugin (@plugins) {
     #remove the extension
     $plugin =~ s/(\.pm){1}$//;
     #add it to the list
-    $inicmds = join ';', $inicmds, $plugin;
+    push @inicmds, $plugin;
   }
 }
 
-if ($inicmds =~ m/DocumentTemplate;/) {
+if (@inicmds = grep !/DocumentTemplate/, @inicmds) {
 	#move DocumentTemplate to the end so that it is always called last (nasty hack I know)
-	$inicmds =~ s/DocumentTemplate;//gi;
-	$inicmds = join ';', $inicmds, 'DocumentTemplate';
+	push @inicmds, 'DocumentTemplate';
 }
-#remove extra semi-colon(s) from the beginning of the list
-$inicmds =~ s/^;*//;
-#remove any trailing semi-colons
-$inicmds =~ s/;*$//;
-#make sure that only one semi-colon seperates each plugin
-$inicmds =~ s/;+/;/g;
 
-if ( $inicmds eq '' ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
-else { &printdebug('Available Plugins', 'pass', $inicmds); }
+if ( ! @inicmds ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
+else { &printdebug('Available Plugins', 'pass', join(',', @inicmds)); }
 # END plugin parsing #
 ######################
 
@@ -87,7 +80,7 @@ else { &printdebug('Available Plugins', 'pass', $inicmds); }
 our $crimp;
 $crimp = {
 	#removed the quotes around the $ENV entries to speed up processing time.
-    IniCommands => $inicmds,
+	IniCommands => \@inicmds, # can't seem to get this to work properly (line 214)
     RemoteHost => $ENV{'REMOTE_ADDR'},
     ServerName =>  $ENV{'SERVER_NAME'},
     ServerSoftware =>  $ENV{'SERVER_SOFTWARE'},
@@ -218,30 +211,16 @@ if ($crimp->{UserConfig} eq ''){
 
 ####################################################################
 #set variables
-
-@IniCommands = split(/\;/,$crimp->{IniCommands});
-
-foreach $IniCommand (@IniCommands){
-    if (!$crimp->{$IniCommand}) {
-        if ($Config->{$crimp->{UserConfig}}->{$IniCommand}) {
-            $crimp->{$IniCommand}=$Config->{$crimp->{UserConfig}}->{$IniCommand};
-        } else {
-            if ($Config->{_}->{$IniCommand}) {
-                $crimp->{$IniCommand}=$Config->{_}->{$IniCommand};
-            }
-        }
-    }
-    #print "$IniCommands $crimp->{$IniCommands}<br>";
-
-    #Load Module
-    if ($crimp->{$IniCommand} ne ''){
-        if ( !-e "Crimp/$IniCommand.pm"){
-            &printdebug("Module '$IniCommand' not found",'warn',"Check 'crimp.ini' for the following:","$IniCommand = $crimp->{$IniCommand}");
-        }else{
-#            &printdebug("Module '$IniCommands' loading","pass","click here to get this file");
-            require "Crimp/$IniCommand.pm";
-        }
-    }
+my %executedCommands;
+foreach my $IniCommand (split /,/, $Config->{$crimp->{UserConfig}}->{PluginOrder}) {
+	&executePlugin($IniCommand) unless $executedCommands{$IniCommand}++;
+}
+foreach my $IniCommand (split /,/, $Config->{_}->{PluginOrder}) {
+	&executePlugin($IniCommand) unless $executedCommands{$IniCommand}++;
+}
+#foreach $IniCommand ($crimp->{IniCommands}) { # couldn't get this to work properly
+foreach my $IniCommand (@inicmds) {
+	&executePlugin($IniCommand) unless $executedCommands{$IniCommand}++;
 }
 
 ####################################################################
@@ -281,6 +260,26 @@ print $crimp->{DisplayHtml};
 ####################################################################
 ####################################################################
 
+sub executePlugin() {
+	my $plugin = shift;
+	if (!$crimp->{$plugin}) {
+		if ($Config->{$crimp->{UserConfig}}->{$plugin}) {
+			$crimp->{$plugin}=$Config->{$crimp->{UserConfig}}->{$plugin};
+		} elsif ($Config->{_}->{$plugin}) {
+				$crimp->{$plugin}=$Config->{_}->{$plugin};
+		}
+	}
+
+	#Load Module
+	if ($crimp->{$plugin} ne ''){
+		if ( !-e "Crimp/$plugin.pm"){
+			&printdebug("Module '$IniCommand' not found",'warn',"Check 'crimp.ini' for the following:","$IniCommand = $crimp->{$IniCommand}");
+		}else{
+			#&printdebug("Module '$IniCommands' loading","pass","click here to get this file");
+			require "Crimp/$plugin.pm";
+		}
+	}
+}
 
 sub printdebug(){
     my $solut="";
