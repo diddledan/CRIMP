@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>WordLink</title>
+</head>
+<body>
+<h2>WordLink</h2>
+This is a concept idea for a module yet to be developed by the crimp
+team.<br>
+<br>
+WordLink parses the chosen page content and makes links of certain key
+words (similar to wiki words).<br>
+<br>
+Firstly, the module would have to appear directly above whatever module
+is being used to grab the page within the config file.<br>
+<br>
+<h3>example crimp.ini</h3>
+<span style="font-style: italic;">&nbsp;&nbsp;&nbsp; [/docs]</span><br
+ style="font-style: italic;">
+<span style="font-style: italic;">&nbsp;&nbsp;&nbsp; WordLink = [path
+to writable text file]</span><br style="font-style: italic;">
+<span style="font-style: italic;">&nbsp;&nbsp;&nbsp; ContentDirectory =
+../cgi-bin/Crimp/docs</span><br>
+<br>
+Secondly, for users that have minimum knowlege of their website, a text
+file should be included to take care of the initial setup.<br>
+<br>
+<h3>example wordlink.txt (proberly in cgi-bin and set to chmod 755)</h3>
+<span style="font-style: italic;">&nbsp;&nbsp;&nbsp; CRIMP =
+http://crimp.sourceforge.net</span><br style="font-style: italic;">
+<span style="font-style: italic;">&nbsp;&nbsp;&nbsp; WordLink =
+http://crimp.sourceforge.net/docs/modules/WordLink</span><br>
+<br>
+Now the crimp.ini file and initial writable text file has been set, any
+pages that contain the word CRIMP (within the chosen section of the
+crimp.ini) will be replaced with &lt;a
+href='http://crimp.sourceforge.net'&gt;CRIMP&lt;/a&gt;<br>
+<br>
+There are several ways to add words to the list.<br>
+1) edit the text file manually<br>
+2) let the module do it for you<br>
+<br>
+To let the module add words to the list, all the user would have to do
+is enter the word into a page as follows:<br>
+<br>
+<span style="font-style: italic;">&nbsp;&nbsp;&nbsp;
+[[CRIMP|http://crimp.sourceforge.net]]</span><br
+ style="font-style: italic;">
+<span style="font-style: italic;">&nbsp;&nbsp;&nbsp; [[my
+computer|http://my.site.net/my-computer.html]]</span><br>
+<br>
+any pages containing these terms will then have the link automatically
+inserted.<br>
+<br>
+<h3>Possible problems and solutions</h3>
+The initial users page with the WordLink may not be writable and so the
+WordLink will always be in the file as written by the user.<br>
+WordLink should be able to overcome this by rewriting the text on the
+fly and not entering the word twice into the WordLink text file.<br>
+<br>
+There will be a page slowdown as WordLink has to check every word in
+its file against the page that has been grabbed.<br>
+I dont think that this will be too noticable on todays servers and if a
+user doesnt like the slowdown, then they shouldnt use the module.<br>
+<br>
+</body>
+</html>
