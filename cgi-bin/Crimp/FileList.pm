@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.4 2005-11-20 23:06:31 diddledan Exp $;
+$ID = q$Id: FileList.pm,v 1.5 2005-11-21 08:33:16 ind-network Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -37,7 +37,7 @@ if ($crimp->{ContentDirectory} ne '') {
 	my @DirChk = readdir(DIR);
 	closedir(DIR);
 	foreach $DirChk (@DirChk) {
-		if (($DirChk ne ".")&&($DirChk ne "..")&&($DirChk ne "index.html")){
+		if (($DirChk ne ".")&&($DirChk ne "..")&&($DirChk ne "index.html")&&($DirChk ne "CVS")){
 			if (-d "$FileDir/$DirChk") {
 				$DirCount ++;
 				$newurl = join '/', $BaseUrl, $DirChk;
