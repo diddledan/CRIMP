@@ -1,11 +1,28 @@
 #!perl
-my $ID = q$Id: index.pl,v 1.26 2005-11-20 20:11:41 diddledan Exp $;
 # CRIMP - Content Redirection Internet Management Program
-# Authors: The CRIMP team
-# Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
-#                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
-# Version: 1.0
-# Home/Docs/Licensing: http://crimp.sourceforge.net/
+# Copyright (C) 2005 The CRIMP Team
+# Authors:			The CRIMP Team
+# Project Leads:	Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
+# 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
+# HomePage:			http://crimp.sourceforge.net/
+my $Version = '0.1'; 
+my $ID = q$Id: index.pl,v 1.27 2005-11-21 18:08:40 diddledan Exp $;
+
+##################################################################################
+# This library is free software; you can redistribute it and/or                  #
+# modify it under the terms of the GNU Lesser General Public                     #
+# License as published by the Free Software Foundation; either                   #
+# version 2.1 of the License, or (at your option) any later version.             #
+#                                                                                #
+# This library is distributed in the hope that it will be useful,                #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of                 #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU              #
+# Lesser General Public License for more details.                                #
+#                                                                                #
+# You should have received a copy of the GNU Lesser General Public               #
+# License along with this library; if not, write to the Free Software            #
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA #
+##################################################################################
 
 package Crimp;
 &printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)',
@@ -14,7 +31,8 @@ package Crimp;
 			'Project Leads:',
 			'&nbsp;&nbsp;&nbsp;Martin "Deadpan110" Guppy [deadpan110@users.sourceforge.net]',
          '&nbsp;&nbsp;&nbsp;Daniel "Fremen" Llewellyn [diddledan@users.sourceforge.net]',
-			"Version: $ID",
+         "Public Version: $Version",
+			"Internal Version: $ID",
 			'http://crimp.sourceforge.net/'
 			);
 #
