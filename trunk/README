@@ -7,6 +7,12 @@ Configuration is all done in the cgi-bin/crimp.ini file
 MODULES
 -------
 
+BreadCrumbs
+Designed to add a backwards navigation system so that users know where
+they are in relation to the homepage, this module can be configured to
+output breadcrumbs at either the top or bottom (or both) of the page.
+See the examples below for usage.
+
 ContentDirectory
 This module is configured with the path to the directory which contains
 the content that you want to be visible within the section. The default
@@ -43,7 +49,10 @@ Example Global Configuration:
   DebugMode = on #can be either 'on', 'off' or 'page'
   # path to the template which should be used for any paths that do
   # not explicitly specify a template file.
-  DocumentTemplate = ../template/index.html 
+  DocumentTemplate = ../template/index.html
+  # set a default BreadCrumbs setting - not necessary, but this makes
+  # sure that BreadCrumbs will be executed for every page..
+  BreadCrumbs = both
 
 Example configuration for ContentDirectory module:
   [/]
@@ -51,6 +60,8 @@ Example configuration for ContentDirectory module:
 
 Example configuration settings for ContentDatabase module:
   [/db]
+  # override the default BreadCrumbs setting
+  BreadCrumbs = top
   ContentDatabase = on
   DBType = mysql
   DBName = test
