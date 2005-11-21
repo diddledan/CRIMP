@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>BreadCrumbs</title>
+</head>
+<body>
+<h1>BreadCrumbs</h1>
+<h2>Introduction</h2>
+In a popular Grimm&rsquo;s fairytale, Hansel and Gretel are taken deep
+into
+the forest in the hope they will not find their way out. However,
+clever Hansel has left a trail of breadcrumbs to show their return
+path. While the story inspires the term &ldquo;breadcrumb
+navigation&rdquo;, it
+also provides a metaphor of Web usage that is much stronger than many
+designers realise.<br>
+<br>
+Strictly speaking &ldquo;breadcrumb navigation&rdquo; is a misnomer
+since Hansel's
+breadcrumbs were eaten by birds with the result that he and Gretel
+remained lost, started snacking on the witch's gingerbread house, and
+so on. His earlier attempt with white pebbles was more successful, but
+&ldquo;white pebble navigation&rdquo; doesn't have quite the same ring!<br>
+<br>
+Taken from : <a
+ href="http://www.syntagm.co.uk/design/articles/breadcrumbs.htm">Breadcrumb
+Navigation: There's More to Hansel and Gretel than Meets the Eye</a><br>
+<br>
+<h2>Description</h2>
+If this page is being viewed from within the default CRIMP install on
+your website, you will already see the BreadCrumbs at the top of your
+page but for anyone that has opened this page directly or still doesnt
+know what this module does, then the following shows what is inserted
+into your page:<br>
+<b><br>
+Location: <a href="/">home</a> - <a href="/docs">docs</a> - <a
+ href="/docs/modules">modules</a> - <a href="/docs/modules/BreadCrumbs">BreadCrumbs</a></b><br>
+<b><br>
+</b>This allows a user to backtrack through your website without the
+need of starting from the begining of your site just to choose an
+alternative route. Documents can also be easily categorised into
+directories allowing users easier access and at any point, they can see
+where they are without looking at the address bar in their browser.<br>
+<br>
+<h2>Installation</h2>
+This module is included within the default CRIMP installation and only
+needs to be configured within the crimp.ini configuration file.<br>
+<br>
+<h2>Configuration</h2>
+This module can be used either globally or on a per directory basis.<br>
+The module has 3 settings for where the BreadCrumbs will be inserted,
+these are 'top', 'bottom' and 'both'.<br>
+The module also needs to be activated after the main page content has
+been processed and before the page template is called.<br>
+<br>
+BreadCrumbs = [top | bottom | both]<br>
+<br>
+<h2>Examples</h2>
+For BreadCrumbs to be globally available on your site and at the top of
+your pages:<br>
+<br>
+#root options<br>
+PluginOrder =
+ContentDirectory,ContentDatabase,FileList,BreadCrumbs,DocumentTemplate<br>
+BreadCrumbs = top<br>
+<br>
+For BreadCrumbs to be on the very top and bottom of the pages within
+the /docs directory:<br>
+<br>
+[/docs]<br>
+PluginOrder = ContentDirectory,FileList,BreadCrumbs<br>
+FileList = horizontal<br>
+BreadCrumbs = both<br>
+ContentDirectory = ../cgi-bin/Crimp/docs<br>
+<br>
+</body>
+</html>
