@@ -21,6 +21,7 @@ pre.crimpDebug {
 	color: #fff;
 	text-align: left;
 	vertical-align: top;
+	padding: 0px;
 }
 /* status box */
 .crimpDebugStatus {
