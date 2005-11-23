@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.28 2005-11-23 13:38:52 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.29 2005-11-23 15:03:50 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -227,6 +227,9 @@ if ($crimp->{UserConfig} eq ''){
     "UserConfig: $crimp->{UserConfig}",
 );
 
+#setup a cookie holder
+our @cookies;
+
 ####################################################################
 # call the plugins in order
 my %executedCommands;
@@ -260,7 +263,7 @@ if ($crimp->{ContentType} eq ''){
 
 #This is where we finish the document or file
 #$crimp->{ExitCode} = '200';
-print $query->header($crimp->{ContentType},$crimp->{ExitCode});
+print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, '</table>';
