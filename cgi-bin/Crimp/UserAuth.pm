@@ -1,4 +1,4 @@
-$ID = q$Id: UserAuth.pm,v 1.1 2005-11-23 15:04:58 diddledan Exp $;
+$ID = q$Id: UserAuth.pm,v 1.2 2005-11-23 15:06:33 diddledan Exp $;
 &printdebug('Module UserAuth','',
 				'Authors: The CRIMP Team',
 				"Version: $ID",
@@ -28,7 +28,6 @@ if ($Config->{$crimp->{UserConfig}}->{UserAuth} ne '') {
 
 	$query = new CGI;
 	my $passy = $Config->{$crimp->{UserConfig}}->{UserAuth};
-	&printdebug('','',$query->param('password'),$query->cookie("$crimp->{UserConfig}:pass"));
 	if (($query->param('password') eq $passy) || ($query->cookie("$crimp->{UserConfig}:pass") eq $passy)) {
 		#clean up after ourselves, as the user is permitted access to this section...
 		push @cookies, $query->cookie(-name => "$crimp->{UserConfig}:pass",
