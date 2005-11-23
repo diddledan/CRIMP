@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.30 2005-11-23 15:26:46 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.31 2005-11-23 15:28:40 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -314,7 +314,7 @@ sub printdebug(){
 
     #print "$Config->{_}->{Debug};";
     while (my $extra = shift) {
-    	if ($solut eq '') { $solut = "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
+    	if ($solut eq '' && $mssge eq '') { $solut = "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
     	else { $solut="$solut<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
      	$logger="$logger, $extra";
     }
