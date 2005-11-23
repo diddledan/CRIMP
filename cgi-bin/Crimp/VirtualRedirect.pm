@@ -1,4 +1,4 @@
-$ID = q$Id: VirtualRedirect.pm,v 1.16 2005-11-18 20:29:08 ind-network Exp $;
+$ID = q$Id: VirtualRedirect.pm,v 1.17 2005-11-23 15:13:41 diddledan Exp $;
 &printdebug('Module VirtualRedirect',
 			'',
 			'Authors: The CRIMP Team',
@@ -10,8 +10,8 @@ $ID = q$Id: VirtualRedirect.pm,v 1.16 2005-11-18 20:29:08 ind-network Exp $;
 #our $crimp;
 
 #parse url and remove the config file section $crimp->{UserConfig}
-if ($crimp->{DisplayHtml} ne "" ){
-  &printdebug("Module 'VirtualRedirect'","warn", "DisplayHtml has already been filled with content");
+if ($crimp->{DisplayHtml} ne '' ){
+  &printdebug('','warn', 'DisplayHtml has already been filled with content');
 }
 
 @HttpRequest = split(/\//,$crimp->{HttpRequest});
@@ -51,7 +51,7 @@ $res = $ua->request($req);
 if ($res->is_success) {
 	#printdebug("File exists on remote server");
 	
-	&printdebug('Module \'VirtualRedirect\'','pass',"Started With: $crimp->{VirtualRedirect}",'Fetching the following content:',$urltoget);
+	&printdebug('','pass',"Started With: $crimp->{VirtualRedirect}",'Fetching the following content:',$urltoget);
 	
 	$crimp->{DisplayHtml} = $res->content;
 	#get the page title
@@ -104,7 +104,7 @@ if ($res->is_success) {
 	    $crimp->{DisplayHtml} =~ s/$image_url/$newimageproto$newimageurl/g;
 	    $i++;
 	  }
-	  &printdebug('Correcting Images', 'pass', "Using $url for image urls", "Converted $i image tags to point to the correct web location");
+	  &printdebug('', 'pass', 'Converting Image URLs', "&nbsp;&nbsp;&nbsp;&nbsp;Using $url", "&nbsp;&nbsp;&nbsp;&nbsp;Converted $i image tags to point to the correct web location");
 	  
 	  #my $proto = 'http://';
 	  #if ($ENV{'SERVER_PORT'} eq '443') { $proto = 'https://'; }
@@ -140,10 +140,10 @@ if ($res->is_success) {
 	    }
 	    $j++;
 	  }
-	  &printdebug('Correcting Links', 'pass', "Successfuly converted $j links to point to the right place.");
+	  &printdebug('', 'pass', 'Correcting Links', "&nbsp;&nbsp;&nbsp;&nbsp;Successfuly converted $j links to point to the right place.");
 	  #foreach $item (keys %ENV) { &printdebug("$item = $ENV{$item}"); }
 	} else {
-	  &printdebug('Correcting Images and Links', 'warn', 'Couldn\'t correct the image and link urls of this page:', $@, 'Make sure you have installed the HTML::TokeParser module');
+	  &printdebug('', 'warn', 'Couldn\'t correct the image and link urls of this page:', $@, 'Make sure you have installed the HTML::TokeParser module');
 	}
 	
 	# END LINK / IMAGE CORRECTION #
@@ -154,7 +154,7 @@ if ($res->is_success) {
 } else {
   # the LWP::UserAgent couldn't get the document - let's tell the user why
   $crimp->{DisplayHtml} = '<span style="color: #f00;">Connection error</span>';
-  &printdebug('Module \'VirtualRedirect\'', 'warn', "Could not get '$urltoget'", $res->status_line);
+  &printdebug('', 'warn', "Could not get '$urltoget':", "&nbsp;&nbsp;&nbsp;&nbsp;$res->status_line");
 }
 
 #on success
