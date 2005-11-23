@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.27 2005-11-21 18:08:40 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.28 2005-11-23 13:38:52 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -228,17 +228,18 @@ if ($crimp->{UserConfig} eq ''){
 );
 
 ####################################################################
-#set variables
+# call the plugins in order
 my %executedCommands;
+$crimp->{skipRemainingPlugins} = 0;
 foreach my $IniCommand (split /,/, $Config->{$crimp->{UserConfig}}->{PluginOrder}) {
-	&executePlugin($IniCommand) unless $executedCommands{$IniCommand}++;
+	&executePlugin($IniCommand) unless (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++));
 }
 foreach my $IniCommand (split /,/, $Config->{_}->{PluginOrder}) {
-	&executePlugin($IniCommand) unless $executedCommands{$IniCommand}++;
+	&executePlugin($IniCommand) unless (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++));
 }
 #foreach $IniCommand ($crimp->{IniCommands}) { # couldn't get this to work properly
 foreach my $IniCommand (@inicmds) {
-	&executePlugin($IniCommand) unless $executedCommands{$IniCommand}++;
+	&executePlugin($IniCommand) unless (($IniCommand ne 'DocumentTemplate') && (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++)));
 }
 
 ####################################################################
