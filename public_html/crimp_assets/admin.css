@@ -1,0 +1,20 @@
+table.crimpAdmin {
+	width: 100%;
+}
+th.crimpAdmin {
+	text-align: center;
+}
+td.crimpAdminDesc {
+	text-align: right;
+}
+td.crimpAdminItem {
+	text-align: left;
+	font-size: 10pt;
+}
+td.crimpAdminDesc, td.crimpAdminItem {
+	border-bottom: 1px dashed #000;
+	vertical-align: top;
+}
+table.crimpAdminItem {
+	font-size: 10pt;
+}
