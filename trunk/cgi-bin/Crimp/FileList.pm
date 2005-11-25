@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.6 2005-11-25 09:50:02 ind-network Exp $;
+$ID = q$Id: FileList.pm,v 1.7 2005-11-25 11:21:50 ind-network Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -8,15 +8,27 @@ $ID = q$Id: FileList.pm,v 1.6 2005-11-25 09:50:02 ind-network Exp $;
 
 &printdebug('','',"Started With: $crimp->{FileList}");
 
-my $DirList = '<b>Directories</b><br />';
-my $FileList = '<b>Documents</b><br />';
+my $DirList = '<b>Directories</b><br />&nbsp;&nbsp;&nbsp;';
+my $FileList = '<b>Documents</b><br />&nbsp;&nbsp;&nbsp;';
+my $DirLayout = '<br />&nbsp;&nbsp;&nbsp;';
 my $DirCount = 0;
 my $FileCount = 0;
-my $DirLayout = '<br />';
+
 
 #Depends on ContentDirectory
 if ($crimp->{ContentDirectory} ne '') {
-	if ($crimp->{FileList} eq 'horizontal') { $DirLayout = ' | '; }
+	if ($crimp->{FileList} eq 'horizontal') { 
+	
+	 $DirList = '<b>Directories:</b> ';
+	 $FileList = '<b>Documents:</b> ';
+	 $DirLayout = ' | '; 
+	
+	
+	}else{
+	
+	
+	
+	}
 	
 	my $FileDir = $crimp->{ContentDirectory};
 
@@ -68,8 +80,8 @@ if ($crimp->{ContentDirectory} ne '') {
 	&printdebug('','pass',"Documents found: $FileCount");
 	
 	$newhtml = '<div id="crimpFileList">';
-	if ($DirCount ne 0) { $newhtml = join '', $newhtml, $DirList, '<br /><br />'; }
-	if ($FileCount ne 0) { $newhtml = join '', $newhtml, $FileList, '<br /><br />'; }
+	if ($DirCount ne 0) { $newhtml = join '', $newhtml, $DirList, '<br />'; }
+	if ($FileCount ne 0) { $newhtml = join '', $newhtml, $FileList, '<br />'; }
 	$newhtml = join '', $newhtml, '</div>';
 	$crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml};
 
