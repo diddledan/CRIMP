@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.5 2005-11-21 08:33:16 ind-network Exp $;
+$ID = q$Id: FileList.pm,v 1.6 2005-11-25 09:50:02 ind-network Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -32,6 +32,9 @@ if ($crimp->{ContentDirectory} ne '') {
 	&printdebug('','', join(': ', 'FileDir', $FileDir));
 	&printdebug('','', join(': ', 'BaseUrl (before sanitisation)', $BaseUrl));
 
+	if (( -d $FileDir )){
+
+	
 	opendir(DIR, $FileDir) or &printdebug('', 'fail', "Could not open the current directory for reading $!");
 	rewinddir(DIR);
 	my @DirChk = readdir(DIR);
@@ -69,6 +72,13 @@ if ($crimp->{ContentDirectory} ne '') {
 	if ($FileCount ne 0) { $newhtml = join '', $newhtml, $FileList, '<br /><br />'; }
 	$newhtml = join '', $newhtml, '</div>';
 	$crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml};
+
+}else{
+&printdebug('', 'warn', 'Couldn\'t open directory for listing');
+}
+
+
+
 }else{
 	&printdebug('','warn','This module depends on the ContentDirectory module');
 }
