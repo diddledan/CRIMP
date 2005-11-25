@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.10 2005-11-25 18:09:11 diddledan Exp $;
+$ID = q$Id: FileList.pm,v 1.11 2005-11-25 22:31:48 ind-network Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -17,6 +17,7 @@ my $FileCount = 0;
 
 #Depends on ContentDirectory
 if ($crimp->{ContentDirectory} ne '') {
+
 	if ($crimp->{FileList} eq 'horizontal') { 
 	
 	 $DirList = '<b>Directories:</b> ';
@@ -41,10 +42,13 @@ if ($crimp->{ContentDirectory} ne '') {
 			$BaseUrl = join '/', $BaseUrl, $HttpRequest;
 		}
 	}
+
 	$BaseUrl =~ s!/{2,}!/!g;
 	$BaseUrl = join '/', $crimp->{UserConfig}, $BaseUrl unless $BaseUrl =~ m!$crimp->{UserConfig}!;
 	&printdebug('','', join(': ', 'FileDir', $FileDir));
 	&printdebug('','', join(': ', 'BaseUrl (before sanitisation)', $BaseUrl));
+
+	#my $CheckUrl = join '','../', $crimp->{HttpRequest};
 
 	if (( -d $FileDir )){
 
@@ -82,12 +86,13 @@ if ($crimp->{ContentDirectory} ne '') {
 	&printdebug('','pass',"Directories found: $DirCount");
 	&printdebug('','pass',"Documents found: $FileCount");
 	
-	$newhtml = '<div id="crimpFileList">';
-	if ($DirCount ne 0) { $newhtml = join '', $newhtml, $DirList, '<br />'; }
-	if ($FileCount ne 0) { $newhtml = join '', $newhtml, $FileList, '<br />'; }
-	$newhtml = join '', $newhtml, '</div>';
-	$crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml};
-
+	if ( ($DirCount + $FileCount) ne 0 ){
+		$newhtml = '<div id="crimpFileList">';
+		if ($DirCount ne 0) { $newhtml = join '', $newhtml, $DirList, '<br />'; }
+		if ($FileCount ne 0) { $newhtml = join '', $newhtml, $FileList, '<br />'; }
+		$newhtml = join '', $newhtml, '</div>';
+		$crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml};
+	}
 }else{
 &printdebug('', 'warn', 'Couldn\'t open directory for listing');
 }
