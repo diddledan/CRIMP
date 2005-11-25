@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.7 2005-11-25 11:21:50 ind-network Exp $;
+$ID = q$Id: FileList.pm,v 1.8 2005-11-25 16:51:30 diddledan Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -33,7 +33,7 @@ if ($crimp->{ContentDirectory} ne '') {
 	my $FileDir = $crimp->{ContentDirectory};
 
 	my @HttpRequest = split(/\//,$crimp->{HttpRequest});
-	my $BaseUrl = $crimp->{UserConfig};
+	my $BaseUrl = '';
 	
 	foreach my $HttpRequest (@HttpRequest) {
 		if (-d "$FileDir/$HttpRequest") {
@@ -41,6 +41,8 @@ if ($crimp->{ContentDirectory} ne '') {
 			$BaseUrl = join '/', $BaseUrl, $HttpRequest;
 		}
 	}
+	$newUrl =~ s/$BaseUrl//;
+	$BaseUrl = join '/', $crimp->{UserConfig}, $BaseUrl;
 	&printdebug('','', join(': ', 'FileDir', $FileDir));
 	&printdebug('','', join(': ', 'BaseUrl (before sanitisation)', $BaseUrl));
 
@@ -67,6 +69,7 @@ if ($crimp->{ContentDirectory} ne '') {
 				$DirChk =~ s/(\.html){1}$//;
 				$newurl = join '/', $BaseUrl, $DirChk;
 				$newurl =~ s!/{2,}!/!g;
+				$newurl = join '', $newurl,'.html';
 				if ($FileCount == 1) {
 					$FileList="$FileList<a href='$newurl'>$DirChk</a>";
 				} else {
