@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.8 2005-11-25 16:51:30 diddledan Exp $;
+$ID = q$Id: FileList.pm,v 1.9 2005-11-25 16:57:41 diddledan Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -41,7 +41,7 @@ if ($crimp->{ContentDirectory} ne '') {
 			$BaseUrl = join '/', $BaseUrl, $HttpRequest;
 		}
 	}
-	$newUrl =~ s/$BaseUrl//;
+	$BaseUrl =~ s/$crmip->{UserConfig}//;
 	$BaseUrl = join '/', $crimp->{UserConfig}, $BaseUrl;
 	&printdebug('','', join(': ', 'FileDir', $FileDir));
 	&printdebug('','', join(': ', 'BaseUrl (before sanitisation)', $BaseUrl));
