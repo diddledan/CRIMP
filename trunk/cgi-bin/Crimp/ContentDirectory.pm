@@ -1,4 +1,4 @@
-$ID = q$Id: ContentDirectory.pm,v 1.11 2005-11-21 16:27:27 diddledan Exp $;
+$ID = q$Id: ContentDirectory.pm,v 1.12 2005-11-25 09:50:39 ind-network Exp $;
 &printdebug('Module ContentDirectory',
 			'',
 			'Authors: The CRIMP Team',
@@ -24,10 +24,23 @@ if ($crimp->{DisplayHtml} ne "" ){
 	if ( -d $requested ) { $requested = join '/', $requested, 'index.html'; }
 	#my $requested = "$crimp->{HomeDirectory}$crimp->{ContentDirectory}$path";
 
-	#&printdebug("$crimp->{HomeDirectory}","","$requested");
+
+# Use error page
+if (( !-e $requested )||( -d $requested )){
+&printdebug('', 'warn', 'Couldn\'t open file for reading',
+				 "file: $requested",
+				 "error: $!",
+				 "Using $crimp->{ErrorDirectory}/404.html for content"
+				 );
+
+$requested = join '/', $crimp->{ErrorDirectory}, '404.html';
+$crimp->{ExitCode} = '404';
+
+}
+
 
    if (( -e $requested ) && ( !-d $requested )) {
-		sysopen (FILE,$requested,O_RDONLY) || &printdebug('', 'warn', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
+		sysopen (FILE,$requested,O_RDONLY) || &printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
 		
 		if (<FILE>) {
 			@display_content=<FILE>;
@@ -62,7 +75,8 @@ if ($crimp->{DisplayHtml} ne "" ){
 			$crimp->{DisplayHtml} = $new_content;
 			
 			####
-			$crimp->{ExitCode} = '200';
+if	($crimp->{ExitCode} ne '404'){$crimp->{ExitCode} = '200';}
+
 			&printdebug('','pass',"DisplayHtml filled with content from '$requested'");
 			#$crimp->{DisplayHtml}=@display_content;
 		} else {

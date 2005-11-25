@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.31 2005-11-23 15:28:40 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.32 2005-11-25 09:50:59 ind-network Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -109,7 +109,7 @@ $crimp = {
     PageTitle => 'CRIMP',
     ExitCode => '500',
     DebugMode => 'off',
-	HomeDirectory => '..'
+	 ErrorDirectory => '../cgi-bin/Crimp/errors'
 
 };
 
@@ -174,26 +174,15 @@ if ($crimp->{DebugMode} ne 'on'){
         $crimp->{DebugMode}=$Config->{_}->{DebugMode};
     }
 }
-############################################DP110
-if ($Config->{_}->{HomeDirectory} ne ''){
-	$crimp->{HomeDirectory}=$Config->{_}->{HomeDirectory};
+####################################################################
+## set default values ##
+#######################
+
+if ($Config->{_}->{ErrorDirectory} ne ''){
+	$crimp->{ErrorDirectory}=$Config->{_}->{ErrorDirectory};
     }
-
-printdebug(
-        'Home Directory',
-        '',
-        'Testing',
-        $crimp->{HomeDirectory}
-    );
-#################################################
-
-#set default values
-#$crimp->{DocumentTemplate}=$Config->{_}->{DocumentTemplate};
-#$crimp->{DebugMode}=$Config->{_}->{DebugMode};
-#$crimp->{DebugMode}=$Config->{_}->{DebugMode};
-
-
-
+ 
+ 
 ####################################################################
 ## Main Routine ##
 #################
