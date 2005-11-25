@@ -1,0 +1,7 @@
+This Directory is a place holder for the real docs directory located in ../cgi-bin/Crimp/docs
+The crimp.ini file redirects clients browsers to the real docs dir 
+but the FileList module does not see it.
+
+The real docs dir is located permanently within ../cgi-bin/Crimp/docs so crimp users have a permanent reference base for installed module documentation.
+  
+IT IS SAFE TO DELETE THIS DIRECTORY WHEN CREATING YOUR NEW CRIMP WEBSITE
