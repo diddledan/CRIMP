@@ -51,7 +51,7 @@ Untar the tarball into a temprary directory:<br>
 <br>
 <pre>&nbsp;&nbsp;&nbsp; mkdir ~/temp</pre>
 <pre>&nbsp;&nbsp;&nbsp; cd ~/temp</pre>
-<pre>&nbsp;&nbsp;&nbsp; tar -xjpvf&nbsp; [ModuleName].bz2&nbsp;&nbsp;&nbsp; # not sure if this is going to create ~/temp/Crimp</pre>
+<pre>&nbsp;&nbsp;&nbsp; tar -xjpvf&nbsp; [ModuleName].tar.bz2&nbsp;&nbsp;&nbsp; # not sure if this is going to create ~/temp/Crimp</pre>
 <br>
 Use your FTP client&nbsp; to upload the Crimp directory into your
 cgi-bin.<br>
@@ -81,8 +81,8 @@ for Windows 98/98se/ME)<br>
 Change to your Putty install directory by typing:<br>
 <br>
 <pre>&nbsp;&nbsp;&nbsp; cd [path\to\putty]</pre>
-<pre>&nbsp;&nbsp;&nbsp; pscp [path\to\ModuleName.bz2] [username]@[server-host.com]:[path\to\cgi-bin]</pre>
-<pre>&nbsp;&nbsp;&nbsp; pscp [path\to\MD5sum] [username]@[server-host.com]:[path\to\cgi-bin]</pre>
+<pre>&nbsp;&nbsp;&nbsp; pscp [path\to\ModuleName.tar.bz2] [username]@[server-host.com]:[path\to\cgi-bin]</pre>
+<pre>&nbsp;&nbsp;&nbsp; pscp [path\to\ModuleName.tar.bz2.sum] [username]@[server-host.com]:[path\to\cgi-bin]</pre>
 <br>
 Then open your SSH client and connect to your server host.<br>
 <h4>Linux</h4>
@@ -90,8 +90,9 @@ If you have downloaded the Module and MD5 sum onto your local linux
 machine, you can use scp in your console to upload the
 files.<br>
 <br>
-<pre>&nbsp;&nbsp;&nbsp; <span class="input">scp [server-host]:~/[path/to/cgi-bin] ~/[path/to/ModuleName.bz2]</span></pre>
-<pre><span class="input"></span>&nbsp;&nbsp;&nbsp; <span class="input">scp [server-host]:~/[path/to/cgi-bin] ~/[path/to/MD5sum]</span></pre>
+<pre>&nbsp;&nbsp;&nbsp; <span class="input">scp [server-host]:~/[path/to/cgi-bin] ~/[path/to/ModuleName.tar.bz2]</span></pre>
+<pre><span class="input"></span>&nbsp;&nbsp;&nbsp; <span class="input">scp [server-host]:~/[path/to/cgi-bin] ~/[path/to/</span>ModuleName.tar.bz2.sum<span
+ class="input">]</span></pre>
 <pre><span class="input"></span>&nbsp;&nbsp;&nbsp; <span class="input">ssh [username]@[server-host]<br></span></pre>
 <h4>SSH Client<span style="font-family: monospace;"></span></h4>
 Once logged into your server host over SSH, you can run the following
@@ -99,13 +100,13 @@ commands to install your module:<br>
 <br>
 <pre>&nbsp;&nbsp;&nbsp; cd ~/[path/to/cgi-bin]</pre>
 <pre>&nbsp;&nbsp;&nbsp; # If you have not yet downloaded the module</pre>
-<pre>&nbsp;&nbsp;&nbsp; wget http://[3rd-party-module-host]/[path/to/ModuleName.bz2]</pre>
-<pre>&nbsp;&nbsp;&nbsp; wget http://[3rd-party-module-host]/[path/to/MD5sum]</pre>
+<pre>&nbsp;&nbsp;&nbsp; wget http://[3rd-party-module-host]/[path/to/ModuleName.tar.bz2]</pre>
+<pre>&nbsp;&nbsp;&nbsp; wget http://[3rd-party-module-host]/[path/to/ModuleName.tar.bz2.sum]</pre>
 <pre>&nbsp;&nbsp;&nbsp; # Installation</pre>
 <pre>&nbsp;&nbsp;&nbsp; # MD5 check the module for consistancy</pre>
-<pre>&nbsp;&nbsp;&nbsp; md5sum -c [ModuleName].bz2.sum</pre>
+<pre>&nbsp;&nbsp;&nbsp; md5sum -c [ModuleName].tar.bz2.sum</pre>
 <pre>&nbsp;&nbsp;&nbsp; # If the check returns OK then unpack the tarball</pre>
-<pre>&nbsp;&nbsp;&nbsp; tar -xjpvf [ModuleName].bz2</pre>
+<pre>&nbsp;&nbsp;&nbsp; tar -xjpvf [ModuleName].tar.bz2</pre>
 <br>
 The module is now installed and ready for configuration.
 <h2>Configuration</h2>
