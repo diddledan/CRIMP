@@ -1,4 +1,4 @@
-$ID = q$Id: BreadCrumbs.pm,v 1.5 2005-11-18 20:15:22 ind-network Exp $;
+$ID = q$Id: BreadCrumbs.pm,v 1.6 2005-11-28 14:33:47 deadpan110 Exp $;
 &printdebug('Module BreadCrumbs',
 			'',
 			'Authors: The CRIMP Team',
@@ -27,12 +27,12 @@ foreach $HttpRequest (@HttpRequest){
 if (($crimp->{BreadCrumbs} eq "top") || ($crimp->{BreadCrumbs} eq "bottom") || ($crimp->{BreadCrumbs} eq "both")){
 
 	if (($crimp->{BreadCrumbs} eq "top") || ($crimp->{BreadCrumbs} eq "both")){
-		$crimp->{DisplayHtml}="<b>Location: $BreadCrumbs</b><br>$crimp->{DisplayHtml}";
+		$crimp->{DisplayHtml}="<b>Location: $BreadCrumbs</b><br/>$crimp->{DisplayHtml}";
 		&printdebug("","pass","BreadCrumbs inserted at the top of the page");
 	}
 
 	if (($crimp->{BreadCrumbs} eq "bottom") || ($crimp->{BreadCrumbs} eq "both")){
-		$crimp->{DisplayHtml}="$crimp->{DisplayHtml}<br><b>Location: $BreadCrumbs</b>";
+		$crimp->{DisplayHtml}="$crimp->{DisplayHtml}<br/><b>Location: $BreadCrumbs</b>";
 		&printdebug("","pass","BreadCrumbs inserted at the bottom of the page");
 	}
 
