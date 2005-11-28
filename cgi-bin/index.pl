@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.33 2005-11-28 14:39:39 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.34 2005-11-28 19:44:45 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -254,10 +254,10 @@ if ($crimp->{ContentType} eq ''){
 #$crimp->{ExitCode} = '200';
 print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 
-if ($crimp->{PageTitle} ne ""){
-$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
-$crimp->{DisplayHtml} =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
-}
+#if ($crimp->{PageTitle} ne ""){
+#$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
+#$crimp->{DisplayHtml} =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
+#}
 
 
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");

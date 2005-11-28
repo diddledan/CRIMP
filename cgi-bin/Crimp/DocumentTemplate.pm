@@ -1,10 +1,12 @@
-$ID = q$Id: DocumentTemplate.pm,v 1.9 2005-11-25 16:20:45 diddledan Exp $;
+$ID = q$Id: DocumentTemplate.pm,v 1.10 2005-11-28 19:44:45 deadpan110 Exp $;
 &printdebug('Module DocumentTemplate',
 			'',
 			'Authors: The CRIMP Team',
 			"Version: $ID",
 			'http://crimp.sourceforge.net/'
 			);
+			
+&printdebug('',$status,"Started With: $crimp->{DocumentTemplate}");
 
 my $blankTemplate = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -40,7 +42,7 @@ if (($crimp->{ContentType} eq 'text/html') || ($crimp->{ContentType} eq 'text/xh
 			}
 		
 			#printdebug ("Putting Page into Template");
-			&printdebug('',$status,"Started With: $crimp->{DocumentTemplate}");
+			
 			&insertContent($new_content);
 		} else {
 			&printdebug('','warn','Template file does not contain any content, using default blank template.');
@@ -53,8 +55,35 @@ if (($crimp->{ContentType} eq 'text/html') || ($crimp->{ContentType} eq 'text/xh
 
 sub insertContent {
 	my $template = shift;
+
+
+			#remove xml header if present
+			$crimp->{DisplayHtml} =~ s|<\?xml.*?\?>||i;
+			#remove doctype if present
+			$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||i;
+			#remove headers storing the title of the page
+			$crimp->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
+			
+			$crimp->{PageTitle} = $1;
+			if ($crimp->{PageTitle} eq ''){
+				&printdebug('','warn','The Page has no title');
+			}else{
+				&printdebug('','pass',"PageTitle: $crimp->{PageTitle}");
+			}
+			
+			#strip from <html> down to the opening <body> tag
+			$crimp->{DisplayHtml} =~ s|<html.*?>.*?<body>||si;
+			#remove the closing </body> tag and any cruft after - alas, that's nothing to do with the dogshow
+			$crimp->{DisplayHtml} =~ s|</body>.*||si;
+			
+	
 	$template =~ s/<!--TITLE-->/$crimp->{PageTitle} - $Config->{_}->{SiteTitle}/gi;
 	$template =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
+	
+	if ($crimp->{PageTitle} ne ""){
+$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
+$crimp->{DisplayHtml} =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
+}
 	
 	$crimp->{DisplayHtml} = $template;
 }
