@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.32 2005-11-25 09:50:59 ind-network Exp $;
+my $ID = q$Id: index.pl,v 1.33 2005-11-28 14:39:39 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -253,10 +253,19 @@ if ($crimp->{ContentType} eq ''){
 #This is where we finish the document or file
 #$crimp->{ExitCode} = '200';
 print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
+
+if ($crimp->{PageTitle} ne ""){
+$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
+$crimp->{DisplayHtml} =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
+}
+
+
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, '</table>';
+    $PRINT_HEAD = '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />';
     $crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;;
+    $crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;;
 }
 
 
@@ -266,7 +275,7 @@ print $crimp->{DisplayHtml};
 
 
 
-#foreach $item (keys %ENV) { print "$item = $ENV{$item}\n<br>";}
+#foreach $item (keys %ENV) { print "$item = $ENV{$item}\n<br />";}
 
 ####################################################################
 ####################################################################
@@ -314,7 +323,7 @@ $log_this=`echo "$mssge,$stats,$logger\n" >> /home/martin/CVS/crimp/cgi-bin/crim
     if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $fatal = 1; }
     if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]'; $fatal = 1; }
 
-    if (($solut ne '')&&($mssge ne '')) { $mssge="<b>&#149;</b> $mssge $solut"; }
+    if (($solut ne '')&&($mssge ne '')) { $mssge="<b>&#8226;</b> $mssge $solut"; }
 	if ($mssge eq ''){$mssge = "$solut";}
     $PRINT_DEBUG = "$PRINT_DEBUG<tr><td class='crimpDebugMsg'><pre class='crimpDebug'>$mssge</pre></td><td class='crimpDebugStatus'><pre class='crimpDebug'><span style='color: #fff;'>$stats</span></pre></td></tr>";
     
