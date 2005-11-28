@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.34 2005-11-28 19:44:45 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.35 2005-11-28 21:46:00 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -262,8 +262,8 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
-    $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, '</table>';
-    $PRINT_HEAD = '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />';
+    $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
+    $PRINT_HEAD = "<link rel='stylesheet' type='text/css' href='/crimp_assets/debug.css'>\n";
     $crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;;
     $crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;;
 }
