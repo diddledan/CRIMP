@@ -1,4 +1,4 @@
-$ID = q$Id: ContentDirectory.pm,v 1.13 2005-11-28 19:44:45 deadpan110 Exp $;
+$ID = q$Id: ContentDirectory.pm,v 1.14 2005-11-28 21:42:52 deadpan110 Exp $;
 &printdebug('Module ContentDirectory',
 			'',
 			'Authors: The CRIMP Team',
@@ -39,13 +39,29 @@ $crimp->{ExitCode} = '404';
 }
 
 
+
+#
+#sysopen (FILE,$crimp->{DocumentTemplate}, O_RDONLY) or &printdebug('','Warn',"Template $crimp->{DocumentTemplate} not found");
+#		@template_content=<FILE>;
+#		#$SIZE=@LINES;
+#		$status = 'pass';
+#		close(FILE);
+#		if (@template_content) {
+#			my $new_content = '';
+#				foreach $template_line(@template_content) {
+#		  		$new_content = join '', $new_content, $template_line;
+#			}
+#		
+
+
    if (( -e $requested ) && ( !-d $requested )) {
 		sysopen (FILE,$requested,O_RDONLY) || &printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
 		
-		if (<FILE>) {
+		
 			@display_content=<FILE>;
 			close(FILE);
 			
+		if (@display_content) {	
 			my $new_content='';
 			
 			####
