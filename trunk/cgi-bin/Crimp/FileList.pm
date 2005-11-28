@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.11 2005-11-25 22:31:48 ind-network Exp $;
+$ID = q$Id: FileList.pm,v 1.12 2005-11-28 21:45:05 deadpan110 Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -91,7 +91,9 @@ if ($crimp->{ContentDirectory} ne '') {
 		if ($DirCount ne 0) { $newhtml = join '', $newhtml, $DirList, '<br />'; }
 		if ($FileCount ne 0) { $newhtml = join '', $newhtml, $FileList, '<br />'; }
 		$newhtml = join '', $newhtml, '</div>';
-		$crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml};
+		
+		 $crimp->{DisplayHtml} =~ s/<body>/<body>$newhtml/i;
+		# $crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml};
 	}
 }else{
 &printdebug('', 'warn', 'Couldn\'t open directory for listing');
