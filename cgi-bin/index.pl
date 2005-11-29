@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.36 2005-11-29 20:29:53 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.37 2005-11-29 22:17:08 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -111,7 +111,8 @@ $crimp = {
     ExitCode => '204',
     DebugMode => 'off',
     VarDirectory => '../cgi-bin/Crimp/var',
-	 ErrorDirectory => '../cgi-bin/Crimp/errors'
+	 ErrorDirectory => '../cgi-bin/Crimp/errors',
+	 RobotsMeta => 'index,follow'
 
 };
 
@@ -189,6 +190,11 @@ if ($Config->{_}->{ErrorDirectory} ne ''){
     }
  
  
+ 
+ 
+ 
+ 
+
 ####################################################################
 ## Main Routine ##
 #################
@@ -222,6 +228,17 @@ if ($crimp->{UserConfig} eq ''){
     "UserConfig: $crimp->{UserConfig}",
 );
 
+
+# RobotsMeta
+if ($Config->{_}->{RobotsMeta} ne ''){
+		$crimp->{RobotsMeta}=$Config->{_}->{RobotsMeta};
+	}else{
+		if ($Config->{$crimp->{UserConfig}}->{RobotsMeta} ne ''){
+	   	$crimp->{RobotsMeta}=$Config->{$crimp->{UserConfig}}->{RobotsMeta};
+		}
+}
+ 
+ 
 #setup a cookie holder
 our @cookies;
 
@@ -244,6 +261,14 @@ foreach my $IniCommand (@inicmds) {
 ## The End ##
 ############
 
+$PRINT_HEAD = join '','<meta name="robots" content="',"$crimp->{RobotsMeta}",'" />',"\n";
+$crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;;
+
+
+
+
+
+
 if ($crimp->{ExitCode} eq '204'){
     $crimp->{ExitCode} = '200';
 }
@@ -265,7 +290,6 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 #$crimp->{DisplayHtml} =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
 #}
 
-
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
@@ -273,6 +297,10 @@ if ($crimp->{DebugMode} eq 'on'){
     $crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;;
     $crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;;
 }
+
+
+
+
 
 
 print $crimp->{DisplayHtml};
