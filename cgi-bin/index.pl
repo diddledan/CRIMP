@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.35 2005-11-28 21:46:00 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.36 2005-11-29 20:29:53 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -55,7 +55,8 @@ package Crimp;
 use Config::Tiny;
 use CGI;
 use CGI::Carp qw/ fatalsToBrowser /;
-#use Fcntl; 
+use Fcntl;
+# 
 
 my $query = new CGI;
 
@@ -107,11 +108,16 @@ $crimp = {
     HttpQuery =>  $ENV{'REDIRECT_QUERY_STRING'},
     ContentType => 'text/html',
     PageTitle => 'CRIMP',
-    ExitCode => '500',
+    ExitCode => '204',
     DebugMode => 'off',
+    VarDirectory => '../cgi-bin/Crimp/var',
 	 ErrorDirectory => '../cgi-bin/Crimp/errors'
 
 };
+
+#HTTP Error 204
+#No Content. The requested completed successfully but the resource requested is empty (has zero length).
+
 
 #use join here as it's the most efficient method of concatonating strings (Fremen)
 if ($crimp->{HttpQuery}) { $crimp->{HttpQuery} = join '', '?', $crimp->{HttpQuery}; }
@@ -154,7 +160,7 @@ if ($i < 8){$tune = "$tune -n ";}
 
 if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
     $crimp = {DebugMode => 'on'};
-    printdebug(
+    &printdebug(
         'Crimp Files not found',
         'fail',
         'Please check the following files exist in the crimp directory',
@@ -238,7 +244,7 @@ foreach my $IniCommand (@inicmds) {
 ## The End ##
 ############
 
-if ($crimp->{ExitCode} eq ''){
+if ($crimp->{ExitCode} eq '204'){
     $crimp->{ExitCode} = '200';
 }
 
@@ -263,7 +269,7 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 &printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
-    $PRINT_HEAD = "<link rel='stylesheet' type='text/css' href='/crimp_assets/debug.css'>\n";
+    $PRINT_HEAD = "<link rel='stylesheet' type='text/css' href='/crimp_assets/debug.css'/>\n";
     $crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;;
     $crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;;
 }
@@ -334,15 +340,104 @@ $log_this=`echo "$mssge,$stats,$logger\n" >> /home/martin/CVS/crimp/cgi-bin/crim
  
  
     if ($fatal){
-        print $query->header('text/html',$crimp->{ExitCode});
+       # print $query->header('text/html',$crimp->{ExitCode});
 #        print $query->header('text/html','200');
         print $PRINT_DEBUG;
-#        exit;
+      #  exit;
         #crimp_display("debug");
         #print "META <meta http-equiv='refresh' content='30;URL=../cgi-bin/crimp.pl?mode=config'>";
         #print "<table width='100%' border='0' cellspacing='0' cellpadding='0'><tr bgcolor='#CCCCCC'><td align='left' valign='top'><h6><font face='Verdana, Arial, Helvetica, sans-serif' size='1'>Powered by Crimp &copy;2004 IND-Web.com</font></h6><td align='right' valign='top'><font face='Verdana, Arial, Helvetica, sans-serif' size='1'><b>admin</b></font></td></tr><tr bgcolor='#000000'><td colspan='2'>$PRINT_DEBUG</td></tr></table>";
     }
 }
+
+
+sub FileRead{
+my $filename=shift(@_);
+my $entry=shift(@_);
+my $string=shift(@_);
+my $fileopen = join '/',$crimp->{VarDirectory},$filename;
+
+&printdebug('','',"FileRead: $filename");
+
+if ( -f $fileopen ){
+	sysopen (FILE,$fileopen,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+		@FileRead=<FILE>;
+		close(FILE);
+			
+		if (@FileRead){	
+			
+			foreach $FileRead(@FileRead){
+				chop($FileRead) if $FileRead =~ /\n$/;
+				($FileEntry,$FileString) = split(/\|\|/,$FileRead);
+					if ($FileEntry eq $entry){return($FileString);}
+			}
+		
+		}
+	}
+	return (&FileWrite($filename,$entry,$string));
+}
+
+sub FileWrite{
+my $filename=shift(@_);
+my $entry=shift(@_);
+my $string=shift(@_);
+my $filelock = join '/',$crimp->{VarDirectory},'lock',$filename;
+my $fileopen = join '/',$crimp->{VarDirectory},$filename;
+
+&printdebug('','',"FileWrite: $filename");
+
+sysopen(LOCKED,$filelock, O_WRONLY | O_EXCL | O_CREAT) or &RetryWait($filename,$entry,$string);if ( -f $fileopen ){
+	sysopen (FILE,$fileopen,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+		@FileRead=<FILE>;
+		close(FILE);
+		
+		if (@FileRead){	
+			
+			foreach $FileRead(@FileRead){
+				chop($FileRead) if $FileRead =~ /\n$/;
+				($FileEntry,$FileString) = split(/\|\|/,$FileRead);
+			
+			
+					if ($FileEntry eq $entry){
+					print LOCKED "$entry||$string\n";
+					}else{print LOCKED "$FileEntry||$FileString\n";}
+				
+			}
+		}
+}else{
+print LOCKED "$entry||$string\n";
+	}
+
+close(LOCKED);
+$file1="$SYSROOT_SYSTEM/system_keys.bak";
+$file2="$SYSROOT_SYSTEM/system_keys.txt";
+rename($filelock, $fileopen) or die "cant rename";
+
+return($string);
+
+
+}
+
+sub RetryWait{
+my $filename=shift(@_);
+my $entry=shift(@_);
+my $string=shift(@_);
+
+	if ($tries gt 5){
+		#$requested = join '/', $crimp->{ErrorDirectory}, '500.html';
+		$crimp->{ExitCode} = '500';
+		&printdebug('','warn',"File lock in place on $filename");		
+		return;
+		}
+
+	if ($tries ne 0){sleep 1;}
+		
+$tries++;
+&FileWrite($filename,$entry,$string);
+
+}
+
+
 
 #print $PRINT_DEBUG;
 #REALLY THE END#
