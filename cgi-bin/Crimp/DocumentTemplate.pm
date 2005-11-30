@@ -1,4 +1,4 @@
-$ID = q$Id: DocumentTemplate.pm,v 1.10 2005-11-28 19:44:45 deadpan110 Exp $;
+$ID = q$Id: DocumentTemplate.pm,v 1.11 2005-11-30 00:00:47 deadpan110 Exp $;
 &printdebug('Module DocumentTemplate',
 			'',
 			'Authors: The CRIMP Team',
@@ -69,6 +69,8 @@ sub insertContent {
 				&printdebug('','warn','The Page has no title');
 			}else{
 				&printdebug('','pass',"PageTitle: $crimp->{PageTitle}");
+				$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
+				$template =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
 			}
 			
 			#strip from <html> down to the opening <body> tag
@@ -77,7 +79,7 @@ sub insertContent {
 			$crimp->{DisplayHtml} =~ s|</body>.*||si;
 			
 	
-	$template =~ s/<!--TITLE-->/$crimp->{PageTitle} - $Config->{_}->{SiteTitle}/gi;
+	#$template =~ s/<!--TITLE-->/$crimp->{PageTitle} - $Config->{_}->{SiteTitle}/gi;
 	$template =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
 	
 	if ($crimp->{PageTitle} ne ""){
