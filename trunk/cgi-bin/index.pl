@@ -6,7 +6,7 @@
 # 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:			http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.37 2005-11-29 22:17:08 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.38 2005-11-30 00:00:46 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -281,6 +281,14 @@ if ($crimp->{ContentType} eq ''){
     $crimp->{ContentType} = 'text/html';
 }
 
+
+&printdebug('Crimp Exit','pass',		
+		"RobotsMeta: $crimp->{RobotsMeta}",
+		"ExitCode: $crimp->{ExitCode}"
+		);
+
+
+
 #This is where we finish the document or file
 #$crimp->{ExitCode} = '200';
 print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
@@ -290,7 +298,7 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 #$crimp->{DisplayHtml} =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
 #}
 
-&printdebug('Crimp Exit','pass',"Error code: $crimp->{ExitCode}");
+
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
     $PRINT_HEAD = "<link rel='stylesheet' type='text/css' href='/crimp_assets/debug.css'/>\n";
