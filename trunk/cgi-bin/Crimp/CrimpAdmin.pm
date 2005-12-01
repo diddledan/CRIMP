@@ -1,4 +1,4 @@
-my $ID = q$Id: CrimpAdmin.pm,v 1.1 2005-11-24 18:47:02 diddledan Exp $;
+my $ID = q$Id: CrimpAdmin.pm,v 1.2 2005-12-01 16:01:53 diddledan Exp $;
 &printdebug('Module CrimpAdmin',
 				'',
 				'Authors: The Crimp Team',
@@ -87,8 +87,10 @@ sub doAdminPage {
 		$changed++;
 	}
 	
-	if ($changed && $Config->write('crimp.ini')) { $msg = 'Successfully wrote new configuration file'; }
-	elsif ($changed) { $msg = 'Failed to write new configuration file'; }
+	if ($changed) {
+		if ($Config->write('crimp.ini')) { $msg = 'Successfully wrote new configuration file'; }
+		else { $msg = 'Failed to write new configuration file'; }
+	}
 	
 	$crimp->{DisplayHtml} = "
 <form method='post'>
