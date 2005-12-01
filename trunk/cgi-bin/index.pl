@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.39 2005-12-01 16:25:45 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.40 2005-12-01 20:08:50 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -253,7 +253,7 @@ foreach my $IniCommand (split /,/, $Config->{_}->{PluginOrder}) {
 	&executePlugin($IniCommand) unless (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++));
 }
 #foreach $IniCommand ($crimp->{IniCommands}) { # couldn't get this to work properly
-foreach my $IniCommand (@{$crimp->{inicmds}}) {
+foreach my $IniCommand (@{$crimp->{IniCommands}}) {
 	&executePlugin($IniCommand) unless (($IniCommand ne 'DocumentTemplate') && (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++)));
 }
 
