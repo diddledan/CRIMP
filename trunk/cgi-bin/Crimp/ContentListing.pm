@@ -1,4 +1,4 @@
-$ID = q$Id: ContentListing.pm,v 1.2 2005-12-01 20:01:57 deadpan110 Exp $;
+$ID = q$Id: ContentListing.pm,v 1.3 2005-12-01 20:31:37 deadpan110 Exp $;
 &printdebug('Module ContentListing',
 				'',
 				'Authors: The CRIMP Team',
@@ -108,48 +108,48 @@ if (( -d $FileDir )){
 				$FileSize = int(1+$FileSize/10.24);
 				$FileSize = $FileSize/100;
 
-
-if($FileType =~ m/.patch/){
+#  m/(.gif|.jpg|.png|.bmp|.ico)$/){
+if($FileType =~ m/(.patch)$/){
 $FileType = "<img src='/icons/small/patch.gif' alt='[Patch]'>";
 }
 
-if($FileType =~ m/.gif|.jpg|.png|.bmp|.ico/){
+elsif($FileType =~ m/(.gif|.jpg|.png|.bmp|.ico)$/){
 $FileType = "<img src='/icons/small/image.gif' alt='[Image]'>";
 }
 
-if($FileType =~ m/.mp3|.wav|.ogg/){
+elsif($FileType =~ m/(.mp3|.wav|.ogg)$/){
 $FileType = "<img src='/icons/small/sound.gif' alt='[Audio]'>";
 }
 
-if($FileType =~ m/.mov|.avi|.mpg|.ram/){
+elsif($FileType =~ m/(.mov|.avi|.mpg|.ram)$/){
 $FileType = "<img src='/icons/small/movie.gif' alt='[Movie]'>";
 }
 
-if($FileType =~ m/.txt|.rtf|.html/){
+elsif($FileType =~ m/(.txt|.rtf|.html)$/){
 $FileType = "<img src='/icons/small/text.gif' alt='[Text]'>";
 }
 
-if($FileType =~ m/.doc|.pdf|.odt/){
+elsif($FileType =~ m/(.doc|.pdf|.odt)$/){
 $FileType = "<img src='/icons/small/doc.gif' alt='[Document]'>";
 }
 
-if($FileType =~ m/.tar/){
+elsif($FileType =~ m/(.tar)$/){
 $FileType = "<img src='/icons/small/tar.gif' alt='[Archive]'>";
 }
 
-if($FileType =~ m/.sum/){
+elsif($FileType =~ m/(.sum)$/){
 $FileType = "<img src='/icons/small/key.gif' alt='[Checksum]'>";
 }
 
-if($FileType =~ m/.bz2|.gz|.zip|.rpm/){
+elsif($FileType =~ m/(.bz2|.gz|.zip|.rpm)$/){
 $FileType = "<img src='/icons/small/compressed.gif' alt='[Compressed]'>";
 }
 
-if($FileType =~ m/.bin|.exe/){
+elsif($FileType =~ m/(.bin|.exe)$/){
 $FileType = "<img src='/icons/small/binary.gif' alt='[Binary]'>";
 }
 
-if ($FileType eq $DirChk){
+elsif ($FileType eq $DirChk){
 $FileType = "<img src='/icons/small/unknown.gif' alt='[Unknown]'>";
 }
 
