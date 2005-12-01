@@ -1,4 +1,4 @@
-$ID = q$Id: ContentListing.pm,v 1.3 2005-12-01 20:31:37 deadpan110 Exp $;
+$ID = q$Id: ContentListing.pm,v 1.4 2005-12-01 22:40:17 deadpan110 Exp $;
 &printdebug('Module ContentListing',
 				'',
 				'Authors: The CRIMP Team',
@@ -110,47 +110,47 @@ if (( -d $FileDir )){
 
 #  m/(.gif|.jpg|.png|.bmp|.ico)$/){
 if($FileType =~ m/(.patch)$/){
-$FileType = "<img src='/icons/small/patch.gif' alt='[Patch]'>";
+$FileType = "<img src='/icons/small/patch.gif' alt='[Patch]'/>";
 }
 
 elsif($FileType =~ m/(.gif|.jpg|.png|.bmp|.ico)$/){
-$FileType = "<img src='/icons/small/image.gif' alt='[Image]'>";
+$FileType = "<img src='/icons/small/image.gif' alt='[Image]'/>";
 }
 
 elsif($FileType =~ m/(.mp3|.wav|.ogg)$/){
-$FileType = "<img src='/icons/small/sound.gif' alt='[Audio]'>";
+$FileType = "<img src='/icons/small/sound.gif' alt='[Audio]'/>";
 }
 
 elsif($FileType =~ m/(.mov|.avi|.mpg|.ram)$/){
-$FileType = "<img src='/icons/small/movie.gif' alt='[Movie]'>";
+$FileType = "<img src='/icons/small/movie.gif' alt='[Movie]'/>";
 }
 
 elsif($FileType =~ m/(.txt|.rtf|.html)$/){
-$FileType = "<img src='/icons/small/text.gif' alt='[Text]'>";
+$FileType = "<img src='/icons/small/text.gif' alt='[Text]'/>";
 }
 
 elsif($FileType =~ m/(.doc|.pdf|.odt)$/){
-$FileType = "<img src='/icons/small/doc.gif' alt='[Document]'>";
+$FileType = "<img src='/icons/small/doc.gif' alt='[Document]'/>";
 }
 
 elsif($FileType =~ m/(.tar)$/){
-$FileType = "<img src='/icons/small/tar.gif' alt='[Archive]'>";
+$FileType = "<img src='/icons/small/tar.gif' alt='[Archive]'/>";
 }
 
 elsif($FileType =~ m/(.sum)$/){
-$FileType = "<img src='/icons/small/key.gif' alt='[Checksum]'>";
+$FileType = "<img src='/icons/small/key.gif' alt='[Checksum]'/>";
 }
 
 elsif($FileType =~ m/(.bz2|.gz|.zip|.rpm)$/){
-$FileType = "<img src='/icons/small/compressed.gif' alt='[Compressed]'>";
+$FileType = "<img src='/icons/small/compressed.gif' alt='[Compressed]'/>";
 }
 
 elsif($FileType =~ m/(.bin|.exe)$/){
-$FileType = "<img src='/icons/small/binary.gif' alt='[Binary]'>";
+$FileType = "<img src='/icons/small/binary.gif' alt='[Binary]'/>";
 }
 
 elsif ($FileType eq $DirChk){
-$FileType = "<img src='/icons/small/unknown.gif' alt='[Unknown]'>";
+$FileType = "<img src='/icons/small/unknown.gif' alt='[Unknown]'/>";
 }
 
 
@@ -186,7 +186,7 @@ $FileList="$FileList<tr><td>$FileType</td><td><a href='$newurl'>$DirChk</a></td>
 <th style="width: 20px;text-align: left;">&nbsp;</th>
 <th style="text-align: left;">File Name</th><th style="width: 20%; text-align: left;">Last Modified Date</th><th style="width: 10%; text-align: left;">File Size</th></tr>
 <tr>
-<td><img src='/icons/small/back.gif' alt='[DIR]'></td><td><a href='../'>Parent Directory</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<td><img src='/icons/small/back.gif' alt='[DIR]'></td><td><a href='../'/>Parent Directory</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>
 	
 	
 ENDEOF
