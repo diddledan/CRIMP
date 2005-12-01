@@ -1,12 +1,12 @@
 #!perl
 # CRIMP - Content Redirection Internet Management Program
 # Copyright (C) 2005 The CRIMP Team
-# Authors:			The CRIMP Team
-# Project Leads:	Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
-# 						Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
-# HomePage:			http://crimp.sourceforge.net/
+# Authors:        The CRIMP Team
+# Project Leads:  Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
+#                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
+# HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.38 2005-11-30 00:00:46 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.39 2005-12-01 16:25:45 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -30,8 +30,8 @@ package Crimp;
 			'Authors: The CRIMP Team',
 			'Project Leads:',
 			'&nbsp;&nbsp;&nbsp;Martin "Deadpan110" Guppy [deadpan110@users.sourceforge.net]',
-         '&nbsp;&nbsp;&nbsp;Daniel "Fremen" Llewellyn [diddledan@users.sourceforge.net]',
-         "Public Version: $Version",
+			'&nbsp;&nbsp;&nbsp;Daniel "Fremen" Llewellyn [diddledan@users.sourceforge.net]',
+			"Public Version: $Version",
 			"Internal Version: $ID",
 			'http://crimp.sourceforge.net/'
 			);
@@ -253,7 +253,7 @@ foreach my $IniCommand (split /,/, $Config->{_}->{PluginOrder}) {
 	&executePlugin($IniCommand) unless (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++));
 }
 #foreach $IniCommand ($crimp->{IniCommands}) { # couldn't get this to work properly
-foreach my $IniCommand (@inicmds) {
+foreach my $IniCommand (@{$crimp->{inicmds}}) {
 	&executePlugin($IniCommand) unless (($IniCommand ne 'DocumentTemplate') && (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++)));
 }
 
@@ -344,133 +344,114 @@ sub executePlugin() {
 }
 
 sub printdebug(){
-    my $solut='';
-    my $logger='';
-    my $mssge=shift(@_);
-    my $stats=shift(@_);
-    my $fatal = 0;
-
-
-
-    #print "$Config->{_}->{Debug};";
-    while (my $extra = shift) {
-    	if ($solut eq '' && $mssge eq '') { $solut = "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
-    	else { $solut="$solut<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
-     	$logger="$logger, $extra";
-    }
-$log_this=`echo "$mssge,$stats,$logger\n" >> /home/martin/CVS/crimp/cgi-bin/crimp.log`;
-  
-    if ($stats eq 'pass') { $stats='[<span style="color: #0f0;">PASS</span>]' }
-    if ($stats eq 'warn') { $stats='[<span style="color: #fc3;">WARN</span>]' }
-    if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $fatal = 1; }
-    if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]'; $fatal = 1; }
-
-    if (($solut ne '')&&($mssge ne '')) { $mssge="<b>&#8226;</b> $mssge $solut"; }
-	if ($mssge eq ''){$mssge = "$solut";}
-    $PRINT_DEBUG = "$PRINT_DEBUG<tr><td class='crimpDebugMsg'><pre class='crimpDebug'>$mssge</pre></td><td class='crimpDebugStatus'><pre class='crimpDebug'><span style='color: #fff;'>$stats</span></pre></td></tr>";
-    
-    
-    #
-    #<table width='100%' border='0' cellspacing='0' cellpadding='0'><tr bgcolor='#CCCCCC'><td align='left' valign='top'><h6><font face='Verdana, Arial, Helvetica, sans-serif' size='1'>Powered by Crimp &copy;2004 IND-Web.com</font></h6><td align='right' valign='top'><font face='Verdana, Arial, Helvetica, sans-serif' size='1'><b>admin</b></font></td></tr><tr bgcolor='#000000'><td colspan='2'>$PRINT_DEBUG</td></tr></table>
-  
- 
- 
-    if ($fatal){
-       # print $query->header('text/html',$crimp->{ExitCode});
-#        print $query->header('text/html','200');
-        print $PRINT_DEBUG;
-      #  exit;
-        #crimp_display("debug");
-        #print "META <meta http-equiv='refresh' content='30;URL=../cgi-bin/crimp.pl?mode=config'>";
-        #print "<table width='100%' border='0' cellspacing='0' cellpadding='0'><tr bgcolor='#CCCCCC'><td align='left' valign='top'><h6><font face='Verdana, Arial, Helvetica, sans-serif' size='1'>Powered by Crimp &copy;2004 IND-Web.com</font></h6><td align='right' valign='top'><font face='Verdana, Arial, Helvetica, sans-serif' size='1'><b>admin</b></font></td></tr><tr bgcolor='#000000'><td colspan='2'>$PRINT_DEBUG</td></tr></table>";
-    }
+	my $solut='';
+	my $logger='';
+	my $mssge=shift(@_);
+	my $stats=shift(@_);
+	my $fatal = 0;
+	
+	#print "$Config->{_}->{Debug};";
+	while (my $extra = shift) {
+		if ($solut eq '' && $mssge eq '') { $solut = "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
+		else { $solut="$solut<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
+		$logger="$logger, $extra";
+	}
+	$log_this=`echo "$mssge,$stats,$logger\n" >> /home/martin/CVS/crimp/cgi-bin/crimp.log`;
+	
+	if ($stats eq 'pass') { $stats='[<span style="color: #0f0;">PASS</span>]' }
+	if ($stats eq 'warn') { $stats='[<span style="color: #fc3;">WARN</span>]' }
+	if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $fatal = 1; }
+	if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]'; $fatal = 1; }
+	
+	if (($solut ne '')&&($mssge ne '')) { $mssge="<b>&#8226;</b> $mssge $solut"; }
+	if ($mssge eq ''){ $mssge = $solut; }
+	$PRINT_DEBUG = "$PRINT_DEBUG<tr><td class='crimpDebugMsg'><pre class='crimpDebug'>$mssge</pre></td><td class='crimpDebugStatus'><pre class='crimpDebug'><span style='color: #fff;'>$stats</span></pre></td></tr>";
+	
+	if ($fatal){
+		# print $query->header('text/html',$crimp->{ExitCode});
+		print $PRINT_DEBUG;
+		# exit;
+	}
 }
 
+sub FileRead {
+	my $filename=shift(@_);
+	my $entry=shift(@_);
+	my $string=shift(@_);
+	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
 
-sub FileRead{
-my $filename=shift(@_);
-my $entry=shift(@_);
-my $string=shift(@_);
-my $fileopen = join '/',$crimp->{VarDirectory},$filename;
+	&printdebug('','',"FileRead: $filename");
 
-&printdebug('','',"FileRead: $filename");
-
-if ( -f $fileopen ){
-	sysopen (FILE,$fileopen,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+	if ( -f $fileopen ) {
+		sysopen (FILE,$fileopen,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
 		@FileRead=<FILE>;
 		close(FILE);
 			
-		if (@FileRead){	
-			
-			foreach $FileRead(@FileRead){
+		if (@FileRead) {
+			foreach $FileRead(@FileRead) {
 				chop($FileRead) if $FileRead =~ /\n$/;
 				($FileEntry,$FileString) = split(/\|\|/,$FileRead);
-					if ($FileEntry eq $entry){return($FileString);}
+				if ($FileEntry eq $entry) { return($FileString); }
 			}
-		
 		}
 	}
 	return (&FileWrite($filename,$entry,$string));
 }
 
-sub FileWrite{
-my $filename=shift(@_);
-my $entry=shift(@_);
-my $string=shift(@_);
-my $filelock = join '/',$crimp->{VarDirectory},'lock',$filename;
-my $fileopen = join '/',$crimp->{VarDirectory},$filename;
-
-&printdebug('','',"FileWrite: $filename");
-
-sysopen(LOCKED,$filelock, O_WRONLY | O_EXCL | O_CREAT) or &RetryWait($filename,$entry,$string);if ( -f $fileopen ){
-	sysopen (FILE,$fileopen,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+sub FileWrite {
+	my $filename=shift(@_);
+	my $entry=shift(@_);
+	my $string=shift(@_);
+	my $filelock = join '/',$crimp->{VarDirectory},'lock',$filename;
+	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
+	
+	&printdebug('','',"FileWrite: $filename");
+	
+	sysopen(LOCKED,$filelock, O_WRONLY | O_EXCL | O_CREAT) or &RetryWait($filename,$entry,$string);
+	if ( -f $fileopen ) {
+		sysopen (FILE,$fileopen,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
 		@FileRead=<FILE>;
 		close(FILE);
 		
-		if (@FileRead){	
-			
-			foreach $FileRead(@FileRead){
+		if (@FileRead) {
+			foreach $FileRead(@FileRead) {
 				chop($FileRead) if $FileRead =~ /\n$/;
 				($FileEntry,$FileString) = split(/\|\|/,$FileRead);
-			
-			
-					if ($FileEntry eq $entry){
-					print LOCKED "$entry||$string\n";
-					}else{print LOCKED "$FileEntry||$FileString\n";}
 				
+				if ($FileEntry eq $entry) {
+					print LOCKED "$entry||$string\n";
+				} else {
+					print LOCKED "$FileEntry||$FileString\n";
+				}
 			}
 		}
-}else{
-print LOCKED "$entry||$string\n";
+	} else {
+		print LOCKED "$entry||$string\n";
 	}
-
-close(LOCKED);
-$file1="$SYSROOT_SYSTEM/system_keys.bak";
-$file2="$SYSROOT_SYSTEM/system_keys.txt";
-rename($filelock, $fileopen) or die "cant rename";
-
-return($string);
-
-
+	
+	close(LOCKED);
+	$file1=join '/', $SYSROOT_SYSTEM, 'system_keys.bak';
+	$file2=join '/', $SYSROOT_SYSTEM, 'system_keys.txt';
+	rename($filelock, $fileopen) or die 'cant rename';
+	
+	return($string);
 }
 
-sub RetryWait{
-my $filename=shift(@_);
-my $entry=shift(@_);
-my $string=shift(@_);
+sub RetryWait {
+	my $filename=shift(@_);
+	my $entry=shift(@_);
+	my $string=shift(@_);
 
-	if ($tries gt 5){
+	if ($tries gt 5) {
 		#$requested = join '/', $crimp->{ErrorDirectory}, '500.html';
 		$crimp->{ExitCode} = '500';
-		&printdebug('','warn',"File lock in place on $filename");		
+		&printdebug('','warn',"File lock in place on $filename");
 		return;
-		}
+	}
 
-	if ($tries ne 0){sleep 1;}
-		
-$tries++;
-&FileWrite($filename,$entry,$string);
-
+	if ($tries ne 0) { sleep 1; }
+	$tries++;
+	&FileWrite($filename,$entry,$string);
 }
 
 
