@@ -1,4 +1,4 @@
-$ID = q$Id: ContentListing.pm,v 1.1 2005-11-29 20:32:16 deadpan110 Exp $;
+$ID = q$Id: ContentListing.pm,v 1.2 2005-12-01 20:01:57 deadpan110 Exp $;
 &printdebug('Module ContentListing',
 				'',
 				'Authors: The CRIMP Team',
@@ -68,7 +68,7 @@ my $FileDir = $crimp->{ContentListing};
 
 			#close;
 			if ($crimp->{ExitCode} ne "500"){
-				print 'Status: 302 Moved', "\r\n", "Location: $BaseUrl$DownloadFile", "\r\n\r\n";
+				print 'Status: 302 Moved', "\r\n", "Location: $BaseUrl/$DownloadFile", "\r\n\r\n";
 
 			}
 
