@@ -1,4 +1,4 @@
-$ID = q$Id: ContentListing.pm,v 1.4 2005-12-01 22:40:17 deadpan110 Exp $;
+$ID = q$Id: ContentListing.pm,v 1.5 2005-12-02 00:16:34 deadpan110 Exp $;
 &printdebug('Module ContentListing',
 				'',
 				'Authors: The CRIMP Team',
@@ -90,7 +90,7 @@ if (( -d $FileDir )){
 				$newurl = join '/', $BaseUrl, $DirChk;
 				$newurl =~ s!/{2,}!/!g;
 				if ($DirCount == 1) {
-					$DirList="$DirList<tr><td><img src='/icons/small/dir.gif' alt='[DIR]'/></td><td><a href='$newurl'>$DirChk</a></td><td>&nbsp;</td><td>&nbsp;</td><tr>";
+					$DirList="$DirList<tr><td><img src='/icons/small/dir.gif' alt='[DIR]'/></td><td><a href='$newurl'>$DirChk</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
 				}
 			} else {
 				$FileCount ++;
@@ -172,28 +172,28 @@ $FileList="$FileList<tr><td>$FileType</td><td><a href='$newurl'>$DirChk</a></td>
 <head>
   <meta
  content="text/html; charset=ISO-8859-1"
- http-equiv="content-type">
+ http-equiv="content-type"/>
   <title>Index of $BaseUrl</title>
 </head>
 <body>
 
 <h1>Index of $BaseUrl</h1>
-<pre>
-<table style='width: 90%; margin-left: auto; margin-right: auto;;'
+
+<table style='width: 90%; margin-left: auto; margin-right: auto'
  border='0' cellpadding='1' cellspacing='1'>
 <tbody>
 <tr>
 <th style="width: 20px;text-align: left;">&nbsp;</th>
 <th style="text-align: left;">File Name</th><th style="width: 20%; text-align: left;">Last Modified Date</th><th style="width: 10%; text-align: left;">File Size</th></tr>
 <tr>
-<td><img src='/icons/small/back.gif' alt='[DIR]'></td><td><a href='../'/>Parent Directory</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<td><img src='/icons/small/back.gif' alt='[DIR]'/></td><td><a href='../'>Parent Directory</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>
 	
 	
 ENDEOF
 	
 		if ($DirCount ne 0) { $newhtml = join '',$newhtml,"$DirList"; }
 		if ($FileCount ne 0) { $newhtml = join '', $newhtml, "$FileList"; }
-		$newhtml = join '', $newhtml, "</tbody></table></pre><br />Number of files served : $FileServed<br /><br />";
+		$newhtml = join '', $newhtml, "</tbody></table><br />Number of files served : $FileServed<br /><br />";
 		$crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml},"</body></html>";
 		
 		
