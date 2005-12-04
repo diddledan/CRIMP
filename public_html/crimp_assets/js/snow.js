@@ -2,6 +2,7 @@
 * Snow Effect Script- By Altan d.o.o. (http://www.altan.hr/snow/index.html)
 * Visit Dynamic Drive DHTML code library (http://www.dynamicdrive.com/) for full source code
 * Last updated Nov 9th, 05' by DD. This notice must stay intact for use
+* Edited by Fremen of the CRIMP team (crimp.sf.net)
 ******************************************/
   
   //Configure below to change URL path to the snow image
@@ -66,10 +67,8 @@
       }
       dx[i] += stx[i];
       flakeid = "snowflake" + i;
-      if (ie4up) { flake = document.all.flakeid; }
-      else { flake = document.getElementById(flakeid); }
-      flake.style.top=yp[i]+"px";
-      flake.style.left=xp[i] + am[i]*Math.sin(dx[i])+"px";  
+      document.getElementById(flakeid).style.top=yp[i]+"px";
+      document.getElementById(flakeid).style.left=xp[i] + am[i]*Math.sin(dx[i])+"px";  
     }
     snowtimer=setTimeout("snowIE_NS6()", 10);
   }
