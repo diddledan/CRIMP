@@ -1,4 +1,4 @@
-$ID = q$Id: DocumentTemplate.pm,v 1.11 2005-11-30 00:00:47 deadpan110 Exp $;
+$ID = q$Id: DocumentTemplate.pm,v 1.12 2005-12-04 17:40:20 diddledan Exp $;
 &printdebug('Module DocumentTemplate',
 			'',
 			'Authors: The CRIMP Team',
@@ -11,7 +11,7 @@ $ID = q$Id: DocumentTemplate.pm,v 1.11 2005-11-30 00:00:47 deadpan110 Exp $;
 my $blankTemplate = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title><!--TITLE--></title>
+<title>'.$Config->{_}->{SiteTitle}.'</title>
 </head>
 <body>
 <!--PAGE_CONTENT-->
@@ -56,36 +56,29 @@ if (($crimp->{ContentType} eq 'text/html') || ($crimp->{ContentType} eq 'text/xh
 sub insertContent {
 	my $template = shift;
 
-
-			#remove xml header if present
-			$crimp->{DisplayHtml} =~ s|<\?xml.*?\?>||i;
-			#remove doctype if present
-			$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||i;
-			#remove headers storing the title of the page
-			$crimp->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
-			
-			$crimp->{PageTitle} = $1;
-			if ($crimp->{PageTitle} eq ''){
-				&printdebug('','warn','The Page has no title');
-			}else{
-				&printdebug('','pass',"PageTitle: $crimp->{PageTitle}");
-				$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
-				$template =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
-			}
-			
-			#strip from <html> down to the opening <body> tag
-			$crimp->{DisplayHtml} =~ s|<html.*?>.*?<body>||si;
-			#remove the closing </body> tag and any cruft after - alas, that's nothing to do with the dogshow
-			$crimp->{DisplayHtml} =~ s|</body>.*||si;
-			
+	#remove xml header if present
+	$crimp->{DisplayHtml} =~ s|<\?xml.*?\?>||i;
+	#remove doctype if present
+	$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||i;
+	#remove headers storing the title of the page
+	$crimp->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
 	
-	#$template =~ s/<!--TITLE-->/$crimp->{PageTitle} - $Config->{_}->{SiteTitle}/gi;
+	$crimp->{PageTitle} ||= $1;
+	
+	#strip from <html> down to the opening <body> tag
+	$crimp->{DisplayHtml} =~ s|<html.*?>.*?<body>||si;
+	#remove the closing </body> tag and any cruft after - alas, that's nothing to do with the dogshow
+	$crimp->{DisplayHtml} =~ s|</body>.*||si;
+	
+	if ($crimp->{PageTitle} eq '') {
+		&printdebug('','warn','The Page has no title');
+	} else {
+		&printdebug('','pass',"PageTitle: $crimp->{PageTitle}");
+		$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
+		$template =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
+	}
+	
 	$template =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
-	
-	if ($crimp->{PageTitle} ne ""){
-$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
-$crimp->{DisplayHtml} =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
-}
 	
 	$crimp->{DisplayHtml} = $template;
 }
