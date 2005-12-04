@@ -40,7 +40,6 @@
   am = new Array();
   stx = new Array();
   sty = new Array();
-  snowsrc=(snowsrc.indexOf("dynamicdrive.com")!=-1)? "snow.gif" : snowsrc
   for (i = 0; i < no; ++ i) {  
     dx[i] = 0;                        // set coordinate variables
     xp[i] = Math.random()*(doc_width-50);  // set position variables
@@ -48,18 +47,15 @@
     am[i] = Math.random()*20;         // set amplitude variables
     stx[i] = 0.02 + Math.random()/10; // set step variables
     sty[i] = 0.7 + Math.random();     // set step variables
-		if (ie4up||ns6up) {
-      if (i == 0) {
-        document.write("<div id=\"dot"+ i +"\" style=\"POSITION: absolute; Z-INDEX: "+ i +"; VISIBILITY: visible; TOP: 15px; LEFT: 15px;\"><a href=\"http://dynamicdrive.com\"><img src='"+snowsrc+"' border=\"0\"><\/a><\/div>");
-      } else {
-        document.write("<div id=\"dot"+ i +"\" style=\"POSITION: absolute; Z-INDEX: "+ i +"; VISIBILITY: visible; TOP: 15px; LEFT: 15px;\"><img src='"+snowsrc+"' border=\"0\"><\/div>");
-      }
+    if (ie4up||ns6up) {
+        document.write("<div id=\"snowflake"+ i +"\" style=\"POSITION: absolute; Z-INDEX: "+ i +"; VISIBILITY: visible; TOP: 15px; LEFT: 15px;\"><img src='"+snowsrc+"' border=\"0\"></div>");
     }
   }
+  document.write("<span style='float: right;visibility: hidden;'>season's greatings</span>");
 
   function snowIE_NS6() {  // IE and NS6 main animation function
     doc_width = ns6up?window.innerWidth-10 : iecompattest().clientWidth-10;
-		doc_height=(window.innerHeight && snowdistance=="windowheight")? window.innerHeight : (ie4up && snowdistance=="windowheight")?  iecompattest().clientHeight : (ie4up && !window.opera && snowdistance=="pageheight")? iecompattest().scrollHeight : iecompattest().offsetHeight;
+    doc_height=(window.innerHeight && snowdistance=="windowheight")? window.innerHeight : (ie4up && snowdistance=="windowheight")?  iecompattest().clientHeight : (ie4up && !window.opera && snowdistance=="pageheight")? iecompattest().scrollHeight : iecompattest().offsetHeight;
     for (i = 0; i < no; ++ i) {  // iterate for every dot
       yp[i] += sty[i];
       if (yp[i] > doc_height-50) {
@@ -69,20 +65,21 @@
         sty[i] = 0.7 + Math.random();
       }
       dx[i] += stx[i];
-      document.getElementById("dot"+i).style.top=yp[i]+"px";
-      document.getElementById("dot"+i).style.left=xp[i] + am[i]*Math.sin(dx[i])+"px";  
+      flakeid = "snowflake" + i;
+      if (ie4up) { flake = document.all.flakeid; }
+      else { flake = document.getElementById(flakeid); }
+      flake.style.top=yp[i]+"px";
+      flake.style.left=xp[i] + am[i]*Math.sin(dx[i])+"px";  
     }
     snowtimer=setTimeout("snowIE_NS6()", 10);
   }
 
-	function hidesnow(){
-		if (window.snowtimer) clearTimeout(snowtimer)
-		for (i=0; i<no; i++) document.getElementById("dot"+i).style.visibility="hidden"
-	}
-		
+function hidesnow(){
+	if (window.snowtimer) clearTimeout(snowtimer)
+	for (i=0; i<no; i++) document.getElementById("snowflake"+i).style.visibility="hidden"
+}
 
 if (ie4up||ns6up){
-    snowIE_NS6();
-		if (hidesnowtime>0)
-		setTimeout("hidesnow()", hidesnowtime*1000)
-		}
+	snowIE_NS6();
+	if (hidesnowtime>0) setTimeout("hidesnow()", hidesnowtime*1000)
+}
