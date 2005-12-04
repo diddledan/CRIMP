@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.40 2005-12-01 20:08:50 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.41 2005-12-04 18:01:53 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -25,6 +25,8 @@ my $ID = q$Id: index.pl,v 1.40 2005-12-01 20:08:50 diddledan Exp $;
 ##################################################################################
 
 package Crimp;
+our $PRINT_DEBUG;
+our $PRINT_HEAD;
 &printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)',
 			'',
 			'Authors: The CRIMP Team',
@@ -257,14 +259,14 @@ foreach my $IniCommand (@{$crimp->{IniCommands}}) {
 	&executePlugin($IniCommand) unless (($IniCommand ne 'DocumentTemplate') && (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++)));
 }
 
+#add the extra CRIMP-specific HTML headers
+
+&addHeaderContent(join('','<meta name="robots" content="',$crimp->{RobotsMeta},'" />'));
+&addHeaderContent('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
+
 ####################################################################
 ## The End ##
 ############
-
-$PRINT_HEAD = join '','<meta name="robots" content="',"$crimp->{RobotsMeta}",'" />',"\n";
-$crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;;
-
-
 
 
 
@@ -301,15 +303,9 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 
 if ($crimp->{DebugMode} eq 'on'){
     $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
-    $PRINT_HEAD = "<link rel='stylesheet' type='text/css' href='/crimp_assets/debug.css'/>\n";
     $crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;;
     $crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;;
 }
-
-
-
-
-
 
 print $crimp->{DisplayHtml};
 
@@ -321,6 +317,11 @@ print $crimp->{DisplayHtml};
 
 ####################################################################
 ####################################################################
+
+sub addHeaderContent {
+	my $new_header = shift;
+	$PRINT_HEAD = join '',$PRINT_HEAD,$new_header,"\n";
+}
 
 sub executePlugin() {
 	my $plugin = shift;
@@ -343,7 +344,7 @@ sub executePlugin() {
 	}
 }
 
-sub printdebug(){
+sub printdebug() {
 	my $solut='';
 	my $logger='';
 	my $mssge=shift(@_);
@@ -353,8 +354,8 @@ sub printdebug(){
 	#print "$Config->{_}->{Debug};";
 	while (my $extra = shift) {
 		if ($solut eq '' && $mssge eq '') { $solut = "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
-		else { $solut="$solut<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
-		$logger="$logger, $extra";
+		else { $solut = join '',$solut,'<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #ccc;">',$extra,'</span>'; }
+		$logger = join ', ',$logger,$extra;
 	}
 	$log_this=`echo "$mssge,$stats,$logger\n" >> /home/martin/CVS/crimp/cgi-bin/crimp.log`;
 	
@@ -363,11 +364,11 @@ sub printdebug(){
 	if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $fatal = 1; }
 	if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]'; $fatal = 1; }
 	
-	if (($solut ne '')&&($mssge ne '')) { $mssge="<b>&#8226;</b> $mssge $solut"; }
-	if ($mssge eq ''){ $mssge = $solut; }
-	$PRINT_DEBUG = "$PRINT_DEBUG<tr><td class='crimpDebugMsg'><pre class='crimpDebug'>$mssge</pre></td><td class='crimpDebugStatus'><pre class='crimpDebug'><span style='color: #fff;'>$stats</span></pre></td></tr>";
+	if (($solut ne '') && ($mssge ne '')) { $mssge="<b>&#8226;</b> $mssge $solut"; }
+	if ($mssge eq '') { $mssge = $solut; }
+	$PRINT_DEBUG = join '', $PRINT_DEBUG,'<tr><td class="crimpDebugMsg"><pre class="crimpDebug">',$mssge,'</pre></td><td class="crimpDebugStatus"><pre class="crimpDebug"><span style="color: #fff;">',$stats,'</span></pre></td></tr>';
 	
-	if ($fatal){
+	if ($fatal) {
 		# print $query->header('text/html',$crimp->{ExitCode});
 		print $PRINT_DEBUG;
 		# exit;
