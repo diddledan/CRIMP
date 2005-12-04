@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.41 2005-12-04 18:01:53 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.42 2005-12-04 19:50:58 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -302,11 +302,11 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 
 
 if ($crimp->{DebugMode} eq 'on'){
-    $PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
-    $crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;;
-    $crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;;
+	$PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
+	$crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;
 }
 
+$crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;
 print $crimp->{DisplayHtml};
 
 ####################################################################
