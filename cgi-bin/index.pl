@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.42 2005-12-04 19:50:58 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.43 2005-12-09 18:14:19 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -174,6 +174,27 @@ if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
 
 our $Config = Config::Tiny->new();
 $Config = Config::Tiny->read( 'crimp.ini' );
+if (!$Config) {
+	print $query->header('text/html', $crimp->{ExitCode});
+	print '
+<html>
+	<head>
+		<title>ERROR</title>
+	</head>
+	<body>
+		<br />
+		<br />
+		<br />
+		<p style="text-align: center;">
+';
+	print Config::Tiny->errstr();
+	print '
+		</p>
+	</body>
+</html>
+';
+	exit 1;
+}
 
 #switch to debug mode if set in crimp.ini
 if ($crimp->{DebugMode} ne 'on'){
