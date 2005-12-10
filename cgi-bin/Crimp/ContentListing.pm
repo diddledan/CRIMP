@@ -1,4 +1,4 @@
-$ID = q$Id: ContentListing.pm,v 1.5 2005-12-02 00:16:34 deadpan110 Exp $;
+$ID = q$Id: ContentListing.pm,v 1.6 2005-12-10 22:21:58 deadpan110 Exp $;
 &printdebug('Module ContentListing',
 				'',
 				'Authors: The CRIMP Team',
@@ -154,7 +154,7 @@ $FileType = "<img src='/icons/small/unknown.gif' alt='[Unknown]'/>";
 }
 
 
-$FileList="$FileList<tr><td>$FileType</td><td><a href='$newurl'>$DirChk</a></td><td>$FileDate</td><td>$FileSize Kb</td></tr>";
+$FileList="$FileList<tr><td>$FileType</td><td><a href='$newurl'>$DirChk</a></td><td>$FileDate</td><td style='text-align: right;'>$FileSize Kb</td></tr>";
 								
 			}
 		}
@@ -184,7 +184,7 @@ $FileList="$FileList<tr><td>$FileType</td><td><a href='$newurl'>$DirChk</a></td>
 <tbody>
 <tr>
 <th style="width: 20px;text-align: left;">&nbsp;</th>
-<th style="text-align: left;">File Name</th><th style="width: 20%; text-align: left;">Last Modified Date</th><th style="width: 10%; text-align: left;">File Size</th></tr>
+<th style="text-align: left;">File Name</th><th style="width: 20%; text-align: left;">Last Modified Date</th><th style="width: 10%; text-align: right;">File Size</th></tr>
 <tr>
 <td><img src='/icons/small/back.gif' alt='[DIR]'/></td><td><a href='../'>Parent Directory</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>
 	
