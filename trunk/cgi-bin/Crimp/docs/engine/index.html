@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>The CRIMP Engine</title>
+</head>
+<body>
+<h1>The CRIMP Engine</h1>
+The main component in CRIMP is its engine,&nbsp; a single file called
+index.pl within the cgi-bin of your website.<br>
+<br>
+<h2>Requirements</h2>
+<p>If you have problems with CRIMP, please FOLLOW THESE <span
+ style="font-weight: bold;">IMPORTANT</span> STEPS!<br>
+</p>
+<ul>
+  <li>An account on one of the following webservers:<br>
+    <pre>Apache (linux)</pre>
+  </li>
+</ul>
+<ul>
+  <li>A perl cgi-bin with the following perl modules:<br>
+  </li>
+  <li><span style="font-weight: bold;"></span>The index.pl script&nbsp;
+made executable:<br>
+    <pre>cd ~<br>chmod 755 cgi-bin/index.pl</pre>
+  </li>
+</ul>
+<h2>Initial setup</h2>
+Point your browser to http://your-web-server/cgi-bin/index.pl<br>
+<br>
+If this fails, then make sure the first line in 'cgi-bin/index.pl' is
+pointing to your perl executable.<br>
+<br>
+<pre>#!perl<br># windows path to perl (Default)</pre>
+<pre>#!/usr/bin/perl<br># linux path to perl</pre>
+or create a symbolic link instead:<br>
+<pre>cd ~<br>ln -s /usr/bin/perl&nbsp; cgi-bin/perl </pre>
+<br>
+</body>
+</html>
