@@ -10,10 +10,9 @@
 The main component in CRIMP is its engine,&nbsp; a single file called
 index.pl within the cgi-bin of your website.<br>
 <br>
-<h2>Requirements</h2>
-<p>If you have problems with CRIMP, please FOLLOW THESE <span
+If you have problems with CRIMP, please FOLLOW THESE <span
  style="font-weight: bold;">IMPORTANT</span> STEPS!<br>
-</p>
+<h2>Requirements</h2>
 <ul>
   <li>An account on one of the following webservers:<br>
     <pre>Apache (linux)</pre>
@@ -21,22 +20,23 @@ index.pl within the cgi-bin of your website.<br>
 </ul>
 <ul>
   <li>A perl cgi-bin with the following perl modules:<br>
+    <pre>CGI<br>Fcntl</pre>
   </li>
-  <li><span style="font-weight: bold;"></span>The index.pl script&nbsp;
-made executable:<br>
-    <pre>cd ~<br>chmod 755 cgi-bin/index.pl</pre>
+  <li><span style="font-weight: bold;"></span>File and directory
+permissions::<br>
+    <pre>cd ~<br>chmod -v 755 cgi-bin/index.pl<br>chmod -Rv 766 cgi-bin/Crimp/var</pre>
   </li>
 </ul>
 <h2>Initial setup</h2>
-Point your browser to http://your-web-server/cgi-bin/index.pl<br>
+Point your browser to <span style="text-decoration: underline;">http://your-web-server/cgi-bin/index.pl</span><br>
 <br>
 If this fails, then make sure the first line in 'cgi-bin/index.pl' is
 pointing to your perl executable.<br>
 <br>
-<pre>#!perl<br># windows path to perl (Default)</pre>
-<pre>#!/usr/bin/perl<br># linux path to perl</pre>
+<pre style="margin-left: 40px;">#!perl<br># windows path to perl (Default)</pre>
+<pre style="margin-left: 40px;">#!/usr/bin/perl<br># linux path to perl</pre>
 or create a symbolic link instead:<br>
-<pre>cd ~<br>ln -s /usr/bin/perl&nbsp; cgi-bin/perl </pre>
+<pre style="margin-left: 40px;">cd ~<br>ln -s /usr/bin/perl&nbsp; cgi-bin/perl </pre>
 <br>
 </body>
 </html>
