@@ -1,4 +1,4 @@
-$ID = q$Id: DocumentTemplate.pm,v 1.12 2005-12-04 17:40:20 diddledan Exp $;
+$ID = q$Id: DocumentTemplate.pm,v 1.13 2005-12-17 23:51:33 deadpan110 Exp $;
 &printdebug('Module DocumentTemplate',
 			'',
 			'Authors: The CRIMP Team',
@@ -62,8 +62,8 @@ sub insertContent {
 	$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||i;
 	#remove headers storing the title of the page
 	$crimp->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
-	
-	$crimp->{PageTitle} ||= $1;
+	#if we insert content then this is important
+	$crimp->{PageTitle} = $1;
 	
 	#strip from <html> down to the opening <body> tag
 	$crimp->{DisplayHtml} =~ s|<html.*?>.*?<body>||si;
