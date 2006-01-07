@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.44 2006-01-07 21:04:03 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.45 2006-01-07 21:37:15 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -175,7 +175,7 @@ if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
 our $Config = Config::Tiny->new();
 $Config = Config::Tiny->read( 'crimp.ini' );
 if (!$Config) {
-	print $query->header('text/html', $crimp->{ExitCode});
+	print $query->header('text/html', 500);
 	print '
 <html>
 	<head>
@@ -187,7 +187,9 @@ if (!$Config) {
 		<br />
 		<p style="text-align: center;">
 ';
-	print Config::Tiny->errstr();
+	if (!Config::Tiny->errstr()) {
+		print "Either the config.ini file is empty, or we could not read it for some reason. Possible permissions problem?";
+	} else { print Config::Tiny->errstr(); }
 	print '
 		</p>
 	</body>
@@ -389,7 +391,7 @@ sub printdebug() {
 	$PRINT_DEBUG = join '', $PRINT_DEBUG,'<tr><td class="crimpDebugMsg"><pre class="crimpDebug">',$mssge,'</pre></td><td class="crimpDebugStatus"><pre class="crimpDebug"><span style="color: #fff;">',$stats,'</span></pre></td></tr>';
 	
 	if ($fatal) {
-		# print $query->header('text/html',$crimp->{ExitCode});
+		# print $query->header('text/html',500);
 		print $PRINT_DEBUG;
 		# exit;
 	}
