@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.43 2005-12-09 18:14:19 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.44 2006-01-07 21:04:03 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -54,11 +54,11 @@ our $PRINT_HEAD;
 #
 #Produce apache style logs
 
-use Config::Tiny;
+
 use CGI;
 use CGI::Carp qw/ fatalsToBrowser /;
+use Config::Tiny;
 use Fcntl;
-# 
 
 my $query = new CGI;
 
@@ -378,7 +378,6 @@ sub printdebug() {
 		else { $solut = join '',$solut,'<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #ccc;">',$extra,'</span>'; }
 		$logger = join ', ',$logger,$extra;
 	}
-	$log_this=`echo "$mssge,$stats,$logger\n" >> /home/martin/CVS/crimp/cgi-bin/crimp.log`;
 	
 	if ($stats eq 'pass') { $stats='[<span style="color: #0f0;">PASS</span>]' }
 	if ($stats eq 'warn') { $stats='[<span style="color: #fc3;">WARN</span>]' }
