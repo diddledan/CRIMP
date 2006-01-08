@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.2 2006-01-08 17:02:13 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.3 2006-01-08 20:02:17 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -27,7 +27,9 @@ sysopen (FILE,$requested,O_RDONLY) || &printdebug('', 'fail', 'Couldn\'t open fi
 close(FILE);
 
 if (@display_content) {
-	my $new_content = '';
+	our $new_content = '';
+	#how many entries per page
+	my $limit = 5;
 	
 	####
 	foreach $display_content(@display_content) {
@@ -59,13 +61,37 @@ if (@display_content) {
 	
 	my $query = new CGI;
 	if ($query->param('show')) {
-	#show entries
+		#show entries
+		my $offset = int($query->param('show'));
+		my $offsetpluslimit = $offset + $limit;
+		&printdebug('','',"Displaying entries $offset to $offsetpluslimit");
+		$crimp->{DisplayHtml} = <<EOF;
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta
+ content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type"/>
+  <title>Blog</title>
+</head>
+<body>
+EOF
+		&parse_blog($offset,$limit);
+		if ($offset > 0) {
+			my $newoffset = $offset - $limit || 0;
+			$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, " <a href='$crimp->{UserConfig}?show=$newoffset'>&lt-- Previous Page</a> ";
+		}
+		if ($new_content =~ m|</h1>|i) {
+			$newoffset = $offset + $limit;
+			$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, " <a href='$crimp->{UserConfig}?show=$newoffset'>Next Page --&gt;</a> ";
+		}
+		$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, '</body></html>';
 	} elsif($BaseContent ne '') {
 		#show a single entry
 		$new_content =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
 		my $EntryTitle = $1;
 		my $EntryContent = $2;
-		# I amended the above to use the title specified
+		#I amended the above to use the title specified
 		# in the blog file, not the one parsed from the
 		# query string. This ensures the title is displayed
 		# as the author intended. (Fremen)
@@ -100,16 +126,9 @@ ENDEOF
 </head>
 <body>
 EOF
-		
-		for (my $counter = 0; $counter < 5; $counter++) {
-			if ($new_content =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
-				my $newurl = join '/', $crimp->{UserConfig}, uri_escape($1);
-				$newurl =~ s|/{2,}|/|g;
-				$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, "
-<h1><a href=\"$newurl\">$1<a></h1>
-$2
-";
-			}
+		&parse_blog(0,$limit);
+		if ($new_content =~ m|</h1>|i) {
+			 $crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, "<a href='$crimp->{UserConfig}?show=5'>Next Page --&gt;</a>";
 		}
 		$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, '</body></html>';
 	}
@@ -124,4 +143,21 @@ $2
 	$crimp->{DisplayHtml} = "<span style='color: #f00;'>There are no entries in $crimp->{VarDirectory}/$crimp->{FlatBlog}</span>";
 }
 
+sub parse_blog {
+	my ($offset,$limit) = @_;
+	if ($offset > 0) {
+		my $offset_counter = 0;
+		while (($offset_counter++ < $offset) && ($new_content =~ s|<h1>.*?<h1>|<h1>|si)) {};
+	}
+	for (my $counter = $offset; $counter < $limit+$offset; $counter++) {
+		if ($new_content =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
+			my $newurl = join '/', $crimp->{UserConfig}, uri_escape($1);
+			$newurl =~ s|/{2,}|/|g;
+			$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, "
+<h1><a href=\"$newurl\">$1<a></h1>
+$2
+";
+		}
+	}
+}
 1;
