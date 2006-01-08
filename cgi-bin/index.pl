@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.45 2006-01-07 21:37:15 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.46 2006-01-08 15:34:41 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -372,7 +372,7 @@ sub printdebug() {
 	my $logger='';
 	my $mssge=shift(@_);
 	my $stats=shift(@_);
-	my $fatal = 0;
+	my $exit = 0;
 	
 	#print "$Config->{_}->{Debug};";
 	while (my $extra = shift) {
@@ -383,17 +383,18 @@ sub printdebug() {
 	
 	if ($stats eq 'pass') { $stats='[<span style="color: #0f0;">PASS</span>]' }
 	if ($stats eq 'warn') { $stats='[<span style="color: #fc3;">WARN</span>]' }
-	if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $fatal = 1; }
-	if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]'; $fatal = 1; }
+	# the module has failed. this is no longer considered a fatal error condition, as we want the page to display _something_.
+	if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]' }
+	if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $exit = 1; }
 	
 	if (($solut ne '') && ($mssge ne '')) { $mssge="<b>&#8226;</b> $mssge $solut"; }
 	if ($mssge eq '') { $mssge = $solut; }
 	$PRINT_DEBUG = join '', $PRINT_DEBUG,'<tr><td class="crimpDebugMsg"><pre class="crimpDebug">',$mssge,'</pre></td><td class="crimpDebugStatus"><pre class="crimpDebug"><span style="color: #fff;">',$stats,'</span></pre></td></tr>';
 	
-	if ($fatal) {
-		# print $query->header('text/html',500);
+	if ($exit) {
+		print $query->header('text/html',500);
 		print $PRINT_DEBUG;
-		# exit;
+		exit;
 	}
 }
 
