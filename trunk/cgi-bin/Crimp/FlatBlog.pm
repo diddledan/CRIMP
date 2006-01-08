@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.3 2006-01-08 20:02:17 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.4 2006-01-08 21:15:35 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -79,7 +79,7 @@ EOF
 		&parse_blog($offset,$limit);
 		if ($offset > 0) {
 			my $newoffset = $offset - $limit || 0;
-			$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, " <a href='$crimp->{UserConfig}?show=$newoffset'>&lt-- Previous Page</a> ";
+			$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, " <a href='$crimp->{UserConfig}?show=$newoffset'>&lt;-- Previous Page</a> ";
 		}
 		if ($new_content =~ m|</h1>|i) {
 			$newoffset = $offset + $limit;
