@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.4 2006-01-08 21:15:35 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.5 2006-01-09 05:53:22 deadpan110 Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -15,6 +15,68 @@ $ID = q$Id: FlatBlog.pm,v 1.4 2006-01-08 21:15:35 diddledan Exp $;
 #If $BaseContent then search and display the single entry
 
 use URI::Escape;
+
+##################################################################################
+# N O T E S
+# we need to create a listing that uses the
+# <div id="crimpFileList"></div>
+# Entries are always outputted vertically
+# my $EntryList = '<b>Entries</b><br />&nbsp;&nbsp;&nbsp;';
+#
+# Entries
+# [Back]
+#    News 6
+#    News 7 <<-- Made Bold with no link to indicate currently viewed entry
+#    News 8
+#    News 9
+#    News 10
+# [Next]
+#
+# 
+# crimp.ini Example Entry
+#
+# [/blog]
+# PluginOrder = FlatBlog,ContentDirectory,FileList,BreadCrumbs
+# BreadCrumbs = top
+# ContentDirectory = ../cgi-bin/Crimp/docs
+# FileList = horizontal
+# FlatBlog = flatblog.html
+#
+# Plese note that ContentDirectory is called but not used
+#
+# As you can see, FlatBlog needs the following:
+#
+
+if ($crimp->{DisplayHtml} ne "" ){
+&printdebug("","warn", "DisplayHtml has already been filled with content");
+}
+
+# Although i have put FileList Detection here... Appending or creating should be
+# done from within the FileList Module:
+#
+# $crimp->{DisplayHtml} =~ s/<div id="crimpFileList">/<div id="crimpFileList">$newhtml/i;
+#
+# and NOT FROM HERE
+
+if ($crimp->{FileList} ne ""){
+&printdebug('','warn',"Module FileList is active... appending (see N O T E S within the source)");
+}
+else{
+&printdebug('','warn',"Module FileList is not active... creating (see N O T E S within the source)");
+}
+
+# This could have a significant outcome on navigation by making it easier
+# The Navigation should be displayed on every page which would make displaying 5
+# entries at a time obsolete... so /blog would show the top entry
+#
+# Other Notes
+# index.pl now has a $crimp->{DefaultHtml} var as it seems like its something we
+# keep using again and again and again...
+#
+# Heh... and once again, i come along and jump all over your hard work...
+# I hope you think these are good ideas Fremen M8 :))
+##################################################################################
+
 
 
 # The blog content is stored in VarDirectory to allow another module to add entries
@@ -39,19 +101,6 @@ if (@display_content) {
 	# display without having an empty entry in the blog file.
 	$new_content = join '', $new_content, '<h1>';
 	
-#	#remove xml header if present
-#	$crimp->{DisplayHtml} =~ s|<\?xml.*?\?>||i;
-#	#remove doctype if present
-#	$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||i;
-#	#remove headers storing the title of the page
-#	$crimp->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
-#	#if we insert content then this is important
-#	$crimp->{PageTitle} = $1;
-#	
-#	#strip from <html> down to the opening <body> tag
-#	$crimp->{DisplayHtml} =~ s|<html.*?>.*?<body>||si;
-#	#remove the closing </body> tag and any cruft after - alas, that's nothing to do with the dogshow
-#	$crimp->{DisplayHtml} =~ s|</body>.*||si;
 	
 	#Decide what to do
 	my $BaseContent = $crimp->{HttpRequest};
