@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.47 2006-01-09 05:51:11 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.48 2006-01-09 18:09:32 diddledan Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -97,11 +97,12 @@ else { &printdebug('Available Plugins', 'pass', join(',', @inicmds)); }
 # END plugin parsing #
 ######################
 
+my @MenuList;
 #DocumentTemplate;ContentDirectory;ContentType
 our $crimp;
 $crimp = {
 	#removed the quotes around the $ENV entries to speed up processing time.
-	IniCommands => \@inicmds, # can't seem to get this to work properly (line 214)
+	IniCommands => \@inicmds,
     RemoteHost => $ENV{'REMOTE_ADDR'},
     ServerName =>  $ENV{'SERVER_NAME'},
     ServerSoftware =>  $ENV{'SERVER_SOFTWARE'},
@@ -113,9 +114,11 @@ $crimp = {
     ExitCode => '204',
     DebugMode => 'off',
     VarDirectory => '../cgi-bin/Crimp/var',
-	 ErrorDirectory => '../cgi-bin/Crimp/errors',
-	 RobotsMeta => 'index,follow',
-	 DefaultHtml => ''
+	ErrorDirectory => '../cgi-bin/Crimp/errors',
+	RobotsMeta => 'index,follow',
+	DefaultHtml => '',
+	MenuList => \@MenuList,
+	MenuDiv => ''
 
 };
 
