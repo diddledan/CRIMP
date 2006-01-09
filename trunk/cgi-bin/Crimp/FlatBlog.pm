@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.6 2006-01-09 16:44:50 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.7 2006-01-09 19:42:03 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -108,49 +108,43 @@ if (@display_content) {
 	
 	my $ShowContent = 0;
 	
+	#show a single entry
+	$new_content =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
+	my $EntryTitle = $1;
+	my $EntryContent = $2;
+	if (!$EntryTitle && !$EntryContent) {
+		$new_content =~ m|<h1>(.*?)</h1>(.*?)<h1>|si;
+		$EntryTitle = $1;
+		$EntryContent = $2;
+	}
+	#I amended the above to use the title specified
+	# in the blog file, not the one parsed from the
+	# query string. This ensures the title is displayed
+	# as the author intended. (Fremen)
+	
+	$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+	$crimp->{DisplayHtml} =~ s|(</title>)|$EntryTitle\1|i;
+	my $newurl = join '/', $crimp->{UserConfig}, uri_escape($EntryTitle);
+	$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$newurl">$EntryTitle<a></h1>\n$EntryContent\1|i;
+
+	push @{$crimp->{MenuList}}, 'Blog Entries:';
+	
 	my $query = new CGI;
+	my $offset = 0;
 	if ($query->param('show')) {
 		#show entries
-		my $offset = int($query->param('show'));
-		my $offsetpluslimit = $offset + $limit;
-		&printdebug('','',"Displaying entries $offset to $offsetpluslimit");
-		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
-		$crimp->{DisplayHtml} =~ s|(</title>)|Blog\1|i;
-
-		&parse_blog($offset,$limit);
-
-		#the next two if statements will disappear once we get FileList integration
+		$offset = int($query->param('show'));
 		if ($offset > 0) {
-			my $newoffset = $offset - $limit || 0;
-			$crimp->{DisplayHtml} =~ s|(</body>)|<a href='$crimp->{UserConfig}?show=$newoffset'>&lt;-- Previous Page</a>\1|i;
+			$newoffset = $offset - $limit || 0;
+			push @{$crimp->{MenuList}}, "<a href='$crimp->{HttpRequest}?show=$newoffset'>Prev 5</a>";
 		}
-		if ($new_content =~ m|</h1>|i) {
-			$newoffset = $offset + $limit;
-			$crimp->{DisplayHtml} =~ s|(</body>)| <a href='$crimp->{UserConfig}?show=$newoffset'>Next Page --&gt;</a>\1|i;
-		}
-	} elsif($BaseContent ne '') {
-		#show a single entry
-		$new_content =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
-		my $EntryTitle = $1;
-		my $EntryContent = $2;
-		#I amended the above to use the title specified
-		# in the blog file, not the one parsed from the
-		# query string. This ensures the title is displayed
-		# as the author intended. (Fremen)
-		
-		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
-		$crimp->{DisplayHtml} =~ s|(</title>)|$EntryTitle\1|i;
-		$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$crimp->{HttpRequest}">$EntryTitle<a></h1>\n$EntryContent\1|i;
-	} else {
-		#we have nothing to show so we will show the 1st 5 entries
-		&printdebug('','','Displaying the latest 5 entries');
-		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
-		$crimp->{DisplayHtml} =~ s|(</title>)|Blog\1|i;
-		&parse_blog(0,$limit);
-		if ($new_content =~ m|</h1>|i) {
-			#this will be disappearing when we get FileList integration working
-			$crimp->{DisplayHtml} =~ s|(</body>)|<a href='$crimp->{UserConfig}?show=5'>Next Page --&gt;</a>\1|i;
-		}
+	}
+	
+	&do_blog_list($offset,$limit);
+	
+	if ($new_content =~ m|</h1>|i) {
+		$newoffset = $offset + $limit;
+		push @{$crimp->{MenuList}}, "<a href='$crimp->{HttpRequest}?show=$newoffset'>Next 5</a>";
 	}
 	
 	&printdebug(
@@ -164,7 +158,7 @@ if (@display_content) {
 	$crimp->{DisplayHtml} =~ s|(<body>)|\1<span style='color: #f00;'>There are no entries in $crimp->{VarDirectory}/$crimp->{FlatBlog}</span>|i;
 }
 
-sub parse_blog {
+sub do_blog_list {
 	my ($offset,$limit) = @_;
 	if ($offset > 0) {
 		my $offset_counter = 0;
@@ -175,7 +169,8 @@ sub parse_blog {
 			my ($title, $text) = ($1, $2);
 			my $newurl = join '/', $crimp->{UserConfig}, uri_escape($1);
 			$newurl =~ s|/{2,}|/|g;
-			$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$newurl">$title<a></h1>\n$text\1|i;
+			push @{$crimp->{MenuList}}, "<a href='$newurl'>$title</a>";
+			#$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$newurl">$title<a></h1>\n$text\1|i;
 		}
 	}
 }
