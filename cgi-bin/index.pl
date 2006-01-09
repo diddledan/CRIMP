@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.46 2006-01-08 15:34:41 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.47 2006-01-09 05:51:11 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -114,9 +114,22 @@ $crimp = {
     DebugMode => 'off',
     VarDirectory => '../cgi-bin/Crimp/var',
 	 ErrorDirectory => '../cgi-bin/Crimp/errors',
-	 RobotsMeta => 'index,follow'
+	 RobotsMeta => 'index,follow',
+	 DefaultHtml => ''
 
 };
+
+$crimp->{DefaultHtml} = <<ENDEOF;
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"/>
+<title></title>
+</head>
+<body>
+</body>
+</html>
+ENDEOF
 
 #HTTP Error 204
 #No Content. The requested completed successfully but the resource requested is empty (has zero length).
