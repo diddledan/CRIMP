@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.5 2006-01-09 05:53:22 deadpan110 Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.6 2006-01-09 16:44:50 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -114,27 +114,20 @@ if (@display_content) {
 		my $offset = int($query->param('show'));
 		my $offsetpluslimit = $offset + $limit;
 		&printdebug('','',"Displaying entries $offset to $offsetpluslimit");
-		$crimp->{DisplayHtml} = <<EOF;
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta
- content="text/html; charset=ISO-8859-1"
- http-equiv="content-type"/>
-  <title>Blog</title>
-</head>
-<body>
-EOF
+		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+		$crimp->{DisplayHtml} =~ s|(</title>)|Blog\1|i;
+
 		&parse_blog($offset,$limit);
+
+		#the next two if statements will disappear once we get FileList integration
 		if ($offset > 0) {
 			my $newoffset = $offset - $limit || 0;
-			$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, " <a href='$crimp->{UserConfig}?show=$newoffset'>&lt;-- Previous Page</a> ";
+			$crimp->{DisplayHtml} =~ s|(</body>)|<a href='$crimp->{UserConfig}?show=$newoffset'>&lt;-- Previous Page</a>\1|i;
 		}
 		if ($new_content =~ m|</h1>|i) {
 			$newoffset = $offset + $limit;
-			$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, " <a href='$crimp->{UserConfig}?show=$newoffset'>Next Page --&gt;</a> ";
+			$crimp->{DisplayHtml} =~ s|(</body>)| <a href='$crimp->{UserConfig}?show=$newoffset'>Next Page --&gt;</a>\1|i;
 		}
-		$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, '</body></html>';
 	} elsif($BaseContent ne '') {
 		#show a single entry
 		$new_content =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
@@ -145,41 +138,19 @@ EOF
 		# query string. This ensures the title is displayed
 		# as the author intended. (Fremen)
 		
-		$crimp->{DisplayHtml} = <<ENDEOF;
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta
- content="text/html; charset=ISO-8859-1"
- http-equiv="content-type"/>
-  <title>$EntryTitle</title>
-</head>
-<body>
-<h1><a href="$crimp->{HttpRequest}">$EntryTitle<a></h1>
-$EntryContent
-</body>
-</html>
-
-ENDEOF
+		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+		$crimp->{DisplayHtml} =~ s|(</title>)|$EntryTitle\1|i;
+		$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$crimp->{HttpRequest}">$EntryTitle<a></h1>\n$EntryContent\1|i;
 	} else {
 		#we have nothing to show so we will show the 1st 5 entries
 		&printdebug('','','Displaying the latest 5 entries');
-		$crimp->{DisplayHtml} = <<EOF;
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta
- content="text/html; charset=ISO-8859-1"
- http-equiv="content-type"/>
-  <title>Blog</title>
-</head>
-<body>
-EOF
+		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+		$crimp->{DisplayHtml} =~ s|(</title>)|Blog\1|i;
 		&parse_blog(0,$limit);
 		if ($new_content =~ m|</h1>|i) {
-			 $crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, "<a href='$crimp->{UserConfig}?show=5'>Next Page --&gt;</a>";
+			#this will be disappearing when we get FileList integration working
+			$crimp->{DisplayHtml} =~ s|(</body>)|<a href='$crimp->{UserConfig}?show=5'>Next Page --&gt;</a>\1|i;
 		}
-		$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, '</body></html>';
 	}
 	
 	&printdebug(
@@ -189,7 +160,8 @@ EOF
 		"HttpQuery: $crimp->{HttpQuery}"
 	);
 } else {
-	$crimp->{DisplayHtml} = "<span style='color: #f00;'>There are no entries in $crimp->{VarDirectory}/$crimp->{FlatBlog}</span>";
+	$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+	$crimp->{DisplayHtml} =~ s|(<body>)|\1<span style='color: #f00;'>There are no entries in $crimp->{VarDirectory}/$crimp->{FlatBlog}</span>|i;
 }
 
 sub parse_blog {
@@ -200,12 +172,10 @@ sub parse_blog {
 	}
 	for (my $counter = $offset; $counter < $limit+$offset; $counter++) {
 		if ($new_content =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
+			my ($title, $text) = ($1, $2);
 			my $newurl = join '/', $crimp->{UserConfig}, uri_escape($1);
 			$newurl =~ s|/{2,}|/|g;
-			$crimp->{DisplayHtml} = join '', $crimp->{DisplayHtml}, "
-<h1><a href=\"$newurl\">$1<a></h1>
-$2
-";
+			$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$newurl">$title<a></h1>\n$text\1|i;
 		}
 	}
 }
