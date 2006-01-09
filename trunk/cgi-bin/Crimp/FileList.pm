@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.12 2005-11-28 21:45:05 deadpan110 Exp $;
+$ID = q$Id: FileList.pm,v 1.13 2006-01-09 16:22:11 diddledan Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -17,18 +17,17 @@ my $FileCount = 0;
 
 #Depends on ContentDirectory
 if ($crimp->{ContentDirectory} ne '') {
-
+	$DirList = '<b>Directories:</b>';
+	$FileList = '<b>Documents:</b>';
+	
 	if ($crimp->{FileList} eq 'horizontal') { 
-	
-	 $DirList = '<b>Directories:</b> ';
-	 $FileList = '<b>Documents:</b> ';
-	 $DirLayout = ' | '; 
-	
-	
-	}else{
-	
-	
-	
+		$DirLayout = ' | ';
+		$DirList = join '', $DirList, ' ';
+		$FileList = join '', $FileList, ' ';
+	} else {
+		$DirLayout = '<br />&nbsp;&nbsp;&nbsp;&nbsp;';
+		$DirList = join '', $DirList, '<br />&nbsp;&nbsp;&nbsp;&nbsp;';
+		$FileList = join '', $FileList, '<br />&nbsp;&nbsp;&nbsp;&nbsp;';
 	}
 	
 	my $FileDir = $crimp->{ContentDirectory};
@@ -58,7 +57,7 @@ if ($crimp->{ContentDirectory} ne '') {
 	my @DirChk = readdir(DIR);
 	closedir(DIR);
 	foreach $DirChk (@DirChk) {
-		if (($DirChk ne ".")&&($DirChk ne "..")&&($DirChk ne "index.html")&&($DirChk ne "CVS")){
+		if (($DirChk ne '.') && ($DirChk ne '..') && ($DirChk ne 'index.html') && ($DirChk ne 'CVS')){
 			if (-d "$FileDir/$DirChk") {
 				$DirCount ++;
 				$newurl = join '/', $BaseUrl, $DirChk;
@@ -86,10 +85,10 @@ if ($crimp->{ContentDirectory} ne '') {
 	&printdebug('','pass',"Directories found: $DirCount");
 	&printdebug('','pass',"Documents found: $FileCount");
 	
-	if ( ($DirCount + $FileCount) ne 0 ){
+	if ( ($DirCount + $FileCount) != 0 ){
 		$newhtml = '<div id="crimpFileList">';
-		if ($DirCount ne 0) { $newhtml = join '', $newhtml, $DirList, '<br />'; }
-		if ($FileCount ne 0) { $newhtml = join '', $newhtml, $FileList, '<br />'; }
+		if ($DirCount != 0) { $newhtml = join '', $newhtml, $DirList, '<br />'; }
+		if ($FileCount != 0) { $newhtml = join '', $newhtml, $FileList, '<br />'; }
 		$newhtml = join '', $newhtml, '</div>';
 		
 		 $crimp->{DisplayHtml} =~ s/<body>/<body>$newhtml/i;
