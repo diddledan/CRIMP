@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.7 2006-01-09 19:42:03 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.8 2006-01-09 20:24:22 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -169,7 +169,7 @@ sub do_blog_list {
 			my ($title, $text) = ($1, $2);
 			my $newurl = join '/', $crimp->{UserConfig}, uri_escape($1);
 			$newurl =~ s|/{2,}|/|g;
-			push @{$crimp->{MenuList}}, "<a href='$newurl'>$title</a>";
+			push @{$crimp->{MenuList}}, "<a href='$newurl?show=$offset'>$title</a>";
 			#$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$newurl">$title<a></h1>\n$text\1|i;
 		}
 	}
