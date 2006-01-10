@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.13 2006-01-09 16:22:11 diddledan Exp $;
+$ID = q$Id: FileList.pm,v 1.14 2006-01-10 15:21:41 deadpan110 Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -84,14 +84,14 @@ if ($crimp->{ContentDirectory} ne '') {
 	
 	&printdebug('','pass',"Directories found: $DirCount");
 	&printdebug('','pass',"Documents found: $FileCount");
-	
+	my $newhtml ="";
 	if ( ($DirCount + $FileCount) != 0 ){
-		$newhtml = '<div id="crimpFileList">';
+		#$newhtml = '<div id="crimpFileList">';
 		if ($DirCount != 0) { $newhtml = join '', $newhtml, $DirList, '<br />'; }
 		if ($FileCount != 0) { $newhtml = join '', $newhtml, $FileList, '<br />'; }
-		$newhtml = join '', $newhtml, '</div>';
-		
-		 $crimp->{DisplayHtml} =~ s/<body>/<body>$newhtml/i;
+		#$newhtml = join '', $newhtml, '</div>';
+		push @{$crimp->{MenuList}},"$newhtml";
+		# $crimp->{MenuList} =~ s/<body>/<body>$newhtml/i;
 		# $crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml};
 	}
 }else{

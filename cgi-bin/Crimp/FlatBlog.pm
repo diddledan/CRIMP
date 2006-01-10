@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.8 2006-01-09 20:24:22 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.9 2006-01-10 15:21:41 deadpan110 Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -125,9 +125,9 @@ if (@display_content) {
 	$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
 	$crimp->{DisplayHtml} =~ s|(</title>)|$EntryTitle\1|i;
 	my $newurl = join '/', $crimp->{UserConfig}, uri_escape($EntryTitle);
-	$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$newurl">$EntryTitle<a></h1>\n$EntryContent\1|i;
+	$crimp->{DisplayHtml} =~ s|(</body>)|<h1>$EntryTitle<br/></h1>\n$EntryContent\1|i;
 
-	push @{$crimp->{MenuList}}, 'Blog Entries:';
+	push @{$crimp->{MenuList}}, '<b>Entries:</b>';
 	
 	my $query = new CGI;
 	my $offset = 0;
@@ -136,7 +136,7 @@ if (@display_content) {
 		$offset = int($query->param('show'));
 		if ($offset > 0) {
 			$newoffset = $offset - $limit || 0;
-			push @{$crimp->{MenuList}}, "<a href='$crimp->{HttpRequest}?show=$newoffset'>Prev 5</a>";
+			push @{$crimp->{MenuList}}, "&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Prev]</b></a>";
 		}
 	}
 	
@@ -144,7 +144,7 @@ if (@display_content) {
 	
 	if ($new_content =~ m|</h1>|i) {
 		$newoffset = $offset + $limit;
-		push @{$crimp->{MenuList}}, "<a href='$crimp->{HttpRequest}?show=$newoffset'>Next 5</a>";
+		push @{$crimp->{MenuList}}, "&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Next]</b></a>";
 	}
 	
 	&printdebug(
@@ -169,7 +169,7 @@ sub do_blog_list {
 			my ($title, $text) = ($1, $2);
 			my $newurl = join '/', $crimp->{UserConfig}, uri_escape($1);
 			$newurl =~ s|/{2,}|/|g;
-			push @{$crimp->{MenuList}}, "<a href='$newurl?show=$offset'>$title</a>";
+			push @{$crimp->{MenuList}}, "&nbsp;&nbsp;&nbsp;&nbsp;<a href='$newurl?show=$offset'>$title</a>";
 			#$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$newurl">$title<a></h1>\n$text\1|i;
 		}
 	}
