@@ -1,9 +1,12 @@
-$ID = q$Id: SiteMenu.pm,v 1.1 2006-01-09 19:58:47 diddledan Exp $;
-&printdebug('Module LinkList',
+$ID = q$Id: SiteMenu.pm,v 1.2 2006-01-10 15:21:40 deadpan110 Exp $;
+&printdebug('Module SiteMenu',
 	'',
 	'Authors: The CRIMP Team',
 	"Version: $ID",
 	'http://crimp.sourceforge.net/');
+	
+	# $crimp->{SiteMenu} should be a separate div to $crimp->{MenuList}
+
 
 my $where = $crimp->{SiteMenu};
 if (sysopen(FILE,join('/',$crimp->{VarDirectory},$where),O_RDONLY)) {
@@ -19,11 +22,11 @@ if (sysopen(FILE,join('/',$crimp->{VarDirectory},$where),O_RDONLY)) {
 }
 
 if ($crimp->{MenuList}) {
-	$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '<ul>';
+	#$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '<ul>';
 	foreach my $linkElement (@{$crimp->{MenuList}}) {
-		$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '<li>', $linkElement, '</li>';
+		$crimp->{MenuDiv} = join '', $crimp->{MenuDiv},$linkElement,'<br/>';
 	}
-	$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '</ul>';
+	#$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '</ul>';
 } else {
 	&printdebug('','warn','Called without a set of links specified by any previous module');
 }
