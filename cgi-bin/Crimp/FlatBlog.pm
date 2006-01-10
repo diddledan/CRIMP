@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.9 2006-01-10 15:21:41 deadpan110 Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.10 2006-01-10 16:08:32 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -83,6 +83,8 @@ else{
 
 if (-f "$crimp->{VarDirectory}/$crimp->{FlatBlog}"){}
 my $requested = "$crimp->{VarDirectory}/$crimp->{FlatBlog}";
+my $BlogTitle = $crimp->{FlatBlog};
+$BlogTitle =~ s|.html||i;
 
 sysopen (FILE,$requested,O_RDONLY) || &printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
 @display_content=<FILE>;
@@ -123,7 +125,7 @@ if (@display_content) {
 	# as the author intended. (Fremen)
 	
 	$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
-	$crimp->{DisplayHtml} =~ s|(</title>)|$EntryTitle\1|i;
+	$crimp->{DisplayHtml} =~ s|(</title>)|$EntryTitle$BlogTitle\1|i;
 	my $newurl = join '/', $crimp->{UserConfig}, uri_escape($EntryTitle);
 	$crimp->{DisplayHtml} =~ s|(</body>)|<h1>$EntryTitle<br/></h1>\n$EntryContent\1|i;
 
