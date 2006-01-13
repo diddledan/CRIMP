@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.11 2006-01-10 16:09:57 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.12 2006-01-13 21:27:51 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -94,6 +94,7 @@ if (@display_content) {
 	our $new_content = '';
 	#how many entries per page
 	my $limit = 5;
+	my $query = new CGI;
 	
 	####
 	foreach $display_content(@display_content) {
@@ -101,54 +102,60 @@ if (@display_content) {
 	}
 	#hacky hack to make sure that _all_ entries are available for
 	# display without having an empty entry in the blog file.
-	$new_content = join '', $new_content, '<h1>';
-	
-	
-	#Decide what to do
-	my $BaseContent = $crimp->{HttpRequest};
-	$BaseContent =~ s/^$crimp->{UserConfig}\/*//;
-	
-	my $ShowContent = 0;
-	
-	#show a single entry
-	$new_content =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
-	my $EntryTitle = $1;
-	my $EntryContent = $2;
-	if (!$EntryTitle && !$EntryContent) {
-		$new_content =~ m|<h1>(.*?)</h1>(.*?)<h1>|si;
-		$EntryTitle = $1;
-		$EntryContent = $2;
-	}
-	#I amended the above to use the title specified
-	# in the blog file, not the one parsed from the
-	# query string. This ensures the title is displayed
-	# as the author intended. (Fremen)
-	
-	$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
-	$crimp->{DisplayHtml} =~ s|(</title>)|$BlogTitle - $EntryTitle\1|i;
-	my $newurl = join '/', $crimp->{UserConfig}, uri_escape($EntryTitle);
-	$crimp->{DisplayHtml} =~ s|(</body>)|<h1>$EntryTitle<br/></h1>\n$EntryContent\1|i;
 
-	push @{$crimp->{MenuList}}, '<b>Entries:</b>';
-	
-	my $query = new CGI;
+
+	$new_content = join '', $new_content, '<h1>';
+
 	my $offset = 0;
-	if ($query->param('show')) {
-		#show entries
+	if ($query->param('show') eq 'all') {
+		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+		$crimp->{DisplayHtml} =~ s|(</title>)|$BlogTitle - Showing ALL Entries\1|i;
+		while ($new_content =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
+			my $EntryTitle = $1;
+			my $EntryText = $2;
+			my $EntryUrl = join '/',$crimp->{UserConfig},$EntryTitle;
+			$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$EntryUrl">$EntryTitle</a></h1>\n$EntryText\n\1|i;
+		}
+	} else {
+		#Decide what to show
+		my $BaseContent = $crimp->{HttpRequest};
+		$BaseContent =~ s/^$crimp->{UserConfig}\/*//;
+		
+		#show the single entry
+		$new_content =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
+		my $EntryTitle = $1;
+		my $EntryContent = $2;
+		#if the requested document doesn't exist, get the first one
+		if (!$EntryTitle && !$EntryContent) {
+			$new_content =~ m|<h1>(.*?)</h1>(.*?)<h1>|si;
+			$EntryTitle = $1;
+			$EntryContent = $2;
+		}
+		#I amended the above to use the title specified
+		# in the blog file, not the one parsed from the
+		# query string. This ensures the title is displayed
+		# as the author intended. (Fremen)
+		
+		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+		$crimp->{DisplayHtml} =~ s|(</title>)|$BlogTitle - $EntryTitle\1|i;
+		my $newurl = join '/', $crimp->{UserConfig}, uri_escape($EntryTitle);
+		$crimp->{DisplayHtml} =~ s|(</body>)|<h1>$EntryTitle<br/></h1>\n$EntryContent\1|i;
+
+		#show menu entries
+		push @{$crimp->{MenuList}}, '<b>Entries:</b>';
 		$offset = int($query->param('show'));
+		my $newoffset = $offset - $limit || 0;
 		if ($offset > 0) {
-			$newoffset = $offset - $limit || 0;
 			push @{$crimp->{MenuList}}, "&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Prev]</b></a>";
 		}
+		&do_blog_list($offset,$limit);
+		if ($new_content =~ m|</h1>|i) {
+			$newoffset = $offset + $limit;
+			push @{$crimp->{MenuList}}, "&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Next]</b></a>";
+		}
 	}
-	
-	&do_blog_list($offset,$limit);
-	
-	if ($new_content =~ m|</h1>|i) {
-		$newoffset = $offset + $limit;
-		push @{$crimp->{MenuList}}, "&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Next]</b></a>";
-	}
-	
+
+
 	&printdebug(
 		'',
 		'',
