@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.12 2006-01-13 21:27:51 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.13 2006-01-13 21:40:43 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -113,8 +113,19 @@ if (@display_content) {
 		while ($new_content =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
 			my $EntryTitle = $1;
 			my $EntryText = $2;
-			my $EntryUrl = join '/',$crimp->{UserConfig},$EntryTitle;
+			my $EntryUrl = join '/',$crimp->{UserConfig}, uri_escape($EntryTitle);
+			$EntryUrl =~ s|/{2,}|/|g;
 			$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$EntryUrl">$EntryTitle</a></h1>\n$EntryText\n\1|i;
+		}
+	} elsif ($query->param('show') eq 'index') {
+		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+		$crimp->{DisplayHtml} =~ s|(</title>)|$BlogTitle - INDEX\1|i;
+		$crimp->{DisplayHtml} =~ s|(<body>)|\1<h1>$BlogTitle Index</h1>|i;
+		while ($new_content =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
+			my ($title, $text) = ($1, $2);
+			my $newurl = join '/', $crimp->{UserConfig}, uri_escape($title);
+			$newurl =~ s|/{2,}|/|g;
+			$crimp->{DisplayHtml} =~ s|(</body>)|&nbsp;&nbsp;&nbsp;<a href='$newurl'>$title</a><br />\1|i;
 		}
 	} else {
 		#Decide what to show
