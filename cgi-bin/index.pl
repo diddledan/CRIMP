@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.48 2006-01-09 18:09:32 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.49 2006-01-15 13:16:53 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -93,7 +93,29 @@ if (@inicmds = grep !/DocumentTemplate/, @inicmds) {
 }
 
 if ( ! @inicmds ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
-else { &printdebug('Available Plugins', 'pass', join(',', @inicmds)); }
+else {
+# print Available plugins to debug (so many per line)
+# doesnt work exactly as planned... but splits them up
+my $inicount = 1;
+	foreach $inicmds(@inicmds){
+			if ($inicount eq 1){
+			$iniout = $inicmds;
+			}
+			else{			
+				if (($inicount / 7) eq (int($inicount / 7))){
+					$iniout = join('<br/>&nbsp;&nbsp;&nbsp;&nbsp;',$iniout,$inicmds);
+					}
+				else {
+					$iniout = join(',',$iniout,$inicmds);
+					}
+				}
+			$inicount ++;
+	}
+&printdebug('Available Plugins', 'pass', $iniout);
+#Original output left here in case we need to put it back in
+#&printdebug('Available Plugins', 'pass', join(',', @inicmds));
+}
+
 # END plugin parsing #
 ######################
 
