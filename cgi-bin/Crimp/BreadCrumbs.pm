@@ -1,4 +1,4 @@
-$ID = q$Id: BreadCrumbs.pm,v 1.9 2006-01-18 14:45:47 deadpan110 Exp $;
+$ID = q$Id: BreadCrumbs.pm,v 1.10 2006-01-18 17:19:34 deadpan110 Exp $;
 &printdebug('Module BreadCrumbs',
 			'',
 			'Authors: The CRIMP Team',
@@ -14,7 +14,6 @@ my $BreadCrumbs = "<a href='/$BreadLink'>home</a>";
 @HttpRequest = split(/\//,$crimp->{HttpRequest});
 
 foreach $HttpRequest (@HttpRequest){
-&printdebug("","","$HttpRequest");
 
 	if ($HttpRequest ne '' && $HttpRequest ne "index.html"){
 
