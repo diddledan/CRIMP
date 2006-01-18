@@ -1,12 +1,9 @@
-$ID = q$Id: SiteMenu.pm,v 1.2 2006-01-10 15:21:40 deadpan110 Exp $;
+$ID = q$Id: SiteMenu.pm,v 1.3 2006-01-18 16:22:30 diddledan Exp $;
 &printdebug('Module SiteMenu',
 	'',
 	'Authors: The CRIMP Team',
 	"Version: $ID",
 	'http://crimp.sourceforge.net/');
-	
-	# $crimp->{SiteMenu} should be a separate div to $crimp->{MenuList}
-
 
 my $where = $crimp->{SiteMenu};
 if (sysopen(FILE,join('/',$crimp->{VarDirectory},$where),O_RDONLY)) {
@@ -15,23 +12,21 @@ if (sysopen(FILE,join('/',$crimp->{VarDirectory},$where),O_RDONLY)) {
 
 	$newMenu = "$newMenu$_\n" foreach (@file);
 
-	$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, $newMenu;
+	$crimp->{SiteMenu} = join '', $crimp->{SiteMenu}, $newMenu;
 	&printdebug('', 'pass', 'Created Site Menu from file:',join('','&nbsp;&nbsp;',$where));
 } else {
 	&printdebug('', 'warn', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
 }
 
+my $FileList = '';
 if ($crimp->{MenuList}) {
-	#$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '<ul>';
-	foreach my $linkElement (@{$crimp->{MenuList}}) {
-		$crimp->{MenuDiv} = join '', $crimp->{MenuDiv},$linkElement,'<br/>';
-	}
-	#$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '</ul>';
+	$FileList = join '', $_, '<br/>' foreach (@{$crimp->{MenuList}});
+	$FileList = join '', '<div id="crimpFileList">', $FileList, '</div>' if $FileList;
+	&printdebug('','pass','Created crimpFileList div');
 } else {
 	&printdebug('','warn','Called without a set of links specified by any previous module');
 }
 
-$crimp->{MenuDiv} = join '', '<div id="crimpFileList">', $crimp->{MenuDiv}, '</div>' if $crimp->{MenuDiv};
-$crimp->{DisplayHtml} =~ s|(<body>)|\1$crimp->{MenuDiv}|i;
+$crimp->{DisplayHtml} =~ s|(<body>)|\1$crimp->{SiteMenu}$FileList|i;
 
 1;
