@@ -1,4 +1,4 @@
-$ID = q$Id: BreadCrumbs.pm,v 1.8 2006-01-18 14:38:54 deadpan110 Exp $;
+$ID = q$Id: BreadCrumbs.pm,v 1.9 2006-01-18 14:45:47 deadpan110 Exp $;
 &printdebug('Module BreadCrumbs',
 			'',
 			'Authors: The CRIMP Team',
@@ -9,7 +9,7 @@ $ID = q$Id: BreadCrumbs.pm,v 1.8 2006-01-18 14:38:54 deadpan110 Exp $;
 &printdebug("","","Started With: $crimp->{BreadCrumbs}");
 
 my $BreadLink = "";
-my $BreadCrumbs = "<a href='$BreadLink'>home</a>";
+my $BreadCrumbs = "<a href='/$BreadLink'>home</a>";
 
 @HttpRequest = split(/\//,$crimp->{HttpRequest});
 
