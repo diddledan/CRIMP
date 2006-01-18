@@ -1,4 +1,4 @@
-$ID = q$Id: DocumentTemplate.pm,v 1.13 2005-12-17 23:51:33 deadpan110 Exp $;
+$ID = q$Id: DocumentTemplate.pm,v 1.14 2006-01-18 16:26:12 diddledan Exp $;
 &printdebug('Module DocumentTemplate',
 			'',
 			'Authors: The CRIMP Team',
@@ -57,9 +57,9 @@ sub insertContent {
 	my $template = shift;
 
 	#remove xml header if present
-	$crimp->{DisplayHtml} =~ s|<\?xml.*?\?>||i;
+	$crimp->{DisplayHtml} =~ s|<\?xml.*?\?>||si;
 	#remove doctype if present
-	$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||i;
+	$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||si;
 	#remove headers storing the title of the page
 	$crimp->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
 	#if we insert content then this is important
