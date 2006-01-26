@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.49 2006-01-15 13:16:53 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.50 2006-01-26 17:54:04 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -90,6 +90,12 @@ foreach $plugin (@plugins) {
 if (@inicmds = grep !/DocumentTemplate/, @inicmds) {
 	#move DocumentTemplate to the end so that it is always called last (nasty hack I know)
 	push @inicmds, 'DocumentTemplate';
+}
+
+if (@inicmds = grep !/MenuButtons/, @inicmds) {
+	#move MenuButtons to the end so that it is always called After DocumentTemplate
+	#(Following Fremen's nasty hack)
+	push @inicmds, 'MenuButtons';
 }
 
 if ( ! @inicmds ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
