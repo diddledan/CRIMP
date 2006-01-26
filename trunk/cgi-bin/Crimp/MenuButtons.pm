@@ -1,4 +1,4 @@
-$ID = q$Id: MenuButtons.pm,v 1.1 2006-01-26 17:35:22 deadpan110 Exp $;
+$ID = q$Id: MenuButtons.pm,v 1.2 2006-01-26 18:08:45 deadpan110 Exp $;
 &printdebug('Module MenuButtons',
 			'',
 			'Authors: The CRIMP Team',
@@ -10,21 +10,14 @@ $ID = q$Id: MenuButtons.pm,v 1.1 2006-01-26 17:35:22 deadpan110 Exp $;
 
 my $MenuButtons = <<ENDEOF;
 <a href="#"><img
- src="/crimp_assets/ButtonBar/help.gif" alt="Help" width="26" height="25"
- style="border: 0px solid ; width: 26px; height: 26px;"/>
-</a>
-<a href="#"><img
- src="/crimp_assets/ButtonBar/view.gif" alt="Text View" width="26" height="25"
- style="border: 0px solid ; width: 26px; height: 26px;"/>
-</a>
-<a href="#"><img
- src="/crimp_assets/ButtonBar/edit.gif" alt="Editor" width="26" height="25"
- style="border: 0px solid ; width: 26px; height: 26px;"/>
-</a>
-<a href="$crimp->{HttpRequest}?debug=on"><img
- src="/crimp_assets/ButtonBar/debug.gif" alt="Debug View" width="26" height="25"
- style="border: 0px solid ; width: 26px; height: 26px;"/>
-</a>
+ src="/crimp_assets/ButtonBar/help.gif"
+ style="border: 0px solid ; width: 26px; height: 25px;"/></a><a href="#"><img
+ src="/crimp_assets/ButtonBar/view.gif"
+ style="border: 0px solid ; width: 26px; height: 25px;"/></a><a href="#"><img
+ src="/crimp_assets/ButtonBar/edit.gif"
+ style="border: 0px solid ; width: 26px; height: 25px;"/></a><a href="$crimp->{HttpRequest}?debug=on"><img
+ src="/crimp_assets/ButtonBar/debug.gif"
+ style="border: 0px solid ; width: 26px; height: 25px;"/></a>
 ENDEOF
 
 
