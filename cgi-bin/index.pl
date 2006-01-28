@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.50 2006-01-26 17:54:04 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.51 2006-01-28 15:52:26 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -92,10 +92,10 @@ if (@inicmds = grep !/DocumentTemplate/, @inicmds) {
 	push @inicmds, 'DocumentTemplate';
 }
 
-if (@inicmds = grep !/MenuButtons/, @inicmds) {
+if (@inicmds = grep !/ButtonBar/, @inicmds) {
 	#move MenuButtons to the end so that it is always called After DocumentTemplate
 	#(Following Fremen's nasty hack)
-	push @inicmds, 'MenuButtons';
+	push @inicmds, 'ButtonBar';
 }
 
 if ( ! @inicmds ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
@@ -143,6 +143,8 @@ $crimp = {
     DebugMode => 'off',
     VarDirectory => '../cgi-bin/Crimp/var',
 	ErrorDirectory => '../cgi-bin/Crimp/errors',
+	HtmlDirectory => '',
+	CgiDirectory => '',
 	RobotsMeta => 'index,follow',
 	DefaultHtml => '',
 	MenuList => \@MenuList,
@@ -258,11 +260,13 @@ if ($Config->{_}->{ErrorDirectory} ne ''){
 	$crimp->{ErrorDirectory}=$Config->{_}->{ErrorDirectory};
     }
  
+if ($Config->{_}->{HtmlDirectory} ne ''){
+	$crimp->{HtmlDirectory}=$Config->{_}->{HtmlDirectory};
+   }
  
- 
- 
- 
- 
+if ($Config->{_}->{CgiDirectory} ne ''){
+	$crimp->{CgiDirectory}=$Config->{_}->{CgiDirectory};
+   }
 
 ####################################################################
 ## Main Routine ##
