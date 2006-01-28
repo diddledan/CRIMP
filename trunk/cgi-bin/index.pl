@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.51 2006-01-28 15:52:26 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.52 2006-01-28 19:30:39 deadpan110 Exp $;
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -143,8 +143,8 @@ $crimp = {
     DebugMode => 'off',
     VarDirectory => '../cgi-bin/Crimp/var',
 	ErrorDirectory => '../cgi-bin/Crimp/errors',
-	HtmlDirectory => '',
-	CgiDirectory => '',
+	HtmlDirectory => '../public_html',
+	CgiDirectory => '../cgi-bin',
 	RobotsMeta => 'index,follow',
 	DefaultHtml => '',
 	MenuList => \@MenuList,
