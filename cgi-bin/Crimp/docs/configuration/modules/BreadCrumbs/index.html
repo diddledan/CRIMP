@@ -36,7 +36,7 @@ Navigation: There's More to Hansel and Gretel than Meets the Eye</a><br>
   <b><br>
   Location: home - docs - configuration - modules - BreadCrumbs</b><br>
   <b><br>
-    </b>This allows a user to backtrack through your website without the
+  </b>This allows a user to backtrack through your website without the
     need of starting from the begining of your site just to choose an
     alternative route. Documents can also be easily categorised into
     directories allowing users easier access and at any point, they can see
@@ -46,27 +46,30 @@ Navigation: There's More to Hansel and Gretel than Meets the Eye</a><br>
 This module is included within the default CRIMP installation and only
 needs to be configured within the crimp.ini configuration file.<br>
 <h2>Configuration</h2>
-This module can be used either globally or on a per directory basis.<br>
-The module has 3 settings for where the BreadCrumbs will be inserted,
-these are 'top', 'bottom' and 'both'.<br>
-The module also needs to be activated after the main page content has
-been processed and before the page template is called.<br>
-<br>
-BreadCrumbs = [top | bottom | both]<br>
+<p>This module can be used either globally or on a per directory basis.<br>
+  The module has 3 settings for where the BreadCrumbs will be inserted,
+  these are 'top', 'bottom' and 'both'.<br>
+  The module also needs to be activated after the main page content has
+been processed and before the page template is called.</p>
+<table width="100%" border="0" cellspacing="10" cellpadding="10">
+  <tr>
+    <td bgcolor="#EEEEEE"><pre>BreadCrumbs = [top | bottom | both]</pre>
+    </td>
+  </tr>
+</table>
 <h2>Examples</h2>
 <p>For BreadCrumbs to be globally available on your site and at the top of
 your pages:</p>
 <table width="100%" border="0" cellspacing="10" cellpadding="10">
   <tr>
-    <td bgcolor="#EEEEEE"><pre>#Global options<br>PluginOrder = ContentDirectory,BreadCrumbs<br>BreadCrumbs = top<br></pre>    </td>
+    <td bgcolor="#EEEEEE"><pre>#Global options<br>PluginOrder = ContentDirectory,BreadCrumbs<br>BreadCrumbs = top</pre></td>
   </tr>
 </table>
 <p>For BreadCrumbs to be on the very top and bottom of the pages within
 the /docs directory:</p>
 <table width="100%" border="0" cellspacing="10" cellpadding="10">
   <tr>
-    <td bgcolor="#EEEEEE"><pre>[/docs]<br>PluginOrder = ContentDirectory,FileList,BreadCrumbs<br>FileList = horizontal<br>BreadCrumbs = both<br>ContentDirectory = ../cgi-bin/Crimp/docs
-</pre>    </td>
+    <td bgcolor="#EEEEEE"><pre>[/docs]<br>PluginOrder = ContentDirectory,FileList,BreadCrumbs<br>FileList = horizontal<br>BreadCrumbs = both<br>ContentDirectory = ../cgi-bin/Crimp/docs</pre></td>
   </tr>
 </table>
 </body>
