@@ -1,0 +1,123 @@
+#Global Options
+#all files must default to standard redirection
+#default options configure files for the local server only
+
+DebugMode = page
+
+#HtmlDirectory = ../public_html
+#CgiDirectory = ../cgi-bin
+
+DocumentTemplate = ../template/default-crimp.html
+
+ButtonBar = Default
+#ButtonBar = BlackRounded
+
+#declare a sitewide navigation menu
+SiteMenu = SiteWide.mnu
+
+#SiteTitle = CRIMP
+
+#lets add some festive cheer - comment out to disable
+#Snow = on
+
+#Plugin Execution Order - LEAVE OUT DocumentTemplate - this will automatically be called last
+PluginOrder = UserAuth,VirtualRedirect,ContentDirectory,ContentDatabase,BreadCrumbs,FileList,SiteMenu
+
+[/]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = horizontal
+BreadCrumbs = top
+ContentDirectory = ../cgi-bin/Crimp/docs/
+DocumentTemplate = ../template/default-crimp.html
+
+[/docs]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = horizontal
+BreadCrumbs = top
+ContentDirectory = ../cgi-bin/Crimp/docs/
+DocumentTemplate = ../template/default-crimp.html
+
+[/blog]
+PluginOrder = FlatBlog,BreadCrumbs
+BreadCrumbs = top
+FlatBlog = flatblog.html
+
+#It is recomended that this remains permanent
+#Get the latest information on updates and news from CRIMP
+[/crimp-news]
+PluginOrder = CrimpNews,BreadCrumbs
+CrimpNews = on
+BreadCrumbs = top
+
+
+#[/download]
+#PluginOrder = UserAuth,ContentListing,FileList,BreadCrumbs
+#DocumentTemplate=off
+#BreadCrumbs = top
+#ContentListing = ../public_html/download
+#UserAuth = ../cgi-bin/Crimp/var/downloads-passwords.txt
+
+[/downloads]
+#DocumentTemplate = ../template/bluerobot-left.html
+RobotsMeta = noindex,nofollow
+PluginOrder = UserAuth,ContentListing,FileList,BreadCrumbs
+#DocumentTemplate = off
+BreadCrumbs = top
+ContentListing = ../public_html/downloads
+
+
+
+# Examples section
+
+[/google]
+# for VirtualRedirect, always include the trailing slash on a non file
+# this is for the url rewriting which takes place on the links and images
+BreadCrumbs = top
+VirtualRedirect = http://www.google.com/
+#UserAuth = ../passwords.txt
+
+[/examples/templates/blue]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = vertical
+BreadCrumbs = top
+DocumentTemplate = ../template/blue.html
+ContentDirectory = ../content
+
+[/examples/templates/none]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = horizontal
+BreadCrumbs = top
+DocumentTemplate = none
+ContentDirectory = ../content
+
+[/examples/templates/bluerobot-left]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = vertical
+BreadCrumbs = top
+DocumentTemplate = ../template/bluerobot-left.html
+ContentDirectory = ../content
+
+[/bluerobot-right]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = vertical
+BreadCrumbs = top
+DocumentTemplate = ../template/bluerobot-right.html
+#ContentDirectory = ../content
+ContentDirectory = ../cgi-bin/Crimp/docs/
+#http://crimp2.ind-web.com/docs/configuration
+
+##################
+
+[/db]
+# set to on here, although any setting (not null) will cause the module to work
+ContentDatabase = on
+DBType = mysql
+DBName = test
+DBTable = test
+DBHost = localhost
+DBUserName = test
+DBUserPass = test
+
+[/admin]
+# set to on here, although any setting (not null) will cause the module to work
+CrimpAdmin = on
