@@ -1,4 +1,4 @@
-$ID = q$Id: VirtualRedirect.pm,v 1.17 2005-11-23 15:13:41 diddledan Exp $;
+$ID = q$Id: VirtualRedirect.pm,v 1.18 2006-01-29 15:24:52 deadpan110 Exp $;
 &printdebug('Module VirtualRedirect',
 			'',
 			'Authors: The CRIMP Team',
@@ -37,7 +37,7 @@ if ($use_proxy){
   #$ua->proxy(http => "http://$use_proxy");
 }
 
-$ua->agent("Mozilla/4.0 (crimp user $crimp->{RemoteHost}\@$crimp->{ServerName})"); # pretend we are very capable browser
+$ua->agent("Mozilla/5.0 (CRIMP user $crimp->{RemoteHost}\@$crimp->{ServerName})"); # pretend we are very capable browser
 $ua->timeout("30");
 
 #create a variable to hold the url we want to retreive, so that it can be
