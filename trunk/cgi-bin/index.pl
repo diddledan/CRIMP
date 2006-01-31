@@ -6,7 +6,10 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.52 2006-01-28 19:30:39 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.53 2006-01-31 03:55:55 deadpan110 Exp $;
+my $version = join (' ', (split (' ', $ID))[2]);
+   $version =~ s/,v\b//;
+
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -25,6 +28,8 @@ my $ID = q$Id: index.pl,v 1.52 2006-01-28 19:30:39 deadpan110 Exp $;
 ##################################################################################
 
 package Crimp;
+
+my @PostQuery = read (STDIN, $query, $ENV{'CONTENT_LENGTH'});
 our $PRINT_DEBUG;
 our $PRINT_HEAD;
 &printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)',
@@ -131,21 +136,24 @@ our $crimp;
 $crimp = {
 	#removed the quotes around the $ENV entries to speed up processing time.
 	IniCommands => \@inicmds,
-    RemoteHost => $ENV{'REMOTE_ADDR'},
-    ServerName =>  $ENV{'SERVER_NAME'},
-    ServerSoftware =>  $ENV{'SERVER_SOFTWARE'},
-    UserAgent =>  $ENV{'HTTP_USER_AGENT'},
-    HttpRequest =>  $ENV{'REDIRECT_URL'},
-    HttpQuery =>  $ENV{'REDIRECT_QUERY_STRING'},
-    ContentType => 'text/html',
-    PageTitle => 'CRIMP',
-    ExitCode => '204',
-    DebugMode => 'off',
-    VarDirectory => '../cgi-bin/Crimp/var',
+	RemoteHost => $ENV{'REMOTE_ADDR'},
+	ServerName =>  $ENV{'SERVER_NAME'},
+	ServerSoftware =>  $ENV{'SERVER_SOFTWARE'},
+	UserAgent =>  $ENV{'HTTP_USER_AGENT'},
+	HttpRequest =>  $ENV{'REDIRECT_URL'},
+	HttpQuery =>  $ENV{'REDIRECT_QUERY_STRING'},
+	PostQuery => \@PostQuery,
+	ContentType => 'text/html',
+	PageTitle => 'CRIMP',
+	ExitCode => '204',
+	DebugMode => 'off',
+	VarDirectory => '../cgi-bin/Crimp/var',
 	ErrorDirectory => '../cgi-bin/Crimp/errors',
 	HtmlDirectory => '../public_html',
 	CgiDirectory => '../cgi-bin',
 	RobotsMeta => 'index,follow',
+	KeywordsMeta => '',
+	DescriptionMeta => '',
 	DefaultHtml => '',
 	MenuList => \@MenuList,
 	MenuDiv => ''
@@ -204,7 +212,8 @@ if ($i < 8){$tune = "$tune -n ";}
     "RemoteHost: $crimp->{RemoteHost}",
     "UserAgent: $crimp->{UserAgent}",
     "HttpRequest: $crimp->{HttpRequest}",
-    "HttpQuery: $crimp->{HttpQuery}"
+    "HttpQuery: $crimp->{HttpQuery}",
+    "PostQuery: $crimp->{PostQuery} (in development)"
 );
 
 if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
@@ -310,7 +319,26 @@ if ($Config->{_}->{RobotsMeta} ne ''){
 	   	$crimp->{RobotsMeta}=$Config->{$crimp->{UserConfig}}->{RobotsMeta};
 		}
 }
- 
+
+# KeywordsMeta
+if ($Config->{_}->{KeywordsMeta} ne ''){
+		$crimp->{KeywordsMeta}=$Config->{_}->{KeywordsMeta};
+	}else{
+		if ($Config->{$crimp->{UserConfig}}->{KeywordsMeta} ne ''){
+	   	$crimp->{KeywordsMeta}=$Config->{$crimp->{UserConfig}}->{KeywordsMeta};
+		}
+}
+
+# DescriptionMeta
+if ($Config->{_}->{DescriptionMeta} ne ''){
+		$crimp->{DescriptionMeta}=$Config->{_}->{DescriptionMeta};
+	}else{
+		if ($Config->{$crimp->{UserConfig}}->{DescriptionMeta} ne ''){
+	   	$crimp->{DescriptionMeta}=$Config->{$crimp->{UserConfig}}->{DescriptionMeta};
+		}
+}
+
+
  
 #setup a cookie holder
 our @cookies;
@@ -332,7 +360,12 @@ foreach my $IniCommand (@{$crimp->{IniCommands}}) {
 
 #add the extra CRIMP-specific HTML headers
 
+&addHeaderContent(join('','<meta name="generator" content="CRIMP ',$version,'" />'));
+
 &addHeaderContent(join('','<meta name="robots" content="',$crimp->{RobotsMeta},'" />'));
+&addHeaderContent(join('','<meta name="keywords" content="',$crimp->{KeywordsMeta},'" />'));
+&addHeaderContent(join('','<meta name="description" content="',$crimp->{DescriptionMeta},'" />'));
+
 &addHeaderContent('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
 
 ####################################################################
@@ -373,11 +406,14 @@ print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 
 
 if ($crimp->{DebugMode} eq 'on'){
-	$PRINT_DEBUG = join '', '<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
+	$PRINT_DEBUG = join '','<a name="crimpDebug" id="crimpDebug"></a>','<table class="crimpDebug">', $PRINT_DEBUG, "</table>\n";
 	$crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;
 }
 
-$crimp->{DisplayHtml} =~ s|(</head>)|$PRINT_HEAD\1|i;
+
+$crimp->{DisplayHtml} =~ s|(<body>)|\1$crimp->{MenuDiv}|i;
+
+$crimp->{DisplayHtml} =~ s|(</head>)|\n$PRINT_HEAD\1|i;
 print $crimp->{DisplayHtml};
 
 ####################################################################
