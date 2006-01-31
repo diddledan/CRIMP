@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.53 2006-01-31 03:55:55 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.54 2006-01-31 13:23:36 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 
@@ -363,8 +363,13 @@ foreach my $IniCommand (@{$crimp->{IniCommands}}) {
 &addHeaderContent(join('','<meta name="generator" content="CRIMP ',$version,'" />'));
 
 &addHeaderContent(join('','<meta name="robots" content="',$crimp->{RobotsMeta},'" />'));
+
+if ($crimp->{KeywordsMeta} ne ''){
 &addHeaderContent(join('','<meta name="keywords" content="',$crimp->{KeywordsMeta},'" />'));
+}
+if ($crimp->{DescriptionMeta} ne ''){
 &addHeaderContent(join('','<meta name="description" content="',$crimp->{DescriptionMeta},'" />'));
+}
 
 &addHeaderContent('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
 
