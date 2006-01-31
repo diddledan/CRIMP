@@ -1,4 +1,4 @@
-$ID = q$Id: ButtonBar.pm,v 1.2 2006-01-28 19:31:20 deadpan110 Exp $;
+$ID = q$Id: ButtonBar.pm,v 1.3 2006-01-31 03:48:09 deadpan110 Exp $;
 &printdebug('Module ButtonBar',
 			'',
 			'Authors: The CRIMP Team',
@@ -11,7 +11,7 @@ $ID = q$Id: ButtonBar.pm,v 1.2 2006-01-28 19:31:20 deadpan110 Exp $;
 my $help ="#";
 my $view = "#";
 my $edit = "#";
-my $debug = "$crimp->{HttpRequest}?debug=on";
+my $debug = "$crimp->{HttpRequest}?debug=on#crimpDebug";
 
 
 @ButtonBar = <<ENDEOF;
