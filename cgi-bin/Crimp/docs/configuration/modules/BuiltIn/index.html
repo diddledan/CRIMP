@@ -21,99 +21,103 @@ the crimp.ini file.<br />
 
   <tbody>
     <tr>
-      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">Debug<br />
-      </td>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">CgiDirectory</td>
       <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
-root section of the <span style="font-weight: bold;">crimp.ini</span>
-file</span><span style="font-weight: bold;"><br />
-on</span> (default)<br />
-
-      <div style="margin-left: 40px;">Prints the output of CRIMP Debug
-at the end of a page.<br />
-      </div>
-      <span style="font-weight: bold;">off</span><br />
-      <div style="margin-left: 40px;">Switches CRIMP Debug mode off
-entirely.<br />
-      </div>
-      <span style="font-weight: bold;">page</span><br />
-      <div style="margin-left: 40px;">Only displays CRIMP Debug mode if
-called from the browser by appending <span style="font-weight: bold;">?debug=on</span>
-
-to the url.</div>
-      </td>
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
+        </span><span style="font-weight: bold;">../cgi-bin</span> (default)<br />
+        <div style="margin-left: 40px;">This is the location of the
+          cgi-bin directory and is not normally needed to be changed. </div>        </td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">Debug<br />      </td>
+      <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file</span><span style="font-weight: bold;"><br />
+          on</span> (default)<br />
+        <div style="margin-left: 40px;">Prints the output of CRIMP Debug
+          at the end of a page.<br />
+        </div>
+        <span style="font-weight: bold;">off</span><br />
+        <div style="margin-left: 40px;">Switches CRIMP Debug mode off
+          entirely.<br />
+        </div>
+        <span style="font-weight: bold;">page</span><br />
+        <div style="margin-left: 40px;">Only displays CRIMP Debug mode if
+          called from the browser by appending <span style="font-weight: bold;">?debug=on</span> to the url.</div></td>
     </tr>
     <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">ErrorDirectory</td>
       <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
-root section of the <span style="font-weight: bold;">crimp.ini</span>
-file<br />
-
-      </span><span style="font-weight: bold;">../cgi-bin/Crimp/errors</span>
-(default)<br />
-      <div style="margin-left: 40px;">This is the location of the
-errors directory and contains html pages of error codes and their error
-messages. If you prefer to use custom error pages, this can be changed
-to the new path containing the custom pages. It is not recomended you
-alter the files within the default directory as they could be
-overwritten while updating crimp.</div>
-      <span style="font-style: italic;"></span></td>
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
+        </span><span style="font-weight: bold;">../cgi-bin/Crimp/errors</span> (default)<br />
+        <div style="margin-left: 40px;">This is the location of the
+          errors directory and contains html pages of error codes and their error
+          messages. If you prefer to use custom error pages, this can be changed
+          to the new path containing the custom pages. It is not recomended you
+          alter the files within the default directory as they could be
+          overwritten while updating crimp</div>        </td>
     </tr>
     <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">FirstRun</td>
-
       <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
-root section of the <span style="font-weight: bold;">crimp.ini</span>
-file<br />
-      </span><span style="font-weight: bold;">on </span>(default)<br />
-      <div style="margin-left: 40px;">After following the <a
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
+        </span><span style="font-weight: bold;">on </span>(default)<br />
+        <div style="margin-left: 40px;">After following the <a
  href="/docs/installation.html">CRIMP install guide</a>, this command
-appears in the new <span style="font-weight: bold;">crimp.ini</span>
-file.<br />
-
-Unless you need CRIMP to do its post install checks then it is safe to
-delete this config entry.</div>
-      <span style="font-style: italic;"></span></td>
+          appears in the new <span style="font-weight: bold;">crimp.ini</span> file.<br />
+          Unless you need CRIMP to do its post install checks then it is safe to
+          delete this config entry</div>        </td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">HtmlDirectory</td>
+      <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
+        </span><span style="font-weight: bold;">../public_html</span> (default)<br />
+        <div style="margin-left: 40px;">This is the location of the
+          public_html directory and is not normally needed to be changed. </div></td>
     </tr>
     <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">PageTitle</td>
       <td bgcolor="#EEEEEE">Not entirely sure if this is needed.</td>
     </tr>
     <tr>
-
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">PluginOrder</td>
+      <td bgcolor="#EEEEEE">Controls the plugin execution order of modules. CRIMP modules are called alphabetically by default but usually content creation modules are required to be called before any other module. <span style="font-style: italic;"><br />
+              </span><span style="font-weight: bold;">VirtualRedirect,BreadCrumbs,RandomContent</span><br />
+        <div style="margin-left: 40px;">This would make sure the VirtualRedirect module is called before the BreadCrumbs and RandomContent modules instead of alphabetical order.<br>
+          (Please note that DocumentTemplate and ButtonBar are always
+        called last if within the global section or any per directory section of the <strong>crimp.ini</strong> file and are not needed within the comma separated list.) </div></td>
+    </tr>
+    <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">RobotsMeta</td>
       <td bgcolor="#EEEEEE">Search engine control of<em> <span
  style="font-style: italic;">'robots implementing</span></em><span
  style="font-style: italic;"> </span><a style="font-style: italic;"
  href="http://www.w3.org/TR/WD-htmllink-970328#meta">The Robots META tag</a><span
  style="font-style: italic;">'</span> which allows HTML authors to
-indicate to visiting robots
-whether a document may be indexed, or used to harvest more links. When
-used on a per directory basis, enables control of visiting spiders and
-bots.<br />
-The list of terms in the content is <tt style="font-weight: bold;">ALL</tt>,
-      <tt style="font-weight: bold;">INDEX</tt>, <tt
+        indicate to visiting robots
+        whether a document may be indexed, or used to harvest more links. When
+        used on a per directory basis, enables control of visiting spiders and
+        bots.<br />
+        The list of terms in the content is <tt style="font-weight: bold;">ALL</tt>, <tt style="font-weight: bold;">INDEX</tt>, <tt
  style="font-weight: bold;">NOFOLLOW</tt>, <tt
  style="font-weight: bold;">NOINDEX</tt>. The name and the content
-attribute
-values are case insensitive.<span style="font-weight: bold;"><br />
-
-index,follow (default)</span><br />
-      <div style="margin-left: 40px;">A robot is able index this
-document, and
-analyse it for links.<br />
-      </div>
-      <span style="font-weight: bold;">noindex,nofollow</span><br />
-      <div style="margin-left: 40px;">A robot should neither index this
-document, nor
-analyse it for links<br />
-      </div>
-      </td>
-
+        attribute
+        values are case insensitive.<span style="font-weight: bold;"><br />
+          index,follow </span>(default)<br />
+        <div style="margin-left: 40px;">A robot is able index this
+          document, and
+          analyse it for links.<br />
+        </div>
+        <span style="font-weight: bold;">noindex,nofollow</span><br />
+        <div style="margin-left: 40px;">A robot should neither index this
+          document, nor
+          analyse it for links<br />
+        </div></td>
     </tr>
     <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">VarDirectory</td>
       <td bgcolor="#EEEEEE">Not sure if this is configurable... It shouldnt need to be
-changed.</td>
+        changed.</td>
     </tr>
   </tbody>
 </table>
