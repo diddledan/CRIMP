@@ -45,6 +45,14 @@ the crimp.ini file.<br />
           called from the browser by appending <span style="font-weight: bold;">?debug=on</span> to the url.</div></td>
     </tr>
     <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">DescriptionMeta</td>
+      <td bgcolor="#EEEEEE"> Some indexing engines look for META elements that give a short description. <a href="http://www.highrankings.com/metadescription.htm">The Meta Description Tag</a>   allows you to influence the description of your page for crawlers that support the tag and can be set within the <strong>crimp.ini</strong> file on a global or per directory basis.<br />
+        <span style="font-weight: bold;">Your descriptive sentence or two goes here. </span>(example)<br />
+        <div style="margin-left: 40px;">Generally, 200 to 250 characters may be indexed, though only a smaller portion of this amount may be displayed.</div>
+        <div style="margin-left: 40px;"><br />
+      </div></td>
+    </tr>
+    <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">ErrorDirectory</td>
       <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
         root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
@@ -54,7 +62,7 @@ the crimp.ini file.<br />
           messages. If you prefer to use custom error pages, this can be changed
           to the new path containing the custom pages. It is not recomended you
           alter the files within the default directory as they could be
-          overwritten while updating crimp</div>        </td>
+          overwritten while updating crimp.</div></td>
     </tr>
     <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">FirstRun</td>
@@ -62,10 +70,10 @@ the crimp.ini file.<br />
         root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
         </span><span style="font-weight: bold;">on </span>(default)<br />
         <div style="margin-left: 40px;">After following the <a
- href="/docs/installation.html">CRIMP install guide</a>, this command
+ href="/docs/installation/index.html">CRIMP install guide</a>, this command
           appears in the new <span style="font-weight: bold;">crimp.ini</span> file.<br />
           Unless you need CRIMP to do its post install checks then it is safe to
-          delete this config entry</div>        </td>
+          delete this config entry.</div></td>
     </tr>
     <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">HtmlDirectory</td>
@@ -76,16 +84,22 @@ the crimp.ini file.<br />
           public_html directory and is not normally needed to be changed. </div></td>
     </tr>
     <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">KeywordsMeta</td>
+      <td bgcolor="#EEEEEE">Some indexing engines look for META elements that define a comma-separated list of keywords/phrases. <a href="http://www.highrankings.com/metakeyword.htm">The Meta Keywords Tag</a> is sometimes useful as a way to reinforce the terms you think a page is important for ON THE FEW CRAWLERS THAT SUPPORT IT and can be set within the <strong>crimp.ini</strong> file on a global or per directory basis.<br />
+        <span style="font-weight: bold;">your keywords,go here,separated by a comma,but not a space </span>(example)<br />
+        <div style="margin-left: 40px;">Generally, 25 words or phrases, with each word or phrase separated by commas.</div></td>
+    </tr>
+    <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">PageTitle</td>
       <td bgcolor="#EEEEEE">Not entirely sure if this is needed.</td>
     </tr>
     <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">PluginOrder</td>
       <td bgcolor="#EEEEEE">Controls the plugin execution order of modules. CRIMP modules are called alphabetically by default but usually content creation modules are required to be called before any other module. <span style="font-style: italic;"><br />
-              </span><span style="font-weight: bold;">VirtualRedirect,BreadCrumbs,RandomContent</span><br />
+        </span><span style="font-weight: bold;">VirtualRedirect,BreadCrumbs,RandomContent</span><br />
         <div style="margin-left: 40px;">This would make sure the VirtualRedirect module is called before the BreadCrumbs and RandomContent modules instead of alphabetical order.<br>
           (Please note that DocumentTemplate and ButtonBar are always
-        called last if within the global section or any per directory section of the <strong>crimp.ini</strong> file and are not needed within the comma separated list.) </div></td>
+          called last if within the global section or any per directory section of the <strong>crimp.ini</strong> file and are not needed within the comma separated list.) </div></td>
     </tr>
     <tr>
       <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">RobotsMeta</td>
@@ -111,7 +125,7 @@ the crimp.ini file.<br />
         <span style="font-weight: bold;">noindex,nofollow</span><br />
         <div style="margin-left: 40px;">A robot should neither index this
           document, nor
-          analyse it for links<br />
+          analyse it for links.<br />
         </div></td>
     </tr>
     <tr>

@@ -1,4 +1,4 @@
-$ID = q$Id: CrimpNews.pm,v 1.1 2006-01-29 15:25:56 deadpan110 Exp $;
+$ID = q$Id: CrimpNews.pm,v 1.2 2006-02-02 15:49:33 deadpan110 Exp $;
 &printdebug('Module CrimpNews',
 			'',
 			'Authors: The CRIMP Team',
@@ -47,6 +47,12 @@ my $urltoget = "http://sourceforge.net/export/projnews.php?group_id=118939&limit
 
 use LWP::UserAgent;
 $ua = LWP::UserAgent->new;
+
+if ($crimp->{DefaultProxy}){
+  &printdebug('','',"Using proxy server $crimp->{DefaultProxy}");
+  $ua->proxy(['http', 'ftp'], $crimp->{DefaultProxy});
+}
+
 
 $ua->agent("Mozilla/5.0 (CRIMP user $crimp->{RemoteHost}\@$crimp->{ServerName})"); # pretend we are very capable browser
 $ua->timeout("30");

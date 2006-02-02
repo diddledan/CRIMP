@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.13 2006-01-13 21:40:43 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.14 2006-02-02 15:49:33 deadpan110 Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -136,7 +136,8 @@ if (@display_content) {
 		$new_content =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
 		my $EntryTitle = $1;
 		my $EntryContent = $2;
-		#if the requested document doesn't exist, get the first one
+		#if the requested document doesnt exist - get the first one
+		
 		if (!$EntryTitle && !$EntryContent) {
 			$new_content =~ m|<h1>(.*?)</h1>(.*?)<h1>|si;
 			$EntryTitle = $1;
@@ -157,16 +158,18 @@ if (@display_content) {
 		$offset = int($query->param('show'));
 		my $newoffset = $offset - $limit || 0;
 		if ($offset > 0) {
-			push @{$crimp->{MenuList}}, "&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Prev]</b></a>";
+			push @{$crimp->{MenuList}}, "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Prev]</b></a>";
 		}
 		&do_blog_list($offset,$limit);
 		if ($new_content =~ m|</h1>|i) {
 			$newoffset = $offset + $limit;
-			push @{$crimp->{MenuList}}, "&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Next]</b></a>";
+			push @{$crimp->{MenuList}}, "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Next]</b></a>";
 		}
+		
 	}
 
-
+$menu = "@{$crimp->{MenuList}}";
+	&addMenuContent($menu);
 	&printdebug(
 		'',
 		'',
@@ -189,9 +192,11 @@ sub do_blog_list {
 			my ($title, $text) = ($1, $2);
 			my $newurl = join '/', $crimp->{UserConfig}, uri_escape($1);
 			$newurl =~ s|/{2,}|/|g;
-			push @{$crimp->{MenuList}}, "&nbsp;&nbsp;&nbsp;&nbsp;<a href='$newurl?show=$offset'>$title</a>";
+			push @{$crimp->{MenuList}}, "<br />&nbsp;&nbsp;&nbsp;&nbsp;<a href='$newurl?show=$offset'>$title</a>";
+			
 			#$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$newurl">$title<a></h1>\n$text\1|i;
 		}
 	}
+	
 }
 1;
