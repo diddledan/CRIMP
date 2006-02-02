@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.56 2006-02-02 15:47:16 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.57 2006-02-02 17:06:22 diddledan Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 
@@ -190,8 +190,8 @@ if ($crimp->{HttpQuery}) { $crimp->{HttpQuery} = join '', '?', $crimp->{HttpQuer
 
 $RemoteHost  = $ENV{'REMOTE_ADDR'};
 $ServerHost  = $ENV{'SERVER_ADDR'};
-($beep[4],$beep[3],$beep[2],$beep[1]) = split(/\./,$ServerHost);
-($beep[5],$beep[6],$beep[7],$beep[8]) = split(/\./,$RemoteHost);
+($beep[4],$beep[3],$beep[2],$beep[1]) = split('.',$ServerHost);
+($beep[5],$beep[6],$beep[7],$beep[8]) = split('.',$RemoteHost);
 
 for ($i=1;$i<=8;$i++){
 $note =($beep[$i]+25)*10;
@@ -286,11 +286,11 @@ if ($Config->{_}->{DefaultProxy} ne ''){
 #   /home/news
 #   /home
 
-@HttpRequest = split(/\//,$crimp->{HttpRequest});
+@HttpRequest = split('/',$crimp->{HttpRequest});
 my $tempstr = '';
 foreach $HttpRequest (@HttpRequest){
     if ($HttpRequest ne '') {
-        $tempstr = "$tempstr/$HttpRequest";
+        $tempstr = join '/', $tempstr, $HttpRequest;
     }
 
     if ($Config->{$tempstr}){
@@ -363,15 +363,15 @@ our @cookies;
 
 my %executedCommands;
 $crimp->{skipRemainingPlugins} = 0;
-foreach my $IniCommand (split /,/, $Config->{$crimp->{UserConfig}}->{PluginOrder}) {
+foreach my $IniCommand (split ',', $Config->{$crimp->{UserConfig}}->{PluginOrder}) {
 	&executePlugin($IniCommand) unless (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++));
 }
-foreach my $IniCommand (split /,/, $Config->{_}->{PluginOrder}) {
+foreach my $IniCommand (split ',', $Config->{_}->{PluginOrder}) {
 	&executePlugin($IniCommand) unless (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++));
 }
 #foreach $IniCommand ($crimp->{IniCommands}) { # couldn't get this to work properly
 foreach my $IniCommand (@{$crimp->{IniCommands}}) {
-	&executePlugin($IniCommand) unless (($IniCommand ne 'DocumentTemplate') && (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++)));
+	&executePlugin($IniCommand) if (($IniCommand eq 'DocumentTemplate') || (!($crimp->{skipRemainingPlugins} || $executedCommands{$IniCommand}++)));
 }
 
 #add the extra CRIMP-specific HTML headers
@@ -500,8 +500,8 @@ sub executePlugin() {
 sub printdebug() {
 	my $solut='';
 	my $logger='';
-	my $mssge=shift(@_);
-	my $stats=shift(@_);
+	my $mssge=shift;
+	my $stats=shift;
 	my $exit = 0;
 	
 	#print "$Config->{_}->{Debug};";
@@ -535,7 +535,7 @@ if ($exit) {
 }
 ####################################################################
 sub PageRead {
-	my $filename=shift(@_);
+	my $filename=shift;
 &printdebug('Module PageRead','',
 				'BuiltIn Module',
 				"File: $filename");
@@ -571,9 +571,9 @@ $FileRead =~ s/<title>/<title>404 - Page Not Found/i;
 }
 ####################################################################
 sub FileRead {
-	my $filename=shift(@_);
-	my $entry=shift(@_);
-	my $string=shift(@_);
+	my $filename=shift;
+	my $entry=shift;
+	my $string=shift;
 	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
 
 	&printdebug('','',"FileRead: $filename");
@@ -586,7 +586,7 @@ sub FileRead {
 		if (@FileRead) {
 			foreach $FileRead(@FileRead) {
 				chop($FileRead) if $FileRead =~ /\n$/;
-				($FileEntry,$FileString) = split(/\|\|/,$FileRead);
+				($FileEntry,$FileString) = split('||',$FileRead);
 				if ($FileEntry eq $entry) { return($FileString); }
 			}
 		}
@@ -595,9 +595,9 @@ sub FileRead {
 }
 ####################################################################
 sub FileWrite {
-	my $filename=shift(@_);
-	my $entry=shift(@_);
-	my $string=shift(@_);
+	my $filename=shift;
+	my $entry=shift;
+	my $string=shift;
 	my $filelock = join '/',$crimp->{VarDirectory},'lock',$filename;
 	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
 	
@@ -612,7 +612,7 @@ sub FileWrite {
 		if (@FileRead) {
 			foreach $FileRead(@FileRead) {
 				chop($FileRead) if $FileRead =~ /\n$/;
-				($FileEntry,$FileString) = split(/\|\|/,$FileRead);
+				($FileEntry,$FileString) = split('||',$FileRead);
 				
 				if ($FileEntry eq $entry) {
 					print LOCKED "$entry||$string\n";
@@ -634,9 +634,9 @@ sub FileWrite {
 }
 ####################################################################
 sub RetryWait {
-	my $filename=shift(@_);
-	my $entry=shift(@_);
-	my $string=shift(@_);
+	my $filename=shift;
+	my $entry=shift;
+	my $string=shift;
 
 	if ($tries gt 5) {
 		#$requested = join '/', $crimp->{ErrorDirectory}, '500.html';
