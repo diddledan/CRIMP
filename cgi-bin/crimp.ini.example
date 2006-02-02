@@ -4,16 +4,13 @@
 
 DebugMode = page
 
-#HtmlDirectory = ../public_html
-#CgiDirectory = ../cgi-bin
-
 DocumentTemplate = ../template/default-crimp.html
 
 ButtonBar = Default
 #ButtonBar = BlackRounded
 
-#declare a sitewide navigation menu
-SiteMenu = SiteWide.mnu
+#declare a sitewide navigation menu (not currently used)
+#SiteMenu = SiteWide.mnu
 
 #SiteTitle = CRIMP
 
@@ -28,8 +25,17 @@ PluginOrder = ContentDirectory,FileList,BreadCrumbs
 FileList = horizontal
 BreadCrumbs = top
 ContentDirectory = ../cgi-bin/Crimp/docs/
-DocumentTemplate = ../template/default-crimp.html
 
+############################################################
+#It is recommended that these remain permanent             #
+
+#Get the latest information on updates and news from CRIMP
+[/crimp-news]
+PluginOrder = CrimpNews,BreadCrumbs
+CrimpNews = on
+BreadCrumbs = top
+
+#Local CRIMP Documentation
 [/docs]
 PluginOrder = ContentDirectory,FileList,BreadCrumbs
 FileList = horizontal
@@ -37,37 +43,22 @@ BreadCrumbs = top
 ContentDirectory = ../cgi-bin/Crimp/docs/
 DocumentTemplate = ../template/default-crimp.html
 
+#Module and CRIMP engine changes in this release
+[/changes]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = vertical
+BreadCrumbs = top
+ContentDirectory = ../cgi-bin/Crimp/Changes/
+DocumentTemplate = off
+
+############################################################
+# Examples section
+# To see these examples, type http://your-website[/directory]
+
 [/blog]
 PluginOrder = FlatBlog,BreadCrumbs
 BreadCrumbs = top
 FlatBlog = flatblog.html
-
-#It is recomended that this remains permanent
-#Get the latest information on updates and news from CRIMP
-[/crimp-news]
-PluginOrder = CrimpNews,BreadCrumbs
-CrimpNews = on
-BreadCrumbs = top
-
-
-#[/download]
-#PluginOrder = UserAuth,ContentListing,FileList,BreadCrumbs
-#DocumentTemplate=off
-#BreadCrumbs = top
-#ContentListing = ../public_html/download
-#UserAuth = ../cgi-bin/Crimp/var/downloads-passwords.txt
-
-[/downloads]
-#DocumentTemplate = ../template/bluerobot-left.html
-RobotsMeta = noindex,nofollow
-PluginOrder = UserAuth,ContentListing,FileList,BreadCrumbs
-#DocumentTemplate = off
-BreadCrumbs = top
-ContentListing = ../public_html/downloads
-
-
-
-# Examples section
 
 [/google]
 # for VirtualRedirect, always include the trailing slash on a non file
@@ -76,37 +67,42 @@ BreadCrumbs = top
 VirtualRedirect = http://www.google.com/
 #UserAuth = ../passwords.txt
 
-[/examples/templates/blue]
+[/downloads]
+RobotsMeta = noindex,nofollow
+PluginOrder = UserAuth,ContentListing,FileList,BreadCrumbs
+BreadCrumbs = top
+ContentListing = ../public_html/downloads
+
+[/blue]
 PluginOrder = ContentDirectory,FileList,BreadCrumbs
 FileList = vertical
 BreadCrumbs = top
 DocumentTemplate = ../template/blue.html
-ContentDirectory = ../content
+ContentDirectory = ../cgi-bin/Crimp/docs/
 
-[/examples/templates/none]
+[/none]
 PluginOrder = ContentDirectory,FileList,BreadCrumbs
 FileList = horizontal
 BreadCrumbs = top
 DocumentTemplate = none
-ContentDirectory = ../content
+ContentDirectory = ../cgi-bin/Crimp/docs/
 
-[/examples/templates/bluerobot-left]
+[/bluerobot-left]
 PluginOrder = ContentDirectory,FileList,BreadCrumbs
 FileList = vertical
 BreadCrumbs = top
 DocumentTemplate = ../template/bluerobot-left.html
-ContentDirectory = ../content
+ContentDirectory = ../cgi-bin/Crimp/docs/
 
 [/bluerobot-right]
 PluginOrder = ContentDirectory,FileList,BreadCrumbs
 FileList = vertical
 BreadCrumbs = top
 DocumentTemplate = ../template/bluerobot-right.html
-#ContentDirectory = ../content
 ContentDirectory = ../cgi-bin/Crimp/docs/
-#http://crimp2.ind-web.com/docs/configuration
 
-##################
+
+############################################################
 
 [/db]
 # set to on here, although any setting (not null) will cause the module to work
