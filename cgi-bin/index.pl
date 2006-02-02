@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.54 2006-01-31 13:23:36 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.55 2006-02-02 04:34:12 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 
@@ -147,6 +147,7 @@ $crimp = {
 	PageTitle => 'CRIMP',
 	ExitCode => '204',
 	DebugMode => 'off',
+	PageRead => '',
 	VarDirectory => '../cgi-bin/Crimp/var',
 	ErrorDirectory => '../cgi-bin/Crimp/errors',
 	HtmlDirectory => '../public_html',
@@ -155,11 +156,14 @@ $crimp = {
 	KeywordsMeta => '',
 	DescriptionMeta => '',
 	DefaultHtml => '',
+	DefaultLang => 'eng',
+	DefaultProxy => '',
 	MenuList => \@MenuList,
 	MenuDiv => ''
 
 };
-
+$crimp->{ErrorDirectory} = '../cgi-bin/Crimp/errors';
+$crimp->{DefaultLang} = 'eng';
 $crimp->{DefaultHtml} = <<ENDEOF;
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -216,13 +220,16 @@ if ($i < 8){$tune = "$tune -n ";}
     "PostQuery: $crimp->{PostQuery} (in development)"
 );
 
-if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
+####################################################################
+## ERROR CHECKING (fatals first) ##
+##################################
+
+if (!-e "Config/Tiny.pm"){
     $crimp = {DebugMode => 'on'};
-    &printdebug(
+		&printdebug(
         'Crimp Files not found',
         'fail',
-        'Please check the following files exist in the crimp directory',
-        'crimp.ini',
+        'Please check the following files exist in the cgi-bin directory',
         'Config/Tiny.pm'
     );
 }
@@ -230,28 +237,15 @@ if ((!-e "crimp.ini")||(!-e "Config/Tiny.pm")){
 our $Config = Config::Tiny->new();
 $Config = Config::Tiny->read( 'crimp.ini' );
 if (!$Config) {
-	print $query->header('text/html', 500);
-	print '
-<html>
-	<head>
-		<title>ERROR</title>
-	</head>
-	<body>
-		<br />
-		<br />
-		<br />
-		<p style="text-align: center;">
-';
-	if (!Config::Tiny->errstr()) {
-		print "Either the config.ini file is empty, or we could not read it for some reason. Possible permissions problem?";
-	} else { print Config::Tiny->errstr(); }
-	print '
-		</p>
-	</body>
-</html>
-';
-	exit 1;
+		&printdebug(
+        'Crimp Files not found',
+        'fail',
+        'Please check the following files exist in the cgi-bin directory',
+        'crimp.ini'
+    );	
 }
+
+
 
 #switch to debug mode if set in crimp.ini
 if ($crimp->{DebugMode} ne 'on'){
@@ -276,6 +270,10 @@ if ($Config->{_}->{HtmlDirectory} ne ''){
 if ($Config->{_}->{CgiDirectory} ne ''){
 	$crimp->{CgiDirectory}=$Config->{_}->{CgiDirectory};
    }
+   
+if ($Config->{_}->{DefaultProxy} ne ''){
+	$crimp->{DefaultProxy}=$Config->{_}->{DefaultProxy};
+	}
 
 ####################################################################
 ## Main Routine ##
@@ -338,13 +336,31 @@ if ($Config->{_}->{DescriptionMeta} ne ''){
 		}
 }
 
+# PageRead
+if ($Config->{_}->{PageRead} ne ''){
+		$crimp->{PageRead}=$Config->{_}->{PageRead};
+	}else{
+		if ($Config->{$crimp->{UserConfig}}->{PageRead} ne ''){
+	   	$crimp->{PageRead}=$Config->{$crimp->{UserConfig}}->{PageRead};
+		}
+}
+
+####################################################################
+## call the builtins in order ##
+###############################
+
+if ($crimp->{PageRead} ne ''){
+$crimp->{DisplayHtml} = &PageRead($crimp->{PageRead});
+}
 
  
 #setup a cookie holder
 our @cookies;
 
 ####################################################################
-# call the plugins in order
+## call the plugins in order ##
+##############################
+
 my %executedCommands;
 $crimp->{skipRemainingPlugins} = 0;
 foreach my $IniCommand (split /,/, $Config->{$crimp->{UserConfig}}->{PluginOrder}) {
@@ -428,13 +444,13 @@ print $crimp->{DisplayHtml};
 #foreach $item (keys %ENV) { print "$item = $ENV{$item}\n<br />";}
 
 ####################################################################
-####################################################################
 
+####################################################################
 sub addHeaderContent {
 	my $new_header = shift;
 	$PRINT_HEAD = join '',$PRINT_HEAD,$new_header,"\n";
 }
-
+####################################################################
 sub executePlugin() {
 	my $plugin = shift;
 	if (!$crimp->{$plugin}) {
@@ -455,7 +471,7 @@ sub executePlugin() {
 		}
 	}
 }
-
+####################################################################
 sub printdebug() {
 	my $solut='';
 	my $logger='';
@@ -473,20 +489,62 @@ sub printdebug() {
 	if ($stats eq 'pass') { $stats='[<span style="color: #0f0;">PASS</span>]' }
 	if ($stats eq 'warn') { $stats='[<span style="color: #fc3;">WARN</span>]' }
 	# the module has failed. this is no longer considered a fatal error condition, as we want the page to display _something_.
-	if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]' }
-	if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $exit = 1; }
+	# FAIL is a serious error condition... modules SHOULD use 'warn' instead for non fatals
+	if ($stats eq 'fail') { $stats='[<span style="color: #f00;">FAIL</span>]'; $exit = 1;}
+	# EXIT is now dropped!
+	#if ($stats eq 'exit') { $stats='[<span style="color: #33f;">EXIT</span>]'; $exit = 1; }
 	
-	if (($solut ne '') && ($mssge ne '')) { $mssge="<b>&#8226;</b> $mssge $solut"; }
+	if (($solut ne '') && ($mssge ne '')) { $mssge="<span style='color: #ccc;'><b>&#8226;</b> $mssge $solut</span>"; }
 	if ($mssge eq '') { $mssge = $solut; }
-	$PRINT_DEBUG = join '', $PRINT_DEBUG,'<tr><td class="crimpDebugMsg"><pre class="crimpDebug">',$mssge,'</pre></td><td class="crimpDebugStatus"><pre class="crimpDebug"><span style="color: #fff;">',$stats,'</span></pre></td></tr>';
+	$PRINT_DEBUG = join '', $PRINT_DEBUG,'<tr><td align="left" valign="top" class="crimpDebugMsg"><pre class="crimpDebug">',$mssge,'</pre></td><td align="right" valign="bottom" class="crimpDebugStatus"><pre class="crimpDebug"><span style="color: #fff;">',$stats,'</span></pre></td></tr>';
 	
-	if ($exit) {
-		print $query->header('text/html',500);
-		print $PRINT_DEBUG;
-		exit;
+if ($exit) {
+#Call Multi lang 500 - Server Error Page
+	print $query->header('text/html', 500);
+	$FAIL_DEBUG = join '','<a name="crimpDebug" id="crimpDebug"></a>','<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#000000">', $PRINT_DEBUG, "</table>\n";
+	$crimp->{DisplayHtml} = &PageRead("Crimp/errors/500.html");
+	$crimp->{DisplayHtml} =~ s|(</body>)|$FAIL_DEBUG\1|i;
+	print "$crimp->{DisplayHtml}";
+		exit 1;
 	}
 }
+####################################################################
+sub PageRead {
+	my $filename=shift(@_);
+&printdebug('Module PageRead','',
+				'BuiltIn Module',
+				"File: $filename");
+		
+	if ( !-f $filename ) {
+		&printdebug('', 'warn', "Couldnt open file for reading",
+				 "Error: $!",
+				 "Using $crimp->{ErrorDirectory}/404.html instead");
+		$filename = join '/', $crimp->{ErrorDirectory}, '404.html';
+		$crimp->{ExitCode} = '404';
+		}
+	if ( -f $filename ) {
+	sysopen (FILE,$filename,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+		@FileRead=<FILE>;
+		close(FILE);
+		&printdebug('','pass',"Returning content from $filename"); 
+	return ("@FileRead");
+		}
 
+&printdebug('','warn',"File: $filename does not exist");
+$newhtml = <<ENDEOF;
+<h1>404 - Page Not Found</h1>
+<p>The document you are looking for has not been found.
+Additionally a 404 Not Found error was encountered while trying to
+use an error document for this request</p>
+
+ENDEOF
+
+$FileRead = $crimp->{DefaultHtml};
+$FileRead =~ s/<body>/<body>$newhtml/i;
+$FileRead =~ s/<title>/<title>404 - Page Not Found/i;
+	return ("$FileRead");
+}
+####################################################################
 sub FileRead {
 	my $filename=shift(@_);
 	my $entry=shift(@_);
@@ -510,7 +568,7 @@ sub FileRead {
 	}
 	return (&FileWrite($filename,$entry,$string));
 }
-
+####################################################################
 sub FileWrite {
 	my $filename=shift(@_);
 	my $entry=shift(@_);
@@ -549,7 +607,7 @@ sub FileWrite {
 	
 	return($string);
 }
-
+####################################################################
 sub RetryWait {
 	my $filename=shift(@_);
 	my $entry=shift(@_);
@@ -567,7 +625,5 @@ sub RetryWait {
 	&FileWrite($filename,$entry,$string);
 }
 
-
-
-#print $PRINT_DEBUG;
+####################################################################
 #REALLY THE END#
