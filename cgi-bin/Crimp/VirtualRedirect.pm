@@ -1,4 +1,4 @@
-$ID = q$Id: VirtualRedirect.pm,v 1.18 2006-01-29 15:24:52 deadpan110 Exp $;
+$ID = q$Id: VirtualRedirect.pm,v 1.19 2006-02-02 15:49:33 deadpan110 Exp $;
 &printdebug('Module VirtualRedirect',
 			'',
 			'Authors: The CRIMP Team',
@@ -32,9 +32,9 @@ if (($crimp->{HttpRequest} =~ m|/$|) && (!($path =~ m|/$|))) { $path = join '', 
 use LWP::UserAgent;
 $ua = LWP::UserAgent->new;
 
-if ($use_proxy){
-  &printdebug("Using proxy server");
-  #$ua->proxy(http => "http://$use_proxy");
+if ($crimp->{DefaultProxy}){
+  &printdebug('','',"Using proxy server $crimp->{DefaultProxy}");
+  $ua->proxy(['http', 'ftp'], $crimp->{DefaultProxy});
 }
 
 $ua->agent("Mozilla/5.0 (CRIMP user $crimp->{RemoteHost}\@$crimp->{ServerName})"); # pretend we are very capable browser
@@ -47,7 +47,7 @@ $urltoget = join '',$crimp->{VirtualRedirect},$path,$crimp->{HttpQuery};
 $req = HTTP::Request->new(GET => $urltoget);
 $req->header('Accept' => '*/*');
 $res = $ua->request($req);
-
+$error = $res->status_line;
 if ($res->is_success) {
 	#printdebug("File exists on remote server");
 	
@@ -120,6 +120,7 @@ if ($res->is_success) {
 	        $newlinkurl = $baseurl;
 	      }
 	      $crimp->{DisplayHtml} =~ s|(href=['"]{1})/(['"]{1})|\1$newlinkurl\2|g;
+	      
 	    } else {
 	      my $newlinkurl = '';
 	      if ($link_url =~ m|^/.+|) {
@@ -153,8 +154,11 @@ if ($res->is_success) {
 	$crimp->{ExitCode} = '200';
 } else {
   # the LWP::UserAgent couldn't get the document - let's tell the user why
-  $crimp->{DisplayHtml} = '<span style="color: #f00;">Connection error</span>';
-  &printdebug('', 'warn', "Could not get '$urltoget':", "&nbsp;&nbsp;&nbsp;&nbsp;$res->status_line");
+	&printdebug('', 'warn', "Could not get '$urltoget':", "Error: $error");
+  $crimp->{DisplayHtml} = &PageRead(join('/',$crimp->{ErrorDirectory},$crimp->{DefaultLang},'404-VirtualRedirect.html'));
+  $crimp->{ExitCode} = '404';
+  return 1;
+
 }
 
 #on success

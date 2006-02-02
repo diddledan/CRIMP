@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.14 2006-01-10 15:21:41 deadpan110 Exp $;
+$ID = q$Id: FileList.pm,v 1.15 2006-02-02 15:49:33 deadpan110 Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -52,7 +52,7 @@ if ($crimp->{ContentDirectory} ne '') {
 	if (( -d $FileDir )){
 
 	
-	opendir(DIR, $FileDir) or &printdebug('', 'fail', "Could not open the current directory for reading $!");
+	opendir(DIR, $FileDir) or &printdebug('', 'warn', "Could not open the current directory for reading $!");
 	rewinddir(DIR);
 	my @DirChk = readdir(DIR);
 	closedir(DIR);
@@ -63,9 +63,9 @@ if ($crimp->{ContentDirectory} ne '') {
 				$newurl = join '/', $BaseUrl, $DirChk;
 				$newurl =~ s!/{2,}!/!g;
 				if ($DirCount == 1) {
-					$DirList="$DirList<a href='$newurl'>$DirChk</a>";
+					$DirList="$DirList<a href='$newurl'>$DirChk</a>\n";
 				} else {
-					$DirList="$DirList$DirLayout<a href='$newurl'>$DirChk</a>";
+					$DirList="$DirList$DirLayout<a href='$newurl'>$DirChk</a>\n";
 				}
 			} else {
 				$FileCount ++;
@@ -74,9 +74,9 @@ if ($crimp->{ContentDirectory} ne '') {
 				$newurl =~ s!/{2,}!/!g;
 				$newurl = join '', $newurl,'.html';
 				if ($FileCount == 1) {
-					$FileList="$FileList<a href='$newurl'>$DirChk</a>";
+					$FileList="$FileList<a href='$newurl'>$DirChk</a>\n";
 				} else {
-					$FileList="$FileList$DirLayout<a href='$newurl'>$DirChk</a>";
+					$FileList="$FileList$DirLayout<a href='$newurl'>$DirChk</a>\n";
 				}
 			}
 		}
@@ -87,12 +87,15 @@ if ($crimp->{ContentDirectory} ne '') {
 	my $newhtml ="";
 	if ( ($DirCount + $FileCount) != 0 ){
 		#$newhtml = '<div id="crimpFileList">';
-		if ($DirCount != 0) { $newhtml = join '', $newhtml, $DirList, '<br />'; }
-		if ($FileCount != 0) { $newhtml = join '', $newhtml, $FileList, '<br />'; }
+		if ($DirCount != 0) { $newhtml = join '', $newhtml,$DirList;}
+		if (($DirCount != 0)&&($FileCount != 0)) { $newhtml = join '', $newhtml,'<br />';}
+		if ($FileCount != 0) { $newhtml = join '', $newhtml,$FileList; }
 		#$newhtml = join '', $newhtml, '</div>';
-		push @{$crimp->{MenuList}},"$newhtml";
-		# $crimp->{MenuList} =~ s/<body>/<body>$newhtml/i;
+		#push @{$crimp->{MenuList}},"$newhtml";
+		#$crimp->{MenuList} =~ s/<body>/<body>$newhtml/i;
 		# $crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml};
+		 
+		 &addMenuContent($newhtml);
 	}
 }else{
 &printdebug('', 'warn', 'Couldn\'t open directory for listing');
