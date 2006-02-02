@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.55 2006-02-02 04:34:12 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.56 2006-02-02 15:47:16 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 
@@ -449,6 +449,31 @@ print $crimp->{DisplayHtml};
 sub addHeaderContent {
 	my $new_header = shift;
 	$PRINT_HEAD = join '',$PRINT_HEAD,$new_header,"\n";
+}
+####################################################################
+sub addMenuContent {
+my $MenuContent=shift(@_);
+my $menuhtml = '';
+if (! $crimp->{DisplayHtml}){
+&printdebug('','warn',"Cannot add MenuContent to an empty page");
+return 1;
+}
+
+if ($crimp->{DisplayHtml} =~ m/(endMenuContent)/){
+&printdebug('','',"Adding MenuContent");
+	$menuhtml = join("\n",'<br />',$MenuContent,'<!--endMenuContent-->');	
+	$crimp->{DisplayHtml} =~ s|<!--endMenuContent-->|$menuhtml\1|i;
+	
+	}else{
+&printdebug('','',"Creating MenuContent");
+	$menuhtml = join("\n","\n",
+		'<div id="crimpMenuContent">',
+		$MenuContent,
+		'<!--endMenuContent-->',
+		"</div>\n");	
+	$crimp->{DisplayHtml} =~ s/<body>/<body>$menuhtml/i;
+		}
+return 1;
 }
 ####################################################################
 sub executePlugin() {
