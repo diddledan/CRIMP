@@ -5,8 +5,8 @@
 # Project Leads:  Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
-my $Version = '0.1'; 
-my $ID = q$Id: index.pl,v 1.57 2006-02-02 17:06:22 diddledan Exp $;
+my $Version = '<!--build-date-->'; 
+my $ID = q$Id: index.pl,v 1.58 2006-02-02 23:09:35 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 
