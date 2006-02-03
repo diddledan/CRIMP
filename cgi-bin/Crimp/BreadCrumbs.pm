@@ -1,4 +1,4 @@
-$ID = q$Id: BreadCrumbs.pm,v 1.10 2006-01-18 17:19:34 deadpan110 Exp $;
+$ID = q$Id: BreadCrumbs.pm,v 1.11 2006-02-03 11:16:47 deadpan110 Exp $;
 &printdebug('Module BreadCrumbs',
 			'',
 			'Authors: The CRIMP Team',
@@ -27,7 +27,7 @@ foreach $HttpRequest (@HttpRequest){
 if (($crimp->{BreadCrumbs} eq "top") || ($crimp->{BreadCrumbs} eq "bottom") || ($crimp->{BreadCrumbs} eq "both")){
 
 	if (($crimp->{BreadCrumbs} eq "top") || ($crimp->{BreadCrumbs} eq "both")){
-	$newhtml = "<b>Location: $BreadCrumbs</b><br/>";
+	$newhtml = "<div id='crimpBreadCrumbs'><b>Location: $BreadCrumbs</b><br/></div>";
 	$crimp->{DisplayHtml} =~ s/<body>/<body>$newhtml/i;
 		#$crimp->{DisplayHtml}="<b>Location: $BreadCrumbs</b><br/>$crimp->{DisplayHtml}";
 		&printdebug("","pass","BreadCrumbs inserted at the top of the page");
@@ -35,7 +35,7 @@ if (($crimp->{BreadCrumbs} eq "top") || ($crimp->{BreadCrumbs} eq "bottom") || (
 
 	if (($crimp->{BreadCrumbs} eq "bottom") || ($crimp->{BreadCrumbs} eq "both")){
 		
-		$newhtml = "<br/><b>Location: $BreadCrumbs</b>";
+		$newhtml = "<div id='crimpBreadCrumbsbottom'><br/><b>Location: $BreadCrumbs</b></div>";
 		$crimp->{DisplayHtml} =~ s|(</body>)|$newhtml\1|i;;
 		#$crimp->{DisplayHtml}="$crimp->{DisplayHtml}<br/><b>Location: $BreadCrumbs</b>";
 		&printdebug("","pass","BreadCrumbs inserted at the bottom of the page");
