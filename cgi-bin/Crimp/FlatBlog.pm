@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.14 2006-02-02 15:49:33 deadpan110 Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.15 2006-02-04 21:04:54 deadpan110 Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -149,6 +149,10 @@ if (@display_content) {
 		# as the author intended. (Fremen)
 		
 		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+
+		$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
+		$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
+
 		$crimp->{DisplayHtml} =~ s|(</title>)|$BlogTitle - $EntryTitle\1|i;
 		my $newurl = join '/', $crimp->{UserConfig}, uri_escape($EntryTitle);
 		$crimp->{DisplayHtml} =~ s|(</body>)|<h1>$EntryTitle<br/></h1>\n$EntryContent\1|i;
