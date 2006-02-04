@@ -1,4 +1,4 @@
-$ID = q$Id: ContentDatabase.pm,v 1.10 2006-02-04 21:11:05 diddledan Exp $;
+$ID = q$Id: ContentDatabase.pm,v 1.11 2006-02-04 21:29:25 diddledan Exp $;
 &printdebug('Module ContentDatabase',
 			'',
 			'Authors: The CRIMP Team',
@@ -54,35 +54,39 @@ eval {$sth->execute();};
 if (!$@) {
   if ($sth->rows) {
     $ref = $sth->fetchrow_hashref();
-  	 my $content = '';
+    my $content = '';
     if (substr($ref->{'content'}, 0, 5) eq '#PERL') {
-   	#evaluate the code from the database
-    	eval $ref->{'content'};
-   	if (!$@) {
-   	  if ($content ne '') {
-   	    &printdebug('', 'pass', 'Successfully parsed the content from the database.');
-   	  } else {
-   	    $content = 'Nothing to display....';
-   	    &printdebug('', 'warn', 'The code from the database failed to return any content.');
-   	  }
-   	} else {
-   	  $content = 'ERROR evaluating page content';
-   	  &printdebug('', 'warn', 'Errors running the script from the database for this page:', $@);
-   	}
+      #evaluate the code from the database
+      eval $ref->{'content'};
+      if (!$@) {
+        if ($content ne '') {
+          &printdebug('', 'pass', 'Successfully parsed the content from the database.');
+        } else {
+          $content = $crimp->{DefaultHtml};
+          $content =~ s/(<body>)/\1Nothing to display..../i;
+          &printdebug('', 'warn', 'The code from the database failed to return any content.');
+        }
+      } else {
+        $content = $crimp->{DefaultHtml};
+        $content =~ s/(<body>)/\1ERROR evaluating page content/i;
+        &printdebug('', 'warn', 'Errors running the script from the database for this page:', $@);
+      }
     } else {
-    	$content = $ref->{'content'};
-    	&printdebug('', 'pass', 'Content retreived from database and sent to the templating engine.'); 
+      $content = $ref->{'content'};
+      &printdebug('', 'pass', 'Content retreived from database and sent to the templating engine.'); 
     }
     $crimp->{ExitCode} = '200';
     $crimp->{PageTitle} = $ref->{'title'};
     $crimp->{DisplayHtml} = $content;
   } else {
-    $crimp->{DisplayHtml} = 'Error 404, not found.';
+    $crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+    $crimp->{DisplayHtml} =~ s/(<body>)/\1Error 404, not found./i;
     $crimp->{ExitCode} = '404';
     &printdebug('', 'warn', 'The database returned no results, hence we are at a 404 state.');
   }
 } else {
-  $crimp->{DisplayHtml} = '<span style="color: #f00;">Database Error</span>';
+  $crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+  $crimp->{DisplayHtml} =~ s/(<body>)/\1<span style="color: #f00;">Database Error<\/span>/i;
   &printdebug('', 'warn', 'Could not query the content for this page:', $@);
 }
 
