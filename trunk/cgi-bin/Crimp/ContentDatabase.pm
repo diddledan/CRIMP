@@ -1,4 +1,4 @@
-$ID = q$Id: ContentDatabase.pm,v 1.8 2005-11-20 23:38:33 diddledan Exp $;
+$ID = q$Id: ContentDatabase.pm,v 1.9 2006-02-04 21:06:37 deadpan110 Exp $;
 &printdebug('Module ContentDatabase',
 			'',
 			'Authors: The CRIMP Team',
@@ -76,6 +76,11 @@ if (!$@) {
     $crimp->{ExitCode} = '200';
     $crimp->{PageTitle} = $ref->{'title'};
     $crimp->{DisplayHtml} = $content;
+    
+    	$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
+		$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
+
+    
   } else {
     $crimp->{DisplayHtml} = 'Error 404, not found.';
     $crimp->{ExitCode} = '404';
