@@ -1,4 +1,4 @@
-$ID = q$Id: ContentDirectory.pm,v 1.16 2006-02-03 11:16:11 deadpan110 Exp $;
+$ID = q$Id: ContentDirectory.pm,v 1.17 2006-02-04 20:51:20 deadpan110 Exp $;
 &printdebug('Module ContentDirectory',
 			'',
 			'Authors: The CRIMP Team',
@@ -52,8 +52,8 @@ if (( -e $requested ) && ( !-d $requested )) {
 			
 $crimp->{DisplayHtml} = $new_content;
 
-$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\ncrimpPageContent/i;
-$crimp->{DisplayHtml} =~ s|(</body>)|</div>\ncrimpPageContent\1|i;;
+$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
+$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
 			
 			####
 if	($crimp->{ExitCode} ne '404'){$crimp->{ExitCode} = '200';}
