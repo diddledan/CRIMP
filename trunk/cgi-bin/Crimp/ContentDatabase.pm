@@ -1,4 +1,4 @@
-$ID = q$Id: ContentDatabase.pm,v 1.9 2006-02-04 21:06:37 deadpan110 Exp $;
+$ID = q$Id: ContentDatabase.pm,v 1.10 2006-02-04 21:11:05 diddledan Exp $;
 &printdebug('Module ContentDatabase',
 			'',
 			'Authors: The CRIMP Team',
@@ -76,11 +76,6 @@ if (!$@) {
     $crimp->{ExitCode} = '200';
     $crimp->{PageTitle} = $ref->{'title'};
     $crimp->{DisplayHtml} = $content;
-    
-    	$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
-		$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
-
-    
   } else {
     $crimp->{DisplayHtml} = 'Error 404, not found.';
     $crimp->{ExitCode} = '404';
@@ -90,5 +85,9 @@ if (!$@) {
   $crimp->{DisplayHtml} = '<span style="color: #f00;">Database Error</span>';
   &printdebug('', 'warn', 'Could not query the content for this page:', $@);
 }
+
+#moved down here so that errors are contained within the div, also.
+$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
+$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;
 
 1;
