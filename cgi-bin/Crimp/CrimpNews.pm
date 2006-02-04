@@ -1,4 +1,4 @@
-$ID = q$Id: CrimpNews.pm,v 1.2 2006-02-02 15:49:33 deadpan110 Exp $;
+$ID = q$Id: CrimpNews.pm,v 1.3 2006-02-04 20:56:25 deadpan110 Exp $;
 &printdebug('Module CrimpNews',
 			'',
 			'Authors: The CRIMP Team',
@@ -37,6 +37,10 @@ $CrimpNews = join('','<h1>Latest CRIMP News</h1>','<p>The latest news updated da
 $crimp->{DisplayHtml} = $crimp->{DefaultHtml};
 $crimp->{DisplayHtml} =~ s/<title>/<title>Latest CRIMP News/i;
 $crimp->{DisplayHtml} =~ s/<body>/<body>$CrimpNews/i;
+
+$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
+$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
+
 
 
 
