@@ -1,4 +1,4 @@
-$ID = q$Id: VirtualRedirect.pm,v 1.19 2006-02-02 15:49:33 deadpan110 Exp $;
+$ID = q$Id: VirtualRedirect.pm,v 1.20 2006-02-04 21:44:23 deadpan110 Exp $;
 &printdebug('Module VirtualRedirect',
 			'',
 			'Authors: The CRIMP Team',
@@ -53,15 +53,24 @@ if ($res->is_success) {
 	
 	&printdebug('','pass',"Started With: $crimp->{VirtualRedirect}",'Fetching the following content:',$urltoget);
 	
-	$crimp->{DisplayHtml} = $res->content;
+	my $CrimpContent = $res->content;
 	#get the page title
-	$crimp->{DisplayHtml} =~ s!<title>(.*?)</title>!!is;
+	$CrimpContent =~ s!<title>(.*?)</title>!!is;
 	$crimp->{PageTitle} = $1;
 	#remove the headers
-	$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||is;
-	$crimp->{DisplayHtml} =~ s!<html>.*?<body>!!is;
+	$CrimpContent =~ s|<!DOCTYPE.*?>||is;
+	$CrimpContent =~ s!<html.*?>.*?<body.*?>!!is;
 	#remove the footer
-	$crimp->{DisplayHtml} =~ s!</body>.*!!is;
+	$CrimpContent =~ s!</body>.*!!is;
+	
+$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
+$crimp->{DisplayHtml} =~ s/<title>/<title>$crimp->{PageTitle}/i;
+$crimp->{DisplayHtml} =~ s/<body>/<body>$CrimpContent/i;
+
+$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
+$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
+
+
 	
 	#################################
 	# BEGIN LINK / IMAGE CORRECTION #
@@ -155,7 +164,11 @@ if ($res->is_success) {
 } else {
   # the LWP::UserAgent couldn't get the document - let's tell the user why
 	&printdebug('', 'warn', "Could not get '$urltoget':", "Error: $error");
+
+
   $crimp->{DisplayHtml} = &PageRead(join('/',$crimp->{ErrorDirectory},$crimp->{DefaultLang},'404-VirtualRedirect.html'));
+
+
   $crimp->{ExitCode} = '404';
   return 1;
 
