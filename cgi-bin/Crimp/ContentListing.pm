@@ -1,4 +1,4 @@
-$ID = q$Id: ContentListing.pm,v 1.7 2006-02-02 15:49:33 deadpan110 Exp $;
+$ID = q$Id: ContentListing.pm,v 1.8 2006-02-04 20:48:40 deadpan110 Exp $;
 &printdebug('Module ContentListing',
 				'',
 				'Authors: The CRIMP Team',
@@ -89,8 +89,8 @@ if (( -d $FileDir )){
 				$DirCount ++;
 				$newurl = join '/', $BaseUrl, $DirChk;
 				$newurl =~ s!/{2,}!/!g;
-				if ($DirCount == 1) {
-					$DirList="$DirList<tr><td><img src='/icons/small/dir.gif' alt='[DIR]'/></td><td><a href='$newurl'>$DirChk</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+				if ($DirCount gt 0) {
+					$DirList="$DirList<tr><td><img src='/icons/small/dir.gif' alt='[DIR]'/></td><td><font size='-1'><a href='$newurl'>$DirChk</a></font></td><td>&nbsp;</td><td>&nbsp;</td></tr>\n";
 				}
 			} else {
 				$FileCount ++;
@@ -154,7 +154,7 @@ $FileType = "<img src='/icons/small/unknown.gif' alt='[Unknown]'/>";
 }
 
 
-$FileList="$FileList<tr><td>$FileType</td><td><font size='-1'><a href='$newurl'>$DirChk</a></font></td><td style='text-align: right;'><font size='-1'>$FileDate</font></td><td style='text-align: right;'><font size='-1'>$FileSize Kb</font></td></tr>";
+$FileList="$FileList<tr><td>$FileType</td><td><font size='-1'><a href='$newurl'>$DirChk</a></font></td><td style='text-align: right;'><font size='-1'>$FileDate</font></td><td style='text-align: right;'><font size='-1'>$FileSize Kb</font></td></tr>\n";
 								
 			}
 		}
@@ -176,7 +176,7 @@ $FileList="$FileList<tr><td>$FileType</td><td><font size='-1'><a href='$newurl'>
   <title>Index of $BaseUrl</title>
 </head>
 <body>
-
+<div id="crimpPageContent">
 <h1>Index of $BaseUrl</h1>
 
 <table style='width: 90%; margin-left: auto; margin-right: auto'
@@ -191,10 +191,10 @@ $FileList="$FileList<tr><td>$FileType</td><td><font size='-1'><a href='$newurl'>
 	
 ENDEOF
 	
-		if ($DirCount ne 0) { $newhtml = join '',$newhtml,"$DirList"; }
-		if ($FileCount ne 0) { $newhtml = join '', $newhtml, "$FileList"; }
+		if ($DirCount ne 0) { $newhtml = join '',$newhtml,"$DirList\n"; }
+		if ($FileCount ne 0) { $newhtml = join '', $newhtml, "$FileList\n"; }
 		$newhtml = join '', $newhtml, "</tbody></table><br />Number of files served : $FileServed<br /><br />";
-		$crimp->{DisplayHtml} = join '', $newhtml, $crimp->{DisplayHtml},"</body></html>";
+		$crimp->{DisplayHtml} = join "\n", $newhtml, $crimp->{DisplayHtml},"</div>\n</body>\n</html>";
 		
 		
 		
