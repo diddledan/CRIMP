@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.60 2006-02-05 02:50:23 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.61 2006-02-05 19:36:41 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
@@ -577,7 +577,9 @@ sub FileRead {
 	my $string=shift;
 	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
 
-	&printdebug('','',"FileRead: $filename");
+	&printdebug('','',"FileRead: $filename",
+								"Entry: $entry",
+								"String: $string");
 
 	if ( -f $fileopen ) {
 		sysopen (FILE,$fileopen,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
@@ -587,7 +589,8 @@ sub FileRead {
 		if (@FileRead) {
 			foreach $FileRead(@FileRead) {
 				chop($FileRead) if $FileRead =~ /\n$/;
-				($FileEntry,$FileString) = split('||',$FileRead);
+				($FileEntry,$FileString) = split(/\|\|/,$FileRead);				
+#				($FileEntry,$FileString) = split('||',$FileRead);
 				if ($FileEntry eq $entry) { return($FileString); }
 			}
 		}
@@ -602,7 +605,12 @@ sub FileWrite {
 	my $filelock = join '/',$crimp->{VarDirectory},'lock',$filename;
 	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
 	
-	&printdebug('','',"FileWrite: $filename");
+#	&printdebug('','',"FileWrite: $filename");
+	
+	&printdebug('','',"FileRead: $filename",
+								"Entry: $entry",
+								"String: $string");
+
 	
 	sysopen(LOCKED,$filelock, O_WRONLY | O_EXCL | O_CREAT) or &RetryWait($filename,$entry,$string);
 	if ( -f $fileopen ) {
@@ -611,24 +619,30 @@ sub FileWrite {
 		close(FILE);
 		
 		if (@FileRead) {
+		my $flag=0;
 			foreach $FileRead(@FileRead) {
+			&printdebug('','',"FileRead: $FileRead");
 				chop($FileRead) if $FileRead =~ /\n$/;
-				($FileEntry,$FileString) = split('||',$FileRead);
+				($FileEntry,$FileString) = split(/\|\|/,$FileRead);
+#				($FileEntry,$FileString) = split('||',$FileRead);
 				
 				if ($FileEntry eq $entry) {
 					print LOCKED "$entry||$string\n";
+					$flag=1;
 				} else {
 					print LOCKED "$FileEntry||$FileString\n";
 				}
 			}
+		if($flag eq 0){print LOCKED "$entry||$string\n";}
+		
 		}
 	} else {
 		print LOCKED "$entry||$string\n";
 	}
 	
 	close(LOCKED);
-	$file1=join '/', $SYSROOT_SYSTEM, 'system_keys.bak';
-	$file2=join '/', $SYSROOT_SYSTEM, 'system_keys.txt';
+#	$file1=join '/', $SYSROOT_SYSTEM, 'system_keys.bak';
+#	$file2=join '/', $SYSROOT_SYSTEM, 'system_keys.txt';
 	rename($filelock, $fileopen) or die 'cant rename';
 	
 	return($string);
