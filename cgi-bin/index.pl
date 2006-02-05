@@ -6,10 +6,10 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.59 2006-02-04 22:02:19 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.60 2006-02-05 02:50:23 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
-if ($Version = '<!--build-date-->'){
+if ($Version eq '<!--build-date-->'){
 $Version =~ s|<!--build-date-->|CVS\1|i;}
 
 ##################################################################################
