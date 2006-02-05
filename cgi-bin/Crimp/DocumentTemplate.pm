@@ -1,4 +1,4 @@
-$ID = q$Id: DocumentTemplate.pm,v 1.14 2006-01-18 16:26:12 diddledan Exp $;
+$ID = q$Id: DocumentTemplate.pm,v 1.15 2006-02-05 01:25:39 deadpan110 Exp $;
 &printdebug('Module DocumentTemplate',
 			'',
 			'Authors: The CRIMP Team',
@@ -21,6 +21,7 @@ my $blankTemplate = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//
 if (($crimp->{ContentType} eq 'text/html') || ($crimp->{ContentType} eq 'text/xhtml+xml')) {
 	# This should also be set within the query string '?DocumentTemplate=[none|off]'
 	if (($crimp->{DocumentTemplate} eq 'none') || ($crimp->{DocumentTemplate} eq 'off')) {
+		#this should not be needed and will eventually be replaced with return 1;
 		&printdebug('','pass','A blank template is being used');
 		&insertContent($blankTemplate);
 	} else {
