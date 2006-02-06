@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.62 2006-02-06 00:02:08 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.63 2006-02-06 17:08:12 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
@@ -577,9 +577,7 @@ sub FileRead {
 	my $string=shift;
 	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
 
-	&printdebug('','',"FileRead: $filename",
-								"Entry: $entry",
-								"String: $string");
+	&printdebug('','',"FileRead: [$filename] $entry");
 
 	if ( -f $fileopen ) {
 		sysopen (FILE,$fileopen,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
@@ -607,9 +605,7 @@ sub FileWrite {
 	
 #	&printdebug('','',"FileWrite: $filename");
 	
-	&printdebug('','',"FileRead: $filename",
-								"Entry: $entry",
-								"String: $string");
+	&printdebug('','',"FileWrite: [$filename] $entry");#Keep on one line
 
 	
 	sysopen(LOCKED,$filelock, O_WRONLY | O_EXCL | O_CREAT) or &RetryWait($filename,$entry,$string);
@@ -621,7 +617,7 @@ sub FileWrite {
 		if (@FileRead) {
 		my $flag=0;
 			foreach $FileRead(@FileRead) {
-			&printdebug('','',"FileRead: $FileRead");
+#			&printdebug('','',"FileRead: $FileRead");
 				chop($FileRead) if $FileRead =~ /\n$/;
 				($FileEntry,$FileString) = split(/\|\|/,$FileRead);
 #				($FileEntry,$FileString) = split('||',$FileRead);
