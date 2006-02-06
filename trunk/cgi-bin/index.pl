@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.61 2006-02-05 19:36:41 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.62 2006-02-06 00:02:08 diddledan Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
@@ -61,12 +61,12 @@ our $PRINT_HEAD;
 #Produce apache style logs
 
 
-use CGI;
+use CGI qw(:standard);
 use CGI::Carp qw/ fatalsToBrowser /;
 use Config::Tiny;
 use Fcntl;
 
-my $query = new CGI;
+#my $query = new CGI;
 
 #print $query->header('text/html','200');
 
@@ -250,7 +250,7 @@ if (!$Config) {
 
 #switch to debug mode if set in crimp.ini
 if ($crimp->{DebugMode} ne 'on'){
-    if (($query->param('debug') eq 'on') && ($Config->{_}->{DebugMode} eq 'page')) {
+    if ((param('debug') eq 'on') && ($Config->{_}->{DebugMode} eq 'page')) {
         $crimp->{DebugMode} = 'on';
     } else {
         $crimp->{DebugMode}=$Config->{_}->{DebugMode};
@@ -419,7 +419,7 @@ if ($crimp->{ContentType} eq ''){
 
 #This is where we finish the document or file
 #$crimp->{ExitCode} = '200';
-print $query->header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
+print header($crimp->{ContentType},$crimp->{ExitCode},\@cookies);
 
 #if ($crimp->{PageTitle} ne ""){
 #$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
@@ -526,7 +526,7 @@ sub printdebug() {
 	
 if ($exit) {
 #Call Multi lang 500 - Server Error Page
-	print $query->header('text/html', 500);
+	print header('text/html', 500);
 	$FAIL_DEBUG = join '','<a name="crimpDebug" id="crimpDebug"></a>','<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#000000">', $PRINT_DEBUG, "</table>\n";
 	$crimp->{DisplayHtml} = &PageRead("Crimp/errors/500.html");
 	$crimp->{DisplayHtml} =~ s|(</body>)|$FAIL_DEBUG\1|i;
