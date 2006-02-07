@@ -1,4 +1,4 @@
-$ID = q$Id: SiteMenu.pm,v 1.5 2006-02-02 15:49:33 deadpan110 Exp $;
+$ID = q$Id: SiteMenu.pm,v 1.6 2006-02-07 19:11:07 deadpan110 Exp $;
 &printdebug('Module SiteMenu',
 	'',
 	'Authors: The CRIMP Team',
@@ -11,6 +11,7 @@ $ID = q$Id: SiteMenu.pm,v 1.5 2006-02-02 15:49:33 deadpan110 Exp $;
 my $where = $crimp->{SiteMenu};
 if (sysopen(FILE,join('/',$crimp->{VarDirectory},$where),O_RDONLY)) {
 	my @file = <FILE>;
+	close(FILE);
 	&addMenuContent("@file");
 #	my $newMenu = '';
 
