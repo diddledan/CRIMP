@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.16 2006-02-08 16:51:16 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.17 2006-02-08 16:59:14 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -145,7 +145,7 @@ if (@display_content) {
 			$redirectUrl =~ s/(\?.*)//;
 			$redirectUrl = join '/',$redirectUrl,$EntryTitle,$1;
 			$redirectUrl =~ s|/{2,}|/|g;
-			print redirect($redirectUrl};
+			print redirect($redirectUrl);
 			exit;
 		}
 		#I amended the above to use the title specified
