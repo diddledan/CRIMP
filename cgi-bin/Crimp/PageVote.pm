@@ -1,4 +1,4 @@
-$ID = q$Id: PageVote.pm,v 1.1 2006-02-07 19:09:34 deadpan110 Exp $;
+$ID = q$Id: PageVote.pm,v 1.2 2006-02-08 15:39:00 diddledan Exp $;
 &printdebug('Module PageVote',
 			'',
 			'Authors: The CRIMP Team',
@@ -21,18 +21,17 @@ my $TotalRating = 0;
 
 my $message = 0;
 
-my $query = new CGI;
-	if ($query->param('PageVote')){
-	if (($query->param('PageVote') eq 'yes')
-		||($query->param('PageVote') eq 'good')
-		||($query->param('PageVote') eq 'ok')){
+if (param('PageVote')){
+	if ((param('PageVote') eq 'yes')
+		||(param('PageVote') eq 'good')
+		||(param('PageVote') eq 'ok')){
 				$message = 1;
 	&PageVote('Yes');
 }
 
-elsif (($query->param('PageVote') eq 'no')
-		||($query->param('PageVote') eq 'poor')
-		||($query->param('PageVote') eq 'bad')) {
+elsif ((param('PageVote') eq 'no')
+		||(param('PageVote') eq 'poor')
+		||(param('PageVote') eq 'bad')) {
 				$message = 2;
 	&PageVote('No');
 }
@@ -105,7 +104,7 @@ $PageVote = join ('',@PageVote);
 # All these tags need clearing before sending them into the page or menu
 
 if($message eq 1){
-	if ($PageVote =~ m/(<!--YesVote:)/){
+	if ($PageVote =~ m/<!--YesVote:/){
 		$PageVote =~ s!<\!--YesVote:(.*?)-->!!is;
 		$message = $1;
 		}else{
@@ -115,7 +114,7 @@ if($message eq 1){
 }
 
 elsif($message eq 2){
-	if ($PageVote =~ m/(<!--NoVote:)/){
+	if ($PageVote =~ m/<!--NoVote:/){
 		$PageVote =~ s!<\!--NoVote:(.*?)-->!!is;
 		$message = $1;
 		}else{
@@ -125,7 +124,7 @@ elsif($message eq 2){
 }
 
 elsif($message eq 3){
-	if ($PageVote =~ m/(<!--VoidVote:)/){
+	if ($PageVote =~ m/<!--VoidVote:/){
 		$PageVote =~ s!<\!--VoidVote:(.*?)-->!!is;
 		$message = $1;
 		}else{
@@ -135,7 +134,7 @@ elsif($message eq 3){
 }
 
 elsif($message eq 4){
-	if ($PageVote =~ m/(<!--ReVote:)/){
+	if ($PageVote =~ m/<!--ReVote:/){
 		$PageVote =~ s!<\!--ReVote:(.*?)-->!!is;
 		$message = $1;
 		}else{
@@ -145,7 +144,7 @@ elsif($message eq 4){
 }	
 
 elsif($message eq 5){
-	if ($PageVote =~ m/(<!--InvalidVote:)/){
+	if ($PageVote =~ m/<!--InvalidVote:/){
 		$PageVote =~ s!<\!--InvalidVote:(.*?)-->!!is;
 		$message = $1;
 		}else{
@@ -173,7 +172,7 @@ $PageVote =~ s/<!--SubmitMessage-->/$message/gi;
 ## Decide if we are adding to the page or the menu ##
 ####################################################
 
-if($PageVote =~ m/(<!--MenuContent)/){
+if($PageVote =~ m/<!--MenuContent/){
 &printdebug('','pass',"Using '$crimp->{PageVote}' PageVote Template in Menu");
 &addMenuContent($PageVote);
 
