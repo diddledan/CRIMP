@@ -6,11 +6,11 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.63 2006-02-06 17:08:12 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.64 2006-02-08 18:14:40 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
-$Version =~ s|<!--build-date-->|CVS\1|i;}
+$Version =~ s|<!--build-date-->|CVS $version\1|i;}
 
 ##################################################################################
 # This library is free software; you can redistribute it and/or                  #
@@ -436,6 +436,10 @@ if ($crimp->{DebugMode} eq 'on'){
 $crimp->{DisplayHtml} =~ s|(<body>)|\1$crimp->{MenuDiv}|i;
 
 $crimp->{DisplayHtml} =~ s|(</head>)|\n$PRINT_HEAD\1|i;
+
+$crimp->{DisplayHtml} =~ s/<!--VERSION-->/$Version/gi;
+
+
 print $crimp->{DisplayHtml};
 
 ####################################################################
