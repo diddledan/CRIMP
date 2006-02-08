@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.17 2006-02-08 16:59:14 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.18 2006-02-08 17:07:08 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -164,7 +164,7 @@ if (@display_content) {
 
 		#show menu entries
 		push @{$crimp->{MenuList}}, '<b>Entries:</b>';
-		$offset = int($query->param('show'));
+		$offset = int(param('show'));
 		my $newoffset = $offset - $limit || 0;
 		if ($offset > 0) {
 			push @{$crimp->{MenuList}}, "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Prev]</b></a>";
