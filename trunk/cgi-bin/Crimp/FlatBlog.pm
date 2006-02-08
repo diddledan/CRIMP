@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.15 2006-02-04 21:04:54 deadpan110 Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.16 2006-02-08 16:51:16 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -94,7 +94,6 @@ if (@display_content) {
 	our $new_content = '';
 	#how many entries per page
 	my $limit = 5;
-	my $query = new CGI;
 	
 	####
 	foreach $display_content(@display_content) {
@@ -107,7 +106,7 @@ if (@display_content) {
 	$new_content = join '', $new_content, '<h1>';
 
 	my $offset = 0;
-	if ($query->param('show') eq 'all') {
+	if (param('show') eq 'all') {
 		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
 		$crimp->{DisplayHtml} =~ s|(</title>)|$BlogTitle - Showing ALL Entries\1|i;
 		while ($new_content =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
@@ -117,7 +116,7 @@ if (@display_content) {
 			$EntryUrl =~ s|/{2,}|/|g;
 			$crimp->{DisplayHtml} =~ s|(</body>)|<h1><a href="$EntryUrl">$EntryTitle</a></h1>\n$EntryText\n\1|i;
 		}
-	} elsif ($query->param('show') eq 'index') {
+	} elsif (param('show') eq 'index') {
 		$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
 		$crimp->{DisplayHtml} =~ s|(</title>)|$BlogTitle - INDEX\1|i;
 		$crimp->{DisplayHtml} =~ s|(<body>)|\1<h1>$BlogTitle Index</h1>|i;
@@ -139,9 +138,15 @@ if (@display_content) {
 		#if the requested document doesnt exist - get the first one
 		
 		if (!$EntryTitle && !$EntryContent) {
-			$new_content =~ m|<h1>(.*?)</h1>(.*?)<h1>|si;
+			# redirect the user to the correct URL
+			$new_content =~ m|<h1>(.*?)</h1>|si;
 			$EntryTitle = $1;
-			$EntryContent = $2;
+			my $redirectUrl = $crimp->{HttpRequest};
+			$redirectUrl =~ s/(\?.*)//;
+			$redirectUrl = join '/',$redirectUrl,$EntryTitle,$1;
+			$redirectUrl =~ s|/{2,}|/|g;
+			print redirect($redirectUrl};
+			exit;
 		}
 		#I amended the above to use the title specified
 		# in the blog file, not the one parsed from the
