@@ -1,4 +1,4 @@
-$ID = q$Id: FlatBlog.pm,v 1.18 2006-02-08 17:07:08 diddledan Exp $;
+$ID = q$Id: FlatBlog.pm,v 1.19 2006-02-08 17:12:17 diddledan Exp $;
 &printdebug('Module FlatBlog',
 			'',
 			'Authors: The CRIMP Team',
@@ -130,6 +130,7 @@ if (@display_content) {
 		#Decide what to show
 		my $BaseContent = $crimp->{HttpRequest};
 		$BaseContent =~ s/^$crimp->{UserConfig}\/*//;
+		$BaseContent = uri_unescape($BaseContent);
 		
 		#show the single entry
 		$new_content =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
@@ -143,7 +144,7 @@ if (@display_content) {
 			$EntryTitle = $1;
 			my $redirectUrl = $crimp->{HttpRequest};
 			$redirectUrl =~ s/(\?.*)//;
-			$redirectUrl = join '/',$redirectUrl,$EntryTitle,$1;
+			$redirectUrl = join '/',$redirectUrl,uri_escape($EntryTitle),$1;
 			$redirectUrl =~ s|/{2,}|/|g;
 			print redirect($redirectUrl);
 			exit;
