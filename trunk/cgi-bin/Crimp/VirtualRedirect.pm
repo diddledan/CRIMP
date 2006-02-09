@@ -1,4 +1,4 @@
-$ID = q$Id: VirtualRedirect.pm,v 1.20 2006-02-04 21:44:23 deadpan110 Exp $;
+$ID = q$Id: VirtualRedirect.pm,v 1.21 2006-02-09 00:01:32 diddledan Exp $;
 &printdebug('Module VirtualRedirect',
 			'',
 			'Authors: The CRIMP Team',
@@ -96,6 +96,7 @@ $crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
 	  while (my $token = $token_parser->get_tag('a')) {
 	    my $url = $token->[1]{'href'} || next;
 	    if (!($url =~ m|^.+?:(//)?|i)) { push(@link_urls, $url) unless ($seenlinks{$url}++); }
+			elsif ($url =~ m|$crimp->{VirtualRedirect}|i) { push(@link_urls, $url) unless ($seenlinks{$url}++); }
 	  }
 	  
 	  my $i = 0;
@@ -132,19 +133,26 @@ $crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
 	      
 	    } else {
 	      my $newlinkurl = '';
-	      if ($link_url =~ m|^/.+|) {
+				my $protocol = $crimp->{ServerProtocol};
+	      if ($link_url =~ m|^/.*|) {
 	        $crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?/)|;
 	        if ($crimp->{VirtualRedirect} eq $1) {
-	          $newlinkurl = join '', $crimp->{UserConfig}, $link_url;
+	          $newlinkurl = join '', $protocol, $crimp->{ServerName}, $crimp->{UserConfig}, $link_url;
 	        } else {
 	          $newlinkurl = join '', $crimp->{VirtualRedirect}, $path, $link_url;
 	        }
 	      } elsif (!($link_url =~ m|^.+?:(//)?|)) {
 	          $newlinkurl = join '', $crimp->{VirtualRedirect}, $path, '/', $link_url;
-	      } else { $newlinkurl = $link_url; }
-	      $newlinkurl =~ s!^((((f|ht){1}tp[s]?)|(irc)?)://)!!i;
+	      } else {
+					$newlinkurl = $link_url;
+					$newlinkurl =~ s|$crimp->{VirtualRedirect}||i;
+					$newlinkurl = join '', $protocol, $crimp->{ServerName}, $crimp->{UserConfig}, $newlinkurl;
+				}
+				
+	      $newlinkurl =~ s!^((((f|(ht))tp[s]?)|(irc)?)://)!!i;
 	      my $newlinkproto = $1;
-	      $newlinkurl =~ s|/{2,}|/|g;
+	      $newlinkurl =~ s|/+|/|g;
+				$link_url =~ s|\?|\\\?|gi;
 	      $newlinkurl = join '', $newlinkproto, $newlinkurl;
 	      $crimp->{DisplayHtml} =~ s/$link_url/$newlinkurl/g;
 	    }

@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.64 2006-02-08 18:14:40 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.65 2006-02-09 00:01:33 diddledan Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
@@ -140,6 +140,7 @@ $crimp = {
 	RemoteHost => $ENV{'REMOTE_ADDR'},
 	ServerName =>  $ENV{'SERVER_NAME'},
 	ServerSoftware =>  $ENV{'SERVER_SOFTWARE'},
+	ServerProtocol => $ENV{'SERVER_PROTOCOL'},
 	UserAgent =>  $ENV{'HTTP_USER_AGENT'},
 	HttpRequest =>  $ENV{'REDIRECT_URL'},
 	HttpQuery =>  $ENV{'REDIRECT_QUERY_STRING'},
@@ -163,6 +164,7 @@ $crimp = {
 	MenuDiv => ''
 
 };
+$crimp->{ServerProtocol} =~ s|(http[s]?)/.*$|\1://|i;
 $crimp->{ErrorDirectory} = '../cgi-bin/Crimp/errors';
 $crimp->{DefaultLang} = 'eng';
 $crimp->{DefaultHtml} = <<ENDEOF;
