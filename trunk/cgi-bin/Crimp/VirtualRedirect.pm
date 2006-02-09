@@ -1,4 +1,4 @@
-$ID = q$Id: VirtualRedirect.pm,v 1.23 2006-02-09 19:20:31 diddledan Exp $;
+$ID = q$Id: VirtualRedirect.pm,v 1.24 2006-02-09 20:25:36 deadpan110 Exp $;
 &printdebug('Module VirtualRedirect',
 						'',
 						'Authors: The CRIMP Team',
@@ -104,7 +104,7 @@ if ($res->is_success) {
 		$baseurl =~ m|^(http[s]?://.+?)[/]?|i;
 		$baseurl = $1;
 		for $image_url (@image_urls) {
-			my $newurl
+			my $newurl='';
 			if ($image_url =~ m|^/.+|) { $newurl = $baseurl; }
 			else { $newurl = join '', $crimp->{VirtualRedirect}, $path, '/'; }
 			my $newimageurl = join '', $newurl, $image_url;
