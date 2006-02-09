@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.65 2006-02-09 00:01:33 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.66 2006-02-09 20:05:43 deadpan110 Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
@@ -439,27 +439,61 @@ $crimp->{DisplayHtml} =~ s|(<body>)|\1$crimp->{MenuDiv}|i;
 
 $crimp->{DisplayHtml} =~ s|(</head>)|\n$PRINT_HEAD\1|i;
 
+####################################################################
+## CRIMP Cheat codes ##
+######################
 $crimp->{DisplayHtml} =~ s/<!--VERSION-->/$Version/gi;
 
 
-print $crimp->{DisplayHtml};
-
 ####################################################################
 
+print $crimp->{DisplayHtml};
 
+exit 1;
 
 #foreach $item (keys %ENV) { print "$item = $ENV{$item}\n<br />";}
 
 ####################################################################
+####################################################################
+## BUILTIN SUBROUTINES ##
+########################
 
 ####################################################################
 sub addHeaderContent {
 	my $new_header = shift;
 	$PRINT_HEAD = join '',$PRINT_HEAD,$new_header,"\n";
+####################################################################
+# this is the future way of inserting content into DisplayHtml
+sub addPageContent {
+my $PageContent=shift(@_);
+my $PageLocation=shift(@_);#reserved for ($PageContent,'top/bottom')
+my $pagehtml = '';
+if (! $crimp->{DisplayHtml}){
+&printdebug('','warn',"Cannot add PageContent to an empty page");
+return 1;
+}
+
+if ($crimp->{DisplayHtml} =~ m/(endPageContent)/){
+&printdebug('','',"Adding PageContent");
+	$pagehtml = join("\n",'<br />',$PageContent,'<!--endPageContent-->');	
+	$crimp->{DisplayHtml} =~ s|<!--endPageContent-->|$pagehtml\1|i;
+	
+	}else{
+&printdebug('','',"Creating PageContent");
+	$pagehtml = join("\n","\n",
+		'<div id="crimpPageContent">',
+		$PageContent,
+		'<!--endPageContent-->',
+		"</div>\n");	
+	$crimp->{DisplayHtml} =~ s/<body>/<body>$menuhtml/i;
+		}
+return 1;
+}
 }
 ####################################################################
 sub addMenuContent {
 my $MenuContent=shift(@_);
+my $MenuLocation=shift(@_);#reserved for ($MenuContent,'top/bottom')
 my $menuhtml = '';
 if (! $crimp->{DisplayHtml}){
 &printdebug('','warn',"Cannot add MenuContent to an empty page");
