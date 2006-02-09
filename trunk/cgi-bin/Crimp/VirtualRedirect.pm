@@ -1,4 +1,4 @@
-$ID = q$Id: VirtualRedirect.pm,v 1.22 2006-02-09 19:09:42 diddledan Exp $;
+$ID = q$Id: VirtualRedirect.pm,v 1.23 2006-02-09 19:20:31 diddledan Exp $;
 &printdebug('Module VirtualRedirect',
 						'',
 						'Authors: The CRIMP Team',
@@ -100,14 +100,14 @@ if ($res->is_success) {
 		}
 
 		my $i = 0;
-		my $url = $crimp->{VirtualRedirect};
-		$url =~ m|(^http[s]?://.+?/)|i;
-		$url = $1;
+		my $baseurl = $crimp->{VirtualRedirect};
+		$baseurl =~ m|^(http[s]?://.+?)[/]?|i;
+		$baseurl = $1;
 		for $image_url (@image_urls) {
-			my $url2 = '';
-			if ($image_url =~ m|^/.+|) { $url2 = $url; }
-			else { $url2 = join '', $crimp->{VirtualRedirect}, $path, '/'; }
-			my $newimageurl = join '', $url2, $image_url;
+			my $newurl
+			if ($image_url =~ m|^/.+|) { $newurl = $baseurl; }
+			else { $newurl = join '', $crimp->{VirtualRedirect}, $path, '/'; }
+			my $newimageurl = join '', $newurl, $image_url;
 			$newimageurl =~ s|^(http[s]?://)||i;
 			my $newimageproto = $1;
 			$newimageurl =~ s|/{2,}|/|g;
@@ -120,7 +120,7 @@ if ($res->is_success) {
 		#if ($ENV{'SERVER_PORT'} eq '443') { $proto = 'https://'; }
 		#$url = join '', $proto, $crimp->{ServerName}, '/';
 		my $j = 0;
-		$crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?)|;
+		$crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?)[/]?|;
 		my $baseurl = $1;
 		for $link_url (@link_urls) {
 			my $newlinkurl = '';
