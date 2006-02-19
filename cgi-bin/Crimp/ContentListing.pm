@@ -1,4 +1,4 @@
-$ID = q$Id: ContentListing.pm,v 1.8 2006-02-04 20:48:40 deadpan110 Exp $;
+$ID = q$Id: ContentListing.pm,v 1.9 2006-02-19 19:30:21 diddledan Exp $;
 &printdebug('Module ContentListing',
 				'',
 				'Authors: The CRIMP Team',
@@ -164,7 +164,9 @@ $FileList="$FileList<tr><td>$FileType</td><td><font size='-1'><a href='$newurl'>
 	&printdebug('','pass',"Documents found: $FileCount");
 	
 	$BaseUrl =~ s!/{2,}!/!g;
-	$crimp->{PageTitle} = "$BaseUrl";
+	$BaseUrl =~ m!.*/(.*?)$!;
+	$dirname = $1;
+	$crimp->{PageTitle} = $BaseUrl;
 	
 		$newhtml = <<ENDEOF;
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -177,7 +179,7 @@ $FileList="$FileList<tr><td>$FileType</td><td><font size='-1'><a href='$newurl'>
 </head>
 <body>
 <div id="crimpPageContent">
-<h1>Index of $BaseUrl</h1>
+<h1>Index of $dirname</h1>
 
 <table style='width: 90%; margin-left: auto; margin-right: auto'
  border='0' cellpadding='1' cellspacing='1'>
