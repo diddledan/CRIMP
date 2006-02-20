@@ -1,4 +1,4 @@
-$ID = q$Id: FileList.pm,v 1.15 2006-02-02 15:49:33 deadpan110 Exp $;
+$ID = q$Id: FileList.pm,v 1.16 2006-02-20 18:00:42 deadpan110 Exp $;
 &printdebug('Module FileList',
 				'',
 				'Authors: The CRIMP Team',
@@ -68,15 +68,17 @@ if ($crimp->{ContentDirectory} ne '') {
 					$DirList="$DirList$DirLayout<a href='$newurl'>$DirChk</a>\n";
 				}
 			} else {
+				if ($DirChk =~ m/.html$/){
 				$FileCount ++;
 				$DirChk =~ s/(\.html){1}$//;
 				$newurl = join '/', $BaseUrl, $DirChk;
 				$newurl =~ s!/{2,}!/!g;
 				$newurl = join '', $newurl,'.html';
-				if ($FileCount == 1) {
-					$FileList="$FileList<a href='$newurl'>$DirChk</a>\n";
-				} else {
-					$FileList="$FileList$DirLayout<a href='$newurl'>$DirChk</a>\n";
+					if ($FileCount == 1) {
+						$FileList="$FileList<a href='$newurl'>$DirChk</a>\n";
+					} else {
+						$FileList="$FileList$DirLayout<a href='$newurl'>$DirChk</a>\n";
+					}
 				}
 			}
 		}
