@@ -1,4 +1,4 @@
-$ID = q$Id: CrimpNews.pm,v 1.3 2006-02-04 20:56:25 deadpan110 Exp $;
+$ID = q$Id: CrimpNews.pm,v 1.4 2006-02-26 13:53:31 deadpan110 Exp $;
 &printdebug('Module CrimpNews',
 			'',
 			'Authors: The CRIMP Team',
@@ -47,7 +47,7 @@ $crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
 sub NewsUpdate{
 &printdebug('','',"Fetching CrimpNews from http://sourceforge.net");
 
-my $urltoget = "http://sourceforge.net/export/projnews.php?group_id=118939&limit=5&show_summaries=1";
+my $urltoget = "http://sourceforge.net/export/projnews.php?group_id=118939&limit=5&show_summaries=1&flat=0";
 
 use LWP::UserAgent;
 $ua = LWP::UserAgent->new;
