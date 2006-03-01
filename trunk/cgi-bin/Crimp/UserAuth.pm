@@ -1,4 +1,5 @@
-$ID = q$Id: UserAuth.pm,v 1.3 2005-11-24 01:41:39 diddledan Exp $;
+$crimp->{DebugMode} = 'on';
+$ID = q$Id: UserAuth.pm,v 1.4 2006-03-01 22:59:26 diddledan Exp $;
 &printdebug('Module UserAuth','',
 				'Authors: The CRIMP Team',
 				"Version: $ID",
@@ -9,26 +10,24 @@ my $authMethod = 'passwd';
 
 &printdebug('','','Using plain text passwd backend');
 
-$query = new CGI;
-
 my ($username, $password, $cookie);
-if ($cookie = $query->cookie("$crimp->{UserConfig}:user/pass")) {
+if ($cookie = cookie("$crimp->{UserConfig}:authtok")) {
 	($username, $password) = split /:/, $cookie;
 }
-if (!$cookie || !$username || !$password) {
-	($username, $password) = ($query->param('username'), $query->param('password'));
-}
+$username ||= $crimp->{PostQuery}->{username};
+$password ||= $crimp->{PostQuery}->{password};
 
-if (!$query->param('postback') && !$cookie) {
+&printdebug('','',"UserName: $username","PassWord: $password");
+
+if (!$crimp->{PostQuery}->{postback} && !$cookie) {
 	&setupLoginForm();
 } elsif (!$username || !$password) {
-	&setupLoginForm('Username and Password must both be specified!');
+	&setupLoginForm('Username and Password must <em>both</em> be specified!');
 } elsif (&doFileAuth($username, $password)) {
 	&printdebug('','pass',"User '$username is authenticated to access this section");
-	push @cookies, $query->cookie(-name => "$crimp->{UserConfig}:user/pass",
-											-value => "$username:$password",
-											-path => $crimp->{UserConfig},
-											);
+	push @cookies, cookie(-name => "$crimp->{UserConfig}:authtok",
+                               -value => "$username:$password",
+                               -path => $crimp->{UserConfig});
 } else {
 	&setupLoginForm('Username and password do not match our database.');
 }
@@ -51,11 +50,10 @@ sub setupLoginForm {
 	$msg ||= 'You need to supply credentials for access to this area of the site.';
 	
 	# set exit code to 403 (forbidden)
-	$crimp->{PageTitle} = 'Access Denied';
 	$crimp->{ExitCode} = '403';
 	$crimp->{skipRemainingPlugins} = 1;
 	
-	$crimp->{DisplayHtml} = "
+	my $html = "
 <div style='text-align: center;'>
 	<br />
 	<h2>Error 403: Forbidden</h2>
@@ -71,6 +69,8 @@ sub setupLoginForm {
 	</form></p>
 </div>
 	";
+
+	&addPageContent($html);
 }
 
 1;

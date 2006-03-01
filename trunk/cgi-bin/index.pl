@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.67 2006-03-01 21:49:49 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.68 2006-03-01 22:59:23 diddledan Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
@@ -30,7 +30,6 @@ $Version =~ s|<!--build-date-->|CVS $version\1|i;}
 
 package Crimp;
 
-my @PostQuery = read (STDIN, $query, $ENV{'CONTENT_LENGTH'});
 our $PRINT_DEBUG;
 our $PRINT_HEAD;
 &printdebug('CRIMP [Content Redirection Internet Management Program] (Debug View)',
@@ -43,6 +42,7 @@ our $PRINT_HEAD;
 			"Internal Version: $ID",
 			'http://crimp.sourceforge.net/'
 			);
+
 #
 # default web settings are to use local files
 # with 404 error document in place
@@ -61,18 +61,29 @@ our $PRINT_HEAD;
 #Produce apache style logs
 
 
+################
+# POST QUERIES #
+read(STDIN, $PostQueryString, $ENV{'CONTENT_LENGTH'});
+my @TempArray = split '&', $PostQueryString;
+my %PostQuery;
+my $n = 0;
+foreach my $item (@TempArray) {
+	my ($name, $value) = split '=', $item;
+	$PostQuery{$name} = $value;
+	$n++;
+}
+&printdebug('POSTed Query Initialisation','',"Found $n parameters");
+
+
+################
+# Perl Modules #
 use CGI qw(:standard);
 use CGI::Carp qw/ fatalsToBrowser /;
 use Config::Tiny;
 use Fcntl;
 
-#my $query = new CGI;
 
-#print $query->header('text/html','200');
-
-#our &printdebug;
-#die;
-
+#print header('text/html','200');
 
 ########################
 # BEGIN plguin parsing #
@@ -104,27 +115,24 @@ if (@inicmds = grep !/ButtonBar/, @inicmds) {
 	push @inicmds, 'ButtonBar';
 }
 
-if ( ! @inicmds ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
+if ( ! @inicmds ) { &printdebug('Plugins', 'fail', 'There appear to be no plugins in the plugin directory.'); }
 else {
-# print Available plugins to debug (so many per line)
-my $inicount = 0;
-foreach $inicmds(@inicmds) {
-	if ($inicount == 0) {
-		$iniout = $inicmds;
-	} else {
-		if ($inicount % 7 == 0) {
-			$iniout = join('<br/>&nbsp;&nbsp;&nbsp;&nbsp;',$iniout,$inicmds);
+	# print Available plugins to debug (so many per line)
+	my $inicount = 0;
+	foreach $inicmds(@inicmds) {
+		if ($inicount == 0) {
+			$iniout = $inicmds;
 		} else {
-			$iniout = join(',',$iniout,$inicmds);
+			if ($inicount % 7 == 0) {
+				$iniout = join('<br/>&nbsp;&nbsp;&nbsp;&nbsp;',$iniout,$inicmds);
+			} else {
+				$iniout = join(',',$iniout,$inicmds);
+			}
 		}
+		$inicount++;
 	}
-	$inicount++;
+	&printdebug('Available Plugins', 'pass', $iniout);
 }
-&printdebug('Available Plugins', 'pass', $iniout);
-#Original output left here in case we need to put it back in
-#&printdebug('Available Plugins', 'pass', join(',', @inicmds));
-}
-
 # END plugin parsing #
 ######################
 
@@ -141,7 +149,7 @@ $crimp = {
 	UserAgent =>  $ENV{'HTTP_USER_AGENT'},
 	HttpRequest =>  $ENV{'REDIRECT_URL'},
 	HttpQuery =>  $ENV{'REDIRECT_QUERY_STRING'},
-	PostQuery => \@PostQuery,
+	PostQuery => \%PostQuery,
 	ContentType => 'text/html',
 	PageTitle => 'CRIMP',
 	ExitCode => '204',
@@ -187,20 +195,22 @@ if ($crimp->{HttpQuery}) { $crimp->{HttpQuery} = join '', '?', $crimp->{HttpQuer
 # this is a server beep (used for testing)
 # Turns local and remote IP's into a tune
 # gentoo users > emerge beep
+## put this into a sub so that it isn't run unless specifically called for (Fremen)
+sub beep {
+	$RemoteHost  = $ENV{'REMOTE_ADDR'};
+	$ServerHost  = $ENV{'SERVER_ADDR'};
+	($beep[4],$beep[3],$beep[2],$beep[1]) = split('.',$ServerHost);
+	($beep[5],$beep[6],$beep[7],$beep[8]) = split('.',$RemoteHost);
 
-$RemoteHost  = $ENV{'REMOTE_ADDR'};
-$ServerHost  = $ENV{'SERVER_ADDR'};
-($beep[4],$beep[3],$beep[2],$beep[1]) = split('.',$ServerHost);
-($beep[5],$beep[6],$beep[7],$beep[8]) = split('.',$RemoteHost);
-
-for ($i=1;$i<=8;$i++){
-$note =($beep[$i]+25)*10;
-$tune = "$tune -f $note -l 100 ";
-if ($i < 8){$tune = "$tune -n ";}
+	for ($i=1;$i<=8;$i++){
+		$note =($beep[$i]+25)*10;
+		$tune = "$tune -f $note -l 100 ";
+		if ($i < 8){$tune = "$tune -n ";}
+	}
+	return `beep $tune`;
 }
-
 # to activate, uncomment below
-# $BEEP = `beep $tune`;
+# $BEEP = &beep;
 ####################################################################
 
 &printdebug(
@@ -224,7 +234,7 @@ if ($i < 8){$tune = "$tune -n ";}
 ## ERROR CHECKING (fatals first) ##
 ##################################
 
-if (!-e "Config/Tiny.pm"){
+if (!-e 'Config/Tiny.pm'){
     $crimp = {DebugMode => 'on'};
 		&printdebug(
         'Crimp Files not found',
@@ -310,47 +320,47 @@ if ($crimp->{UserConfig} eq ''){
 
 
 # RobotsMeta
-if ($Config->{_}->{RobotsMeta} ne ''){
-		$crimp->{RobotsMeta}=$Config->{_}->{RobotsMeta};
-	}else{
-		if ($Config->{$crimp->{UserConfig}}->{RobotsMeta} ne ''){
+if ($Config->{_}->{RobotsMeta} ne '') {
+	$crimp->{RobotsMeta}=$Config->{_}->{RobotsMeta};
+} else {
+	if ($Config->{$crimp->{UserConfig}}->{RobotsMeta} ne '') {
 	   	$crimp->{RobotsMeta}=$Config->{$crimp->{UserConfig}}->{RobotsMeta};
-		}
+	}
 }
 
 # KeywordsMeta
-if ($Config->{_}->{KeywordsMeta} ne ''){
-		$crimp->{KeywordsMeta}=$Config->{_}->{KeywordsMeta};
-	}else{
-		if ($Config->{$crimp->{UserConfig}}->{KeywordsMeta} ne ''){
+if ($Config->{_}->{KeywordsMeta} ne '') {
+	$crimp->{KeywordsMeta}=$Config->{_}->{KeywordsMeta};
+} else {
+	if ($Config->{$crimp->{UserConfig}}->{KeywordsMeta} ne '') {
 	   	$crimp->{KeywordsMeta}=$Config->{$crimp->{UserConfig}}->{KeywordsMeta};
-		}
+	}
 }
 
 # DescriptionMeta
-if ($Config->{_}->{DescriptionMeta} ne ''){
-		$crimp->{DescriptionMeta}=$Config->{_}->{DescriptionMeta};
-	}else{
-		if ($Config->{$crimp->{UserConfig}}->{DescriptionMeta} ne ''){
+if ($Config->{_}->{DescriptionMeta} ne '') {
+	$crimp->{DescriptionMeta}=$Config->{_}->{DescriptionMeta};
+} else {
+	if ($Config->{$crimp->{UserConfig}}->{DescriptionMeta} ne '') {
 	   	$crimp->{DescriptionMeta}=$Config->{$crimp->{UserConfig}}->{DescriptionMeta};
-		}
+	}
 }
 
 # PageRead
-if ($Config->{_}->{PageRead} ne ''){
-		$crimp->{PageRead}=$Config->{_}->{PageRead};
-	}else{
-		if ($Config->{$crimp->{UserConfig}}->{PageRead} ne ''){
+if ($Config->{_}->{PageRead} ne '') {
+	$crimp->{PageRead}=$Config->{_}->{PageRead};
+} else {
+	if ($Config->{$crimp->{UserConfig}}->{PageRead} ne '') {
 	   	$crimp->{PageRead}=$Config->{$crimp->{UserConfig}}->{PageRead};
-		}
+	}
 }
 
 ####################################################################
 ## call the builtins in order ##
 ###############################
 
-if ($crimp->{PageRead} ne ''){
-$crimp->{DisplayHtml} = &PageRead($crimp->{PageRead});
+if ($crimp->{PageRead} ne '') {
+	$crimp->{DisplayHtml} = &PageRead($crimp->{PageRead});
 }
 
  
@@ -369,24 +379,15 @@ foreach my $IniCommand (split ',', $Config->{$crimp->{UserConfig}}->{PluginOrder
 foreach my $IniCommand (split ',', $Config->{_}->{PluginOrder}) {
 	&executePlugin($IniCommand) unless (($crimp->{skipRemainingPlugins}) || ($executedCommands{$IniCommand}++));
 }
-#foreach $IniCommand ($crimp->{IniCommands}) { # couldn't get this to work properly
 foreach my $IniCommand (@{$crimp->{IniCommands}}) {
 	&executePlugin($IniCommand) if (($IniCommand eq 'DocumentTemplate') || (!($crimp->{skipRemainingPlugins} || $executedCommands{$IniCommand}++)));
 }
 
 #add the extra CRIMP-specific HTML headers
-
 &addHeaderContent(join('','<meta name="generator" content="CRIMP ',$version,' Build ', $Version,'" />'));
-
 &addHeaderContent(join('','<meta name="robots" content="',$crimp->{RobotsMeta},'" />'));
-
-if ($crimp->{KeywordsMeta} ne ''){
-&addHeaderContent(join('','<meta name="keywords" content="',$crimp->{KeywordsMeta},'" />'));
-}
-if ($crimp->{DescriptionMeta} ne ''){
-&addHeaderContent(join('','<meta name="description" content="',$crimp->{DescriptionMeta},'" />'));
-}
-
+&addHeaderContent(join('','<meta name="keywords" content="',$crimp->{KeywordsMeta},'" />')) if ($crimp->{KeywordsMeta} ne '');
+&addHeaderContent(join('','<meta name="description" content="',$crimp->{DescriptionMeta},'" />')) if ($crimp->{DescriptionMeta} ne '');
 &addHeaderContent('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
 
 ####################################################################
@@ -431,9 +432,7 @@ if ($crimp->{DebugMode} eq 'on'){
 	$crimp->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;
 }
 
-
 $crimp->{DisplayHtml} =~ s|(<body>)|\1$crimp->{MenuDiv}|i;
-
 $crimp->{DisplayHtml} =~ s|(</head>)|\n$PRINT_HEAD\1|i;
 
 ####################################################################
@@ -459,52 +458,52 @@ exit 1;
 sub addHeaderContent {
 	my $new_header = shift;
 	$PRINT_HEAD = join '',$PRINT_HEAD,$new_header,"\n";
+}
 ####################################################################
 # this is the future way of inserting content into DisplayHtml
 sub addPageContent {
-my $PageContent=shift(@_);
-my $PageLocation=shift(@_);#reserved for ($PageContent,'top/bottom')
-my $pagehtml = '';
-if (! $crimp->{DisplayHtml}){
-&printdebug('','warn',"Cannot add PageContent to an empty page");
-return 1;
-}
+	my $PageContent = shift;
+	my $PageLocation = shift;#reserved for ($PageContent,'top/bottom')
+	my $pagehtml = '';
 
-if ($crimp->{DisplayHtml} =~ m/(endPageContent)/){
-&printdebug('','',"Adding PageContent");
-	$pagehtml = join("\n",'<br />',$PageContent,'<!--endPageContent-->');	
-	$crimp->{DisplayHtml} =~ s|<!--endPageContent-->|$pagehtml\1|i;
-	
-	}else{
-&printdebug('','',"Creating PageContent");
-	$pagehtml = join("\n","\n",
-		'<div id="crimpPageContent">',
-		$PageContent,
-		'<!--endPageContent-->',
-		"</div>\n");	
-	$crimp->{DisplayHtml} =~ s/<body>/<body>$menuhtml/i;
-		}
-return 1;
-}
+	$crimp->{DisplayHtml} = $crimp->{DefaultHtml} unless ($crimp->{DisplayHtml});
+
+	if (($PageLocation eq 'top') && ($crimp->{DisplayHtml} =~ m/<!--startPageContent-->/)) {
+		&printdebug('','','Adding PageContent (top)');
+		$crimp->{DisplayHtml} =~ s|(<!--startPageContent-->)|\1\n$PageContent\n\n|;
+	}
+	if ($crimp->{DisplayHtml} =~ m/(endPageContent)/) {
+		&printdebug('','',"Adding PageContent");
+		$pagehtml = join("\n",'<br />',$PageContent,'<!--endPageContent-->');
+		$crimp->{DisplayHtml} =~ s|(<!--endPageContent-->)|<br />\n$PageContent\n\1|;
+	} else {
+		&printdebug('','',"Creating PageContent");
+		$pagehtml = join("\n","\n",
+			'<div id="crimpPageContent">',
+			'<!--startPageContent-->',
+			$PageContent,
+			'<!--endPageContent-->',
+			"</div>\n");
+		$crimp->{DisplayHtml} =~ s/(<body>)/\1$pagehtml/i;
+	}
+	return 1;
 }
 ####################################################################
 sub addMenuContent {
 	my $MenuContent=shift(@_);
 	my $MenuLocation=shift(@_);#reserved for ($MenuContent,'top/bottom')
 	my $menuhtml = '';
-	if (! $crimp->{DisplayHtml}){
+	if (!$crimp->{DisplayHtml}){
 		&printdebug('','warn',"Cannot add MenuContent to an empty page");
 		return 1;
 	}
 
 	if (($MenuLocation eq 'top') && ($crimp->{DisplayHtml} =~ m/<!--startMenuContent-->/)) {
 		&printdebug('','','Adding MenuContent (top)');
-		$menuhtml = join "\n", '<!--startMenuContent-->', $MenuContent, '<br />';
-		$crimp->{DisplayHtml} =~ s|<!--startMenuContent-->|$menuhtml|;
-	} elsif ($crimp->{DisplayHtml} =~ m/(endMenuContent)/){
+		$crimp->{DisplayHtml} =~ s|(<!--startMenuContent-->)|\1\n$menuhtml\n<br />\n|;
+	} elsif ($crimp->{DisplayHtml} =~ m/(<!--endMenuContent-->)/){
 		&printdebug('','','Adding MenuContent (bottom)');
-		$menuhtml = join("\n",'<br />',$MenuContent,'<!--endMenuContent-->');	
-		$crimp->{DisplayHtml} =~ s|<!--endMenuContent-->|$menuhtml|;
+		$crimp->{DisplayHtml} =~ s|(<!--endMenuContent-->)|<br />\n$MenuContent\n\1|;
 	} else {
 		&printdebug('','',"Creating MenuContent");
 		$menuhtml = join("\n","\n",
