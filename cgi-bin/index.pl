@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.66 2006-02-09 20:05:43 deadpan110 Exp $;
+my $ID = q$Id: index.pl,v 1.67 2006-03-01 21:49:49 diddledan Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
@@ -107,22 +107,19 @@ if (@inicmds = grep !/ButtonBar/, @inicmds) {
 if ( ! @inicmds ) { &printdebug('Plugins', 'fail', 'There appears to be no plugins in the plugin directory.'); }
 else {
 # print Available plugins to debug (so many per line)
-# doesnt work exactly as planned... but splits them up
-my $inicount = 1;
-	foreach $inicmds(@inicmds){
-			if ($inicount eq 1){
-			$iniout = $inicmds;
-			}
-			else{			
-				if (($inicount / 7) eq (int($inicount / 7))){
-					$iniout = join('<br/>&nbsp;&nbsp;&nbsp;&nbsp;',$iniout,$inicmds);
-					}
-				else {
-					$iniout = join(',',$iniout,$inicmds);
-					}
-				}
-			$inicount ++;
+my $inicount = 0;
+foreach $inicmds(@inicmds) {
+	if ($inicount == 0) {
+		$iniout = $inicmds;
+	} else {
+		if ($inicount % 7 == 0) {
+			$iniout = join('<br/>&nbsp;&nbsp;&nbsp;&nbsp;',$iniout,$inicmds);
+		} else {
+			$iniout = join(',',$iniout,$inicmds);
+		}
 	}
+	$inicount++;
+}
 &printdebug('Available Plugins', 'pass', $iniout);
 #Original output left here in case we need to put it back in
 #&printdebug('Available Plugins', 'pass', join(',', @inicmds));
@@ -492,29 +489,33 @@ return 1;
 }
 ####################################################################
 sub addMenuContent {
-my $MenuContent=shift(@_);
-my $MenuLocation=shift(@_);#reserved for ($MenuContent,'top/bottom')
-my $menuhtml = '';
-if (! $crimp->{DisplayHtml}){
-&printdebug('','warn',"Cannot add MenuContent to an empty page");
-return 1;
-}
+	my $MenuContent=shift(@_);
+	my $MenuLocation=shift(@_);#reserved for ($MenuContent,'top/bottom')
+	my $menuhtml = '';
+	if (! $crimp->{DisplayHtml}){
+		&printdebug('','warn',"Cannot add MenuContent to an empty page");
+		return 1;
+	}
 
-if ($crimp->{DisplayHtml} =~ m/(endMenuContent)/){
-&printdebug('','',"Adding MenuContent");
-	$menuhtml = join("\n",'<br />',$MenuContent,'<!--endMenuContent-->');	
-	$crimp->{DisplayHtml} =~ s|<!--endMenuContent-->|$menuhtml\1|i;
-	
-	}else{
-&printdebug('','',"Creating MenuContent");
-	$menuhtml = join("\n","\n",
-		'<div id="crimpMenuContent">',
-		$MenuContent,
-		'<!--endMenuContent-->',
-		"</div>\n");	
-	$crimp->{DisplayHtml} =~ s/<body>/<body>$menuhtml/i;
-		}
-return 1;
+	if (($MenuLocation eq 'top') && ($crimp->{DisplayHtml} =~ m/<!--startMenuContent-->/)) {
+		&printdebug('','','Adding MenuContent (top)');
+		$menuhtml = join "\n", '<!--startMenuContent-->', $MenuContent, '<br />';
+		$crimp->{DisplayHtml} =~ s|<!--startMenuContent-->|$menuhtml|;
+	} elsif ($crimp->{DisplayHtml} =~ m/(endMenuContent)/){
+		&printdebug('','','Adding MenuContent (bottom)');
+		$menuhtml = join("\n",'<br />',$MenuContent,'<!--endMenuContent-->');	
+		$crimp->{DisplayHtml} =~ s|<!--endMenuContent-->|$menuhtml|;
+	} else {
+		&printdebug('','',"Creating MenuContent");
+		$menuhtml = join("\n","\n",
+			'<div id="crimpMenuContent">',
+			'<!--startMenuContent-->',
+			$MenuContent,
+			'<!--endMenuContent-->',
+			"</div>\n");	
+		$crimp->{DisplayHtml} =~ s/<body>/<body>$menuhtml/i;
+	}
+	return 1;
 }
 ####################################################################
 sub executePlugin() {
