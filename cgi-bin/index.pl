@@ -6,7 +6,7 @@
 #                 Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:       http://crimp.sourceforge.net/
 my $Version = '<!--build-date-->'; 
-my $ID = q$Id: index.pl,v 1.68 2006-03-01 22:59:23 diddledan Exp $;
+my $ID = q$Id: index.pl,v 1.69 2006-03-02 00:05:31 diddledan Exp $;
 my $version = join (' ', (split (' ', $ID))[2]);
    $version =~ s/,v\b//;
 if ($Version eq '<!--build-date-->'){
@@ -60,6 +60,9 @@ our $PRINT_HEAD;
 #
 #Produce apache style logs
 
+################################################
+# Need URI BEFORE POSTed queries can be parsed #
+use URI::Escape;
 
 ################
 # POST QUERIES #
@@ -69,6 +72,10 @@ my %PostQuery;
 my $n = 0;
 foreach my $item (@TempArray) {
 	my ($name, $value) = split '=', $item;
+	$name =~ s/([^\\])\+/\1 /g;
+	$name = uri_unescape($name);
+	$value =~ s/([^\\])\+/\1 /g;
+	$value = uri_unescape($value);
 	$PostQuery{$name} = $value;
 	$n++;
 }
