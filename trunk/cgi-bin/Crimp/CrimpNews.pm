@@ -1,83 +1,93 @@
-$ID = q$Id: CrimpNews.pm,v 1.4 2006-02-26 13:53:31 deadpan110 Exp $;
-&printdebug('Module CrimpNews',
+package Crimp::CrimpNews;
+
+sub new {
+	my ($class,$crimp) = @_;
+	my $self = { id => q$Id: CrimpNews.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	bless $self, $class;
+}
+
+sub execute {
+	my $self = shift;
+	
+	$self->{crimp}->printdebug('Module CrimpNews',
 			'',
 			'Authors: The CRIMP Team',
-			"Version: $ID",
+			"Version: $self->{id},
 			'http://crimp.sourceforge.net/'
 			);
-
-my $NewsLocation = "$crimp->{VarDirectory}/CrimpNews.htm";
-
-#Check if we have news and if it needs updating
-
-if (!-f $NewsLocation){
-&printdebug('','warn',"No CrimpNews exists locally");
-$CrimpNews = &NewsUpdate;
-}else{
-# Check File Date
-use File::stat;
-#use Time::localtime;
-
-#$FileDate = ctime(stat("$NewsLocation")->mtime);
-#86400 seconds in 24 hours
-$ServerDate = time;
-$FileDate = stat("$NewsLocation")->mtime;
-if ($ServerDate gt ($FileDate + 86400)){
-$CrimpNews = &NewsUpdate;
-}else{ 
-&printdebug('','',"Using local CrimpNews from cache");
-sysopen (NEWS,$NewsLocation,O_RDONLY) || &printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
-			@CrimpNews=<NEWS>;
-			close(NEWS);
-			$CrimpNews = "@CrimpNews";
-}
-}
-
-$CrimpNews = join('','<h1>Latest CRIMP News</h1>','<p>The latest news updated daily, directly via the <a href="http://sourceforge.net">SourceForge.net</a> CRIMP project website.</p>',$CrimpNews);
-$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
-$crimp->{DisplayHtml} =~ s/<title>/<title>Latest CRIMP News/i;
-$crimp->{DisplayHtml} =~ s/<body>/<body>$CrimpNews/i;
-
-$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
-$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
-
-
-
-
-sub NewsUpdate{
-&printdebug('','',"Fetching CrimpNews from http://sourceforge.net");
-
-my $urltoget = "http://sourceforge.net/export/projnews.php?group_id=118939&limit=5&show_summaries=1&flat=0";
-
-use LWP::UserAgent;
-$ua = LWP::UserAgent->new;
-
-if ($crimp->{DefaultProxy}){
-  &printdebug('','',"Using proxy server $crimp->{DefaultProxy}");
-  $ua->proxy(['http', 'ftp'], $crimp->{DefaultProxy});
+	
+	my $NewsLocation = $self->{crimp}->VarDirectory.'/CrimpNews.htm';
+	
+	#Check if we have news and if it needs updating
+	if (!-f $NewsLocation) {
+		$self->{crimp}->printdebug('','warn','No CrimpNews exists locally');
+		$CrimpNews = $self->NewsUpdate($NewsLocation);
+	} else {
+		# Check File Date
+		eval "use File::stat";
+		if (!$@) {
+			my $ServerDate = time;
+			my $FileDate = stat($NewsLocation)->mtime;
+			
+			if ($ServerDate > ($FileDate + 86400)) {
+				$CrimpNews = $self->NewsUpdate($NewsLocation);
+			} else { 
+				$self->{crimp}->printdebug('','','Using local CrimpNews from cache');
+				sysopen (NEWS,$NewsLocation,O_RDONLY) || $self->{crimp}->printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
+				@CrimpNews=<NEWS>;
+				close(NEWS);
+				$CrimpNews = "@CrimpNews";
+			}
+		} else {
+			$self->{crimp}->printdebug('','warn','Could not load File::Stat perl module:','&nbsp;&nbsp;'.$@);
+			$CrimpNews = '<br /><br /><p style="color: #f00; text-align: center;"><em>WARNING</em>Could not determine file age,
+				refetching from sourceforge server...<br /><small>(Please check the debug view)</small></p><br /><br />'.$self->NewsUpdate($NewsLocation);
+		}
+	}
+		
+	$CrimpNews = join('','<h1>Latest CRIMP News</h1>','<p>The latest news updated daily, directly via the <a href="http://sourceforge.net">SourceForge.net</a> CRIMP project website.</p>',$CrimpNews);
+	$self->{crimp}->addPageContent($CrimpNews);
 }
 
-
-$ua->agent("Mozilla/5.0 (CRIMP user $crimp->{RemoteHost}\@$crimp->{ServerName})"); # pretend we are very capable browser
-$ua->timeout("30");
-
-$req = HTTP::Request->new(GET => $urltoget);
-$req->header('Accept' => '*/*');
-$res = $ua->request($req);
-
-if ($res->is_success) {
-$CrimpNews = $res->content;
-sysopen(NEWS,$NewsLocation, O_WRONLY | O_CREAT | O_TRUNC) or die;
-print NEWS "$CrimpNews\n";
-close(NEWS);
-return ("$CrimpNews");
-} else {
-  # the LWP::UserAgent couldn't get the document - let's tell the user why
-&printdebug('', 'warn', "Could not get '$urltoget':", "&nbsp;&nbsp;&nbsp;&nbsp;$res->status_line");
-$CrimpNews = '<span style="color: #f00;">Connection error</span>';
-return("$CrimpNews");
-}
-
+sub NewsUpdate {
+	my $self = shift;
+	my $NewsLocation = shift;
+	
+	$self->{crimp}->printdebug('','','Fetching CrimpNews from http://sourceforge.net');
+	
+	my $urltoget = 'http://sourceforge.net/export/projnews.php?group_id=118939&limit=5&show_summaries=1&flat=0';
+	
+	use LWP::UserAgent;
+	$ua = LWP::UserAgent->new;
+	
+	if ($self->{crimp}->DefaultProxy) {
+		$self->{crimp}->printdebug('','','Using proxy server '.$self->{crimp}->DefaultProxy);
+		$ua->proxy(['http', 'ftp'], $self->{crimp}->DefaultProxy);
+	}
+	
+	$ua->agent('Mozilla/5.0 (CRIMP user '.$self->{crimp}->{_RemoteHost}.'@'.$self->{crimp}->{_ServerName}.')'); # pretend we are very capable browser
+	$ua->timeout(30);
+	
+	$req = HTTP::Request->new(GET => $urltoget);
+	$req->header('Accept' => '*/*');
+	$res = $ua->request($req);
+	
+	if ($res->is_success) {
+		$CrimpNews = $res->content;
+		if (!sysopen(NEWS,$NewsLocation, O_WRONLY | O_CREAT | O_TRUNC)) {
+			$self->{crimp}->printdebug('','warn','Could not open file for writing','&nbsp;&nbsp;'.$NewsLocation.': '.$!);
+			return '<br /><br /><p style="color: #f00; text-align: center;">Please check the debug view. An error occurred writing the cache file.
+				If this problem persists, you will have a dramatic increase in bandwidth usage.</p><br /><br />'.$CrimpNews;
+		}
+		print NEWS "$CrimpNews\n";
+		close(NEWS);
+		return $CrimpNews;
+	} else {
+		# the LWP::UserAgent couldn't get the document - let's tell the user why
+		$self->{crimp}->printdebug('', 'warn', "Could not get '$urltoget':", "&nbsp;&nbsp;&nbsp;&nbsp;$res->status_line");
+		$CrimpNews = '<span style="color: #f00;">Connection error</span>';
+		return $CrimpNews;
+	}
 }
 
 1;

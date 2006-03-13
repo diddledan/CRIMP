@@ -1,72 +1,47 @@
-$ID = q$Id: RandomContent.pm,v 1.1 2006-01-08 15:30:17 deadpan110 Exp $;
-&printdebug('Module RandomContent',
+package Crimp::RandomContent;
+
+sub new {
+	my ($class, $crimp) = @_;
+	my $self = { id => q$Id: RandomContent.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	bless $self, $class;
+}
+
+sub execute {
+	my $self = shift;
+	$self->{crimp}->printdebug('Module RandomContent',
 			'',
 			'Authors: The CRIMP Team',
-			"Version: $ID",
+			"Version: $self->{id}",
 			'http://crimp.sourceforge.net/'
 			);
-			
-
-
-if($crimp->{RandomContent} =~ m/(.txt)$/){
-
-	&printdebug('','',"Started With: $crimp->{RandomContent}");
-
-}
-else{
-
-	&printdebug('','warn',"File extension must be *.txt");
-
-}
-
-if ( -f "$crimp->{VarDirectory}/$crimp->{RandomContent}" ){
-
-	srand(time);
-	sysopen (FILE,"$crimp->{VarDirectory}/$crimp->{RandomContent}",O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+	
+	if(!$self->{crimp}->{RandomContent} =~ m/\.txt$/) {
+		$self->{crimp}->printdebug('','warn',"File extension must be *.txt");
+		return;
+	}
+	
+	$self->{crimp}->printdebug('','',"Started With: $self->{crimp}->{RandomContent}");
+	
+	my $file = join '/', $self->{crimp}->VarDirectory, $self->{crimp}->{RandomContent}
+	if ( -f $file ) {
+		srand(time);
+		sysopen (FILE,$file,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $file", "error: $!");
 		@FileRead=<FILE>;
 		close(FILE);
-
-	$NbLines = @FileRead;
-	$Phrase = $FileRead[int rand $NbLines];
-
-if ($crimp->{DisplayHtml} eq ""){
-
-$crimp->{RandomContent} =~ s/(\.txt){1}$//;
-
-
-$crimp->{DisplayHtml} = <<ENDEOF;
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta
- content="text/html; charset=ISO-8859-1"
- http-equiv="content-type"/>
-<title>$crimp->{RandomContent}</title>
-</head>
-<body>
-$Phrase
-</body>
-</html>
-
-	
-ENDEOF
-
-}
-else{
-
-$newhtml = "<div id=\"crimpRandomContent\">\n$Phrase\n</div>";
-
-}
-
-
-#$crimp->{DisplayHtml} = "$newhtml\n$crimp->{DisplayHtml}";
-
-$crimp->{DisplayHtml} =~ s/<body>/<body>$newhtml/i;
-
-
-}
-else{
-&printdebug('','',"$crimp->{RandomContent} does not exist!");
+		
+		$NbLines = @FileRead;
+		$Phrase = $FileRead[int rand $NbLines];
+		
+		if (!defined $self->{crimp}->{DisplayHtml} || $self->{crimp}->{DisplayHtml} eq '') {
+			$self->{crimp}->{RandomContent} =~ s/\.txt$//;
+			$self->{crimp}->{DisplayHtml} = $self->{crimp}->{_DefaultHtml};
+		}
+		my $newhtml = "<div id=\"crimpRandomContent\">\n$Phrase\n</div>";
+		
+		$self->{crimp}->{DisplayHtml} =~ s/<body>/<body>$newhtml/i;
+	} else {
+		$self->{crimp}->printdebug('','',"$self->{crimp}->{RandomContent} does not exist!");
+	}
 }
 
 1;

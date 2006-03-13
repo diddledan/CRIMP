@@ -1,74 +1,74 @@
-$ID = q$Id: ContentDirectory.pm,v 1.17 2006-02-04 20:51:20 deadpan110 Exp $;
-&printdebug('Module ContentDirectory',
+#package declaration (needed - should be Crimp::Something where Something is the name of the file minus the extension)
+package Crimp::ContentDirectory;
+
+sub new {
+	my $class = shift;
+	my $crimp = shift;
+	my $self = { id => q$Id: ContentDirectory.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp };
+	bless $self, $class;
+	return $self;
+}
+
+#execute subroutine (needed - this one does the actual work)
+sub execute {
+	my $self = shift;
+	$self->{crimp}->printdebug('Module ContentDirectory',
 			'',
 			'Authors: The CRIMP Team',
-			"Version: $ID",
+			'Version: '.$self->{id},
 			'http://crimp.sourceforge.net/'
 			);
 
-@HttpRequest = split(/\//,$crimp->{HttpRequest});
+	@HttpRequest = split(/\//,$self->{crimp}->{_HttpRequest});
 
-foreach $HttpRequest (@HttpRequest){
-	#printdebug "$crimp->{HttpRequest} :: $HttpRequest :: $crimp->{UserConfig}<br>";
-	if ($crimp->{UserConfig} ne "/$HttpRequest"){$path = "$path/$HttpRequest";}
-}
+	foreach (@HttpRequest) {
+		$path = "$path/$_" if ($self->{crimp}->userConfig ne "/$_");
+	}
 
-if ($path eq '') { $path = '/index.html'; }
+	$path = '/index.html' if ($path eq '');
 
-if ($crimp->{DisplayHtml} ne "" ){
-	&printdebug("","warn", "DisplayHtml has already been filled with content");
-}else{
 	#check for directory here if it is then use $path
 	#make sure the requested file is _NOT_ a directory (Fremen)
-	my $requested = join('',$crimp->{ContentDirectory}, $path);
+	my $requested = join('',$self->{crimp}->{ContentDirectory}, $path);
 	if ( -d $requested ) { $requested = join '/', $requested, 'index.html'; }
-	#my $requested = "$crimp->{HomeDirectory}$crimp->{ContentDirectory}$path";
-&printdebug('', '', "File: $requested");
+	$self->{crimp}->printdebug('', '', "File: $requested");
 
-# Use error page
-if (( !-f $requested )||( -d $requested )||( !-r $requested)){
-&printdebug('', 'warn', 'Couldnt open file for reading',
-				 "Error: $!");
+	# Use error page
+	if (( !-f $requested )||( -d $requested )||( !-r $requested)) {
+		$self->{crimp}->printdebug('', 'warn', 'Couldnt open file for reading',
+								"Error: $!");
 
-$crimp->{DisplayHtml} = &PageRead(join('/',$crimp->{ErrorDirectory},$crimp->{DefaultLang},'404-ContentDirectory.html'));
-$crimp->{ExitCode} = '404';
-return 1;
-}
+		$self->{crimp}->addPageContent($self->{crimp}->PageRead(join('/',$self->{crimp}->{_ErrorDirectory},$self->{crimp}->{_DefaultLang},'404-ContentDirectory.html')));
+		$self->{crimp}->ExitCode('404');
 
+		# finish execution of this sub;
+		return;
+	}
 
-
-if (( -e $requested ) && ( !-d $requested )) {
-		sysopen (FILE,$requested,O_RDONLY) || &printdebug('', 'warn', 'Couldnt open file for reading', "file: $requested", "error: $!");
-			
-			@display_content=<FILE>;
-			close(FILE);
-			
-		if (@display_content) {	
-			my $new_content='';
-			
-			foreach $display_content(@display_content) {
-				$new_content= join '', $new_content, $display_content;
+	if (( -e $requested ) && ( !-d $requested )) {
+		sysopen (FILE,$requested,O_RDONLY) || $self->{crimp}->printdebug('', 'warn', 'Couldnt open file for reading', "file: $requested", "error: $!");
+		@display_content=<FILE>;
+		close(FILE);
+		
+		if (@display_content) {
+			my $newcontent = '';
+			foreach (@display_content) {
+				$newcontent = "$newcontent$_";
 			}
-			
-$crimp->{DisplayHtml} = $new_content;
-
-$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
-$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
+			$self->{crimp}->addPageContent($newcontent);
 			
 			####
-if	($crimp->{ExitCode} ne '404'){$crimp->{ExitCode} = '200';}
-
-			&printdebug('','pass',"DisplayHtml filled with content from '$requested'");
-			#$crimp->{DisplayHtml}=@display_content;
+			
+			$self->{crimp}->ExitCode('200') if ($self->{crimp}->ExitCode ne '404');
 		} else {
-			&printdebug('','warn','The file handle is invalid. This should not happen.');
+			$self->{crimp}->printdebug('','warn','The file handle is invalid. This should not happen.');
 		}
 	} else {
-		$crimp->{DisplayHtml} = 'Could not get the requested content. Please check the link and try again.';
+		$self->{crimp}->addPageContent('Could not get the requested content. Please check the link and try again.');
 		if (!-e $requested) {
-			&printdebug('','warn',"$requested does not exist.");
+			$self->{crimp}->printdebug('','warn',"$requested does not exist.");
 		} else {
-			&printdebug('','warn',"$requested is a directory.");
+			$self->{crimp}->printdebug('','warn',"$requested is a directory.");
 		}
 	}
 }

@@ -1,57 +1,69 @@
-$crimp->{DebugMode} = 'on';
-$ID = q$Id: UserAuth.pm,v 1.4 2006-03-01 22:59:26 diddledan Exp $;
-&printdebug('Module UserAuth','',
+package Crimp::UserAuth;
+
+sub new {
+	my ($class, $crimp) = @_;
+	my $self = { id => q$Id: UserAuth.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	bless $self, $class;
+}
+
+sub execute {
+	my $self = shift;
+	
+	$self->{crimp}->printdebug('Module UserAuth','',
 				'Authors: The CRIMP Team',
-				"Version: $ID",
+				"Version: $self->{id}",
 				'http://crimp.sourceforge.net/',
 				);
-
-my $authMethod = 'passwd';
-
-&printdebug('','','Using plain text passwd backend');
-
-my ($username, $password, $cookie);
-if ($cookie = cookie("$crimp->{UserConfig}:authtok")) {
-	($username, $password) = split /:/, $cookie;
-}
-$username ||= $crimp->{PostQuery}->{username};
-$password ||= $crimp->{PostQuery}->{password};
-
-&printdebug('','',"UserName: $username","PassWord: $password");
-
-if (!$crimp->{PostQuery}->{postback} && !$cookie) {
-	&setupLoginForm();
-} elsif (!$username || !$password) {
-	&setupLoginForm('Username and Password must <em>both</em> be specified!');
-} elsif (&doFileAuth($username, $password)) {
-	&printdebug('','pass',"User '$username is authenticated to access this section");
-	push @cookies, cookie(-name => "$crimp->{UserConfig}:authtok",
-                               -value => "$username:$password",
-                               -path => $crimp->{UserConfig});
-} else {
-	&setupLoginForm('Username and password do not match our database.');
-}
 	
+	my $authMethod = 'passwd';
+	
+	$self->{crimp}->printdebug('','','Using plain text passwd backend');
+	
+	my ($username, $password, $cookie);
+	if ($cookie = cookie(join ':', $self->{crimp}->userConfig, 'authtok')) {
+		($username, $password) = split /:/, $cookie;
+	}
+	$username ||= $self->{crimp}->queryParam(username);
+	$password ||= $self->{crimp}->queryParam(password);
+	
+	$self->{crimp}->printdebug('','',"UserName: $username","PassWord: $password");
+	
+	if (!$self->{crimp}->queryParam(postback) && !$cookie) {
+		$self->setupLoginForm();
+	} elsif (!$username || !$password) {
+		$self->setupLoginForm('Username and Password must <em>both</em> be specified!');
+	} elsif ($self->doFileAuth($username, $password)) {
+		$self->{crimp}->printdebug('','pass',"User '$username' is authenticated to access this section");
+		$self->{crimp}->addCookie, cookie(-name => join(':',$self->{crimp}->userConfig,'authtok'),
+			-value => join(':',$username,$password),
+			-path => $self->{crimp}->userConfig);
+	} else {
+		$self->{crimp}->setupLoginForm('Username and password do not match our database.');
+	}
+}
+
 sub doFileAuth {
-	my ($user, $pass) = @_;
-	if (!sysopen(AUTHFILE, $Config->{$crimp->{UserConfig}}->{UserAuth}, O_RDONLY)) {
-		&printdebug('','warn',"Couldn't open auth file: $!");
-		return 0;
+	my ($self, $user, $pass) = @_;
+	
+	if (!sysopen(AUTHFILE, $self->{crimp}->{Config}->{$self->{crimp}->userConfig}->{UserAuth}, O_RDONLY)) {
+		$self->{crimp}->printdebug('','warn',"Couldn't open auth file: $!");
+		return;
 	}
 	
 	my @authfile = <AUTHFILE>;
 	close(AUTHFILE);
-	&printdebug('','',"checking for $user:$pass");
+	$self->{crimp}->printdebug('','',"checking for $user:$pass");
 	if (grep /$user:$pass/, @authfile) { return 1; }
 }
 
 sub setupLoginForm {
+	my $self = shift;
 	my $msg = shift;
 	$msg ||= 'You need to supply credentials for access to this area of the site.';
 	
 	# set exit code to 403 (forbidden)
-	$crimp->{ExitCode} = '403';
-	$crimp->{skipRemainingPlugins} = 1;
+	$self->{crimp}->ExitCode('403');
+	$self->{crimp}->{skipRemainingPlugins} = 1;
 	
 	my $html = "
 <div style='text-align: center;'>
@@ -70,7 +82,7 @@ sub setupLoginForm {
 </div>
 	";
 
-	&addPageContent($html);
+	$self->{crimp}->addPageContent($html);
 }
 
 1;
