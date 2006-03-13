@@ -1,215 +1,165 @@
-$ID = q$Id: ContentListing.pm,v 1.9 2006-02-19 19:30:21 diddledan Exp $;
-&printdebug('Module ContentListing',
-				'',
-				'Authors: The CRIMP Team',
-				"Version: $ID",
-				'http://crimp.sourceforge.net/'
-				);
+package Crimp::ContentListing;
 
-&printdebug('','',"Started With: $crimp->{ContentListing}");
+sub new {
+	my ($class, $crimp) = @_;
+	my $self = { id => q$Id: ContentListing.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	bless $self, $class;
+}
 
-use File::stat;
-use Time::localtime;
-
-my $DirLayout = '<br />';
-my $DirCount = 0;
-my $FileCount = 0;
-my $DownloadFile = "";
-my $FileType = "unknown";
-my $FileDate = "unknown";
-my $FileSize = "unknown";
-
-my $lock = 0;
-
-my $FileServed = &FileRead("ContentListing","$crimp->{UserConfig}","0");
-&printdebug('','',"FileCount: $FileServed");
-
-
-
-&printdebug('','',"ExitCode: $crimp->{ExitCode}");
-
-
-
-
-if ($crimp->{DisplayHtml} ne "" ){
-	&printdebug("","warn", "DisplayHtml has already been filled with content");
-}else{
-
-
-my $FileDir = $crimp->{ContentListing};
-
+sub execute {
+	my $self = shift;
+	
+	$self->{crimp}->printdebug('Module ContentListing',
+		'',
+		'Authors: The CRIMP Team',
+		"Version: $ID",
+		'http://crimp.sourceforge.net/');
+	
+	$self->{crimp}->printdebug('','',"Started With: $self->{crimp}->{ContentListing}");
+	
+	eval "use File::stat;use Time::localtime";
+	if ($@) {
+		$self->{crimp}->printdebug('','warn','Could not load necessary modules for this plugin:','&nbsp;&nbsp;'.$@);
+		return;
+	}
+	
+	my $DirLayout = '<br />';
+	my $DirCount = 0;
+	my $FileCount = 0;
+	my $DownloadFile = '';
+	my $FileType = "unknown";
+	my $FileDate = "unknown";
+	my $FileSize = "unknown";
+	
+	my $lock = 0;
+	
+	my $FileServed = $self->{crimp}->FileRead('ContentListing',$self->{crimp}->userConfig,'0');
+	$self->{crimp}->printdebug('','',"FileCount: $FileServed");
+	$self->{crimp}->printdebug('','','ExitCode: '.$self->{crimp}->ExitCode);
+	
+	my $FileDir = $self->{crimp}->{ContentListing};
+	
 	my @HttpRequest = split(/\//,$crimp->{HttpRequest});
 	my $BaseUrl = '';
 	
-	foreach my $HttpRequest (@HttpRequest) {
-		if (-d "$FileDir/$HttpRequest") {
-			$FileDir = join '/', $FileDir, $HttpRequest;
-			$BaseUrl = join '/', $BaseUrl, $HttpRequest;
+	foreach (@HttpRequest) {
+		if (-d "$FileDir/$_") {
+			$FileDir = join '/', $FileDir, $_;
+			$BaseUrl = join '/', $BaseUrl, $_;
 		}
-		if (($HttpRequest ne "")&&(grep /.download/, $HttpRequest)){
-		$DownloadFile = $HttpRequest;
-		$DownloadFile =~ s/(\.download){1}$//;
-		}		
+		if (($_ ne '') && (grep /.download/, $_)){
+			$DownloadFile = $_;
+			$DownloadFile =~ s/\.download$//;
+		}
 	}
-
+	
+	$BaseUrl = join '/', $self->{crimp}->userConfig, $BaseUrl unless $BaseUrl =~ m!$self->{crimp}->userConfig!;
 	$BaseUrl =~ s!/{2,}!/!g;
-	$BaseUrl = join '/', $crimp->{UserConfig}, $BaseUrl unless $BaseUrl =~ m!$crimp->{UserConfig}!;
-	&printdebug('','', join(': ', 'FileDir', $FileDir));
-	&printdebug('','', join(': ', 'BaseUrl (before sanitisation)', $BaseUrl));
+	$self->{crimp}->printdebug('','', join(': ', 'FileDir', $FileDir));
+	$self->{crimp}->printdebug('','', join(': ', 'BaseUrl', $BaseUrl));
 	
-	
-
-	
+	if ($DownloadFile ne ''){
+		$self->{crimp}->printdebug('','', join(': ', 'DownloadFile', $DownloadFile));
+		$FileServed++;
+		$self->{crimp}->FileWrite('ContentListing',$self->{crimp}->userConfig,$FileServed);
 		
-		if ($DownloadFile ne ""){
-			&printdebug('','', join(': ', 'DownloadFile', $DownloadFile));
-			$FileServed ++;
-			&FileWrite("ContentListing","$crimp->{UserConfig}",$FileServed);
-
-			#close;
-			if ($crimp->{ExitCode} ne "500"){
-				print 'Status: 302 Moved', "\r\n", "Location: $BaseUrl/$DownloadFile", "\r\n\r\n";
-
-			}
-
-		}
-
-
-
-if (( -d $FileDir )){
-
+		#close;
+		$self->{crimp}->redirect("$BaseUrl/$DownloadFile") if ($crimp->{ExitCode} ne '500');
+		return;
+	}
 	
-	opendir(DIR, $FileDir) or &printdebug('', 'fail', "Could not open the current directory for reading $!");
+	if ( !-d $FileDir ) {
+		&printdebug('', 'warn', 'Configured file is _NOT_ a directory. Bailing out.');
+		return;
+	}
+	
+	opendir(DIR, $FileDir) or $self->{crimp}->printdebug('', 'fail', "Could not open the current directory for reading $!");
 	rewinddir(DIR);
 	my @DirChk = readdir(DIR);
 	closedir(DIR);
-	foreach $DirChk (@DirChk) {
-		if (($DirChk ne ".")&&($DirChk ne "..")&&($DirChk ne "index.html")&&($DirChk ne "CVS")){
-			if (-d "$FileDir/$DirChk") {
-				$DirCount ++;
-				$newurl = join '/', $BaseUrl, $DirChk;
+	foreach $file (@DirChk) {
+		if (($file ne '.') && ($file ne '..') && ($file ne 'index.html') && ($file ne 'CVS')) {
+			if (-d "$FileDir/$file") {
+				$DirCount++;
+				$newurl = join '/', $BaseUrl, $file;
 				$newurl =~ s!/{2,}!/!g;
-				if ($DirCount gt 0) {
-					$DirList="$DirList<tr><td><img src='/icons/small/dir.gif' alt='[DIR]'/></td><td><font size='-1'><a href='$newurl'>$DirChk</a></font></td><td>&nbsp;</td><td>&nbsp;</td></tr>\n";
+				if ($DirCount > 0) {
+					$DirList="$DirList<tr><td><img src='/icons/small/dir.gif' alt='[DIR]'/></td><td><font size='-1'><a href='$newurl'>$file</a></font></td><td>&nbsp;</td><td>&nbsp;</td></tr>\n";
 				}
 			} else {
-				$FileCount ++;
+				$FileCount++;
 				
-				$DirChk =~ s/(\.html){1}$//;
-				$newurl = join '/', $BaseUrl, $DirChk;
+				$file =~ s/\.html$//;
+				$newurl = join '/', $BaseUrl, $file;
 				$newurl =~ s!/{2,}!/!g;
 				
 				$newurl = join '', $newurl,'.download';
-				$FileType = $DirChk;
+				$FileType = $file;
 				
-
-				$FileDate = ctime(stat("$FileDir/$DirChk")->mtime);
-				$FileSize = -s "$FileDir/$DirChk";
+				$FileDate = ctime(stat("$FileDir/$file")->mtime);
+				$FileSize = -s "$FileDir/$flie";
 				$FileSize = int(1+$FileSize/10.24);
 				$FileSize = $FileSize/100;
-
-#  m/(.gif|.jpg|.png|.bmp|.ico)$/){
-if($FileType =~ m/(.patch)$/){
-$FileType = "<img src='/icons/small/patch.gif' alt='[Patch]'/>";
-}
-
-elsif($FileType =~ m/(.gif|.jpg|.png|.bmp|.ico)$/){
-$FileType = "<img src='/icons/small/image.gif' alt='[Image]'/>";
-}
-
-elsif($FileType =~ m/(.mp3|.wav|.ogg)$/){
-$FileType = "<img src='/icons/small/sound.gif' alt='[Audio]'/>";
-}
-
-elsif($FileType =~ m/(.mov|.avi|.mpg|.ram)$/){
-$FileType = "<img src='/icons/small/movie.gif' alt='[Movie]'/>";
-}
-
-elsif($FileType =~ m/(.txt|.rtf|.html)$/){
-$FileType = "<img src='/icons/small/text.gif' alt='[Text]'/>";
-}
-
-elsif($FileType =~ m/(.doc|.pdf|.odt)$/){
-$FileType = "<img src='/icons/small/doc.gif' alt='[Document]'/>";
-}
-
-elsif($FileType =~ m/(.tar)$/){
-$FileType = "<img src='/icons/small/tar.gif' alt='[Archive]'/>";
-}
-
-elsif($FileType =~ m/(.sum)$/){
-$FileType = "<img src='/icons/small/key.gif' alt='[Checksum]'/>";
-}
-
-elsif($FileType =~ m/(.bz2|.gz|.zip|.rpm)$/){
-$FileType = "<img src='/icons/small/compressed.gif' alt='[Compressed]'/>";
-}
-
-elsif($FileType =~ m/(.bin|.exe)$/){
-$FileType = "<img src='/icons/small/binary.gif' alt='[Binary]'/>";
-}
-
-elsif ($FileType eq $DirChk){
-$FileType = "<img src='/icons/small/unknown.gif' alt='[Unknown]'/>";
-}
-
-
-$FileList="$FileList<tr><td>$FileType</td><td><font size='-1'><a href='$newurl'>$DirChk</a></font></td><td style='text-align: right;'><font size='-1'>$FileDate</font></td><td style='text-align: right;'><font size='-1'>$FileSize Kb</font></td></tr>\n";
-								
+				
+				# should really use given/when statements here - I'll do that when I get around to it (Fremen)
+				if($FileType =~ m/(.patch)$/) {
+					$FileType = "<img src='/icons/small/patch.gif' alt='[Patch]'/>";
+				} elsif($FileType =~ m/(.gif|.jpg|.png|.bmp|.ico)$/) {
+					$FileType = "<img src='/icons/small/image.gif' alt='[Image]'/>";
+				} elsif($FileType =~ m/(.mp3|.wav|.ogg)$/) {
+					$FileType = "<img src='/icons/small/sound.gif' alt='[Audio]'/>";
+				} elsif($FileType =~ m/(.mov|.avi|.mpg|.ram)$/) {
+					$FileType = "<img src='/icons/small/movie.gif' alt='[Movie]'/>";
+				} elsif($FileType =~ m/(.txt|.rtf|.html)$/) {
+					$FileType = "<img src='/icons/small/text.gif' alt='[Text]'/>";
+				} elsif($FileType =~ m/(.doc|.pdf|.odt)$/) {
+					$FileType = "<img src='/icons/small/doc.gif' alt='[Document]'/>";
+				} elsif($FileType =~ m/(.tar)$/) {
+					$FileType = "<img src='/icons/small/tar.gif' alt='[Archive]'/>";
+				} elsif($FileType =~ m/(.sum)$/) {
+					$FileType = "<img src='/icons/small/key.gif' alt='[Checksum]'/>";
+				} elsif($FileType =~ m/(.bz2|.gz|.zip|.rpm)$/) {
+					$FileType = "<img src='/icons/small/compressed.gif' alt='[Compressed]'/>";
+				} elsif($FileType =~ m/(.bin|.exe)$/) {
+					$FileType = "<img src='/icons/small/binary.gif' alt='[Binary]'/>";
+				} elsif ($FileType eq $DirChk) {
+					$FileType = "<img src='/icons/small/unknown.gif' alt='[Unknown]'/>";
+				}
+				
+				$FileList="$FileList<tr><td>$FileType</td><td><font size='-1'><a href='$newurl'>$file</a></font></td><td style='text-align: right;'><font size='-1'>$FileDate</font></td><td style='text-align: right;'><font size='-1'>$FileSize Kb</font></td></tr>\n";
 			}
 		}
 	}
 	
-	&printdebug('','pass',"Directories found: $DirCount");
-	&printdebug('','pass',"Documents found: $FileCount");
+	$self->{crimp}->printdebug('','pass',"Directories found: $DirCount");
+	$self->{crimp}->printdebug('','pass',"Documents found: $FileCount");
 	
 	$BaseUrl =~ s!/{2,}!/!g;
 	$BaseUrl =~ m!.*/(.*?)$!;
 	$dirname = $1;
-	$crimp->{PageTitle} = $BaseUrl;
+	$self->{crimp}->PageTitle($BaseUrl);
 	
-		$newhtml = <<ENDEOF;
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta
- content="text/html; charset=ISO-8859-1"
- http-equiv="content-type"/>
-  <title>Index of $BaseUrl</title>
-</head>
-<body>
-<div id="crimpPageContent">
-<h1>Index of $dirname</h1>
-
-<table style='width: 90%; margin-left: auto; margin-right: auto'
- border='0' cellpadding='1' cellspacing='1'>
-<tbody>
-<tr>
-<th style="width: 20px;text-align: left;">&nbsp;</th>
-<th style="text-align: left;">File Name</th><th style="text-align: right;">Last Modified Date</th><th style="text-align: right;">File Size</th></tr>
-<tr>
-<td><img src='/icons/small/back.gif' alt='[DIR]'/></td><td><font size='-1'><a href='../'>Parent Directory</a></font></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+	$newhtml = "<h1>Index of $dirname</h1>
+<table style='width: 90%; margin-left: auto; margin-right: auto;' border='0' cellpadding='1' cellspacing='1'>
+	<tbody>
+	<tr>
+		<th style='width: 20px;text-align: left;'>&nbsp;</th>
+		<th style='text-align: left;'>File Name</th>
+		<th style='text-align: right;'>Last Modified Date</th>
+		<th style='text-align: right;'>File Size</th>
+	</tr>
+	<tr>
+		<td><img src='/icons/small/back.gif' alt='[DIR]'/></td>
+		<td><font size='-1'><a href='../'>Parent Directory</a></font></td>
+		<td>&nbsp;</td><td>&nbsp;</td>
+	</tr>";
 	
+	$newhtml = join '',$newhtml,"$DirList\n" if ($DirCount != 0);
+	$newhtml = join '', $newhtml, "$FileList\n" if ($FileCount != 0);
 	
-ENDEOF
+	$newhtml = join '', $newhtml, "</tbody></table><br />Number of files served : $FileServed<br /><br />";
 	
-		if ($DirCount ne 0) { $newhtml = join '',$newhtml,"$DirList\n"; }
-		if ($FileCount ne 0) { $newhtml = join '', $newhtml, "$FileList\n"; }
-		$newhtml = join '', $newhtml, "</tbody></table><br />Number of files served : $FileServed<br /><br />";
-		$crimp->{DisplayHtml} = join "\n", $newhtml, $crimp->{DisplayHtml},"</div>\n</body>\n</html>";
-		
-		
-		
-		
-
-}else{
-&printdebug('', 'warn', 'Couldn\'t open directory for listing');
+	$self->{crimp}->addPageContent($newhtml);
 }
-
-
-
-}
-
-
 
 1;

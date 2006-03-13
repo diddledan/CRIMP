@@ -1,87 +1,97 @@
-$ID = q$Id: DocumentTemplate.pm,v 1.15 2006-02-05 01:25:39 deadpan110 Exp $;
-&printdebug('Module DocumentTemplate',
-			'',
-			'Authors: The CRIMP Team',
-			"Version: $ID",
-			'http://crimp.sourceforge.net/'
-			);
-			
-&printdebug('',$status,"Started With: $crimp->{DocumentTemplate}");
+package Crimp::DocumentTemplate;
 
-my $blankTemplate = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>'.$Config->{_}->{SiteTitle}.'</title>
-</head>
-<body>
-<!--PAGE_CONTENT-->
-</body></html>';
+sub new {
+	my $class = shift;
+	my $crimp = shift;
+	my $self = { id => q$Id: DocumentTemplate.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp };
+	bless $self, $class;
+	return $self;
+}
 
-#only parse the template if this is an html or xhtml page
-if (($crimp->{ContentType} eq 'text/html') || ($crimp->{ContentType} eq 'text/xhtml+xml')) {
-	# This should also be set within the query string '?DocumentTemplate=[none|off]'
-	if (($crimp->{DocumentTemplate} eq 'none') || ($crimp->{DocumentTemplate} eq 'off')) {
-		#this should not be needed and will eventually be replaced with return 1;
-		&printdebug('','pass','A blank template is being used');
-		&insertContent($blankTemplate);
-	} else {
-		@HttpRequest = split(/\//,$crimp->{HttpRequest});
-		foreach $HttpRequest (@HttpRequest){
-			#print "$crimp->{HttpRequest} :: $HttpRequest :: $crimp->{UserConfig}<br>";
-			if ($crimp->{UserConfig} ne "/$HttpRequest"){$path = "$path/$HttpRequest";}
-		}
+sub execute {
+	my $self = shift;
 	
-		sysopen (FILE,$crimp->{DocumentTemplate}, O_RDONLY) or &printdebug('','Warn',"Template $crimp->{DocumentTemplate} not found");
-		@template_content=<FILE>;
-		#$SIZE=@LINES;
-		$status = 'pass';
-		close(FILE);
-		if (@template_content) {
-			my $new_content = '';
-				foreach $template_line(@template_content) {
-		  		$new_content = join '', $new_content, $template_line;
-			}
-		
-			#printdebug ("Putting Page into Template");
-			
-			&insertContent($new_content);
-		} else {
-			&printdebug('','warn','Template file does not contain any content, using default blank template.');
-			&insertContent($blankTemplate);
-		}
+	$self->{crimp}->printdebug('Module DocumentTemplate',
+				'',
+				'Authors: The CRIMP Team',
+				"Version: $self->{id}",
+				'http://crimp.sourceforge.net/'
+				);
+	
+	if (-e $self->{crimp}->{DocumentTemplate}) {
+		$self->{crimp}->printdebug('','pass',"Started With: $self->{crimp}->{DocumentTemplate}");
+	} else {
+		$self->{crimp}->printdebug('','warn','Template file does not exist, using default empty template');
+		$self->{crimp}->{DocumentTemplate} = 'none';
 	}
-} else {
-	&printdebug('', 'pass', "Skipped module for ContentType: $crimp->{ContentType}");
+
+	my $blankTemplate = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+	<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+	<title>'.$self->{crimp}->{Config}->{_}->{SiteTitle}.'</title>
+	</head>
+	<body>
+	<!--PAGE_CONTENT-->
+	</body></html>';
+
+	#only parse the template if this is an html or xhtml page
+	if (($self->{crimp}->ContentType eq 'text/html') || ($self->{crimp}->ContentType eq 'text/xhtml+xml')) {
+		# This should also be set within the query string '?DocumentTemplate=[none|off]'
+		## see $self->{crimp}->queryParam('DocumentTemplate') :-) Fremen
+		if (($self->{crimp}->{DocumentTemplate} eq 'none') || ($self->{crimp}->{DocumentTemplate} eq 'off')) {
+			#this should not be needed and will eventually be replaced with return 1;
+			$self->{crimp}->printdebug('','pass','A blank template is being used');
+			$self->insertContent($blankTemplate);
+		} else {
+			sysopen (FILE,$self->{crimp}->{DocumentTemplate}, O_RDONLY) or $self->{crimp}->printdebug('','warn',"Template $self->{crimp}->{DocumentTemplate} not found");
+			@template_content=<FILE>;
+			close(FILE);
+			
+			if (@template_content) {
+				my $template = '';
+				foreach (@template_content) {
+					$template = "$template$_";
+				}
+				
+				$self->insertContent($template);
+			} else {
+				$self->{crimp}->printdebug('','warn','Template file does not contain any content, using default blank template.');
+				$self->insertContent($blankTemplate);
+			}
+		}
+	} else {
+		$self->{crimp}->printdebug('', 'pass', "Skipped module for ContentType: $crimp->{ContentType}");
+	}
 }
 
 sub insertContent {
+	my $self = shift;
 	my $template = shift;
 
 	#remove xml header if present
-	$crimp->{DisplayHtml} =~ s|<\?xml.*?\?>||si;
+	$self->{crimp}->{DisplayHtml} =~ s|<\?xml.*?\?>||si;
 	#remove doctype if present
-	$crimp->{DisplayHtml} =~ s|<!DOCTYPE.*?>||si;
+	$self->{crimp}->{DisplayHtml} =~ s|<!DOCTYPE.*?>||si;
 	#remove headers storing the title of the page
-	$crimp->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
+	$self->{crimp}->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
 	#if we insert content then this is important
-	$crimp->{PageTitle} = $1;
+	my $pageTitle = $1;
 	
 	#strip from <html> down to the opening <body> tag
-	$crimp->{DisplayHtml} =~ s|<html.*?>.*?<body>||si;
+	$self->{crimp}->{DisplayHtml} =~ s|<html.*?>.*?<body.*?>||si;
 	#remove the closing </body> tag and any cruft after - alas, that's nothing to do with the dogshow
-	$crimp->{DisplayHtml} =~ s|</body>.*||si;
+	$self->{crimp}->{DisplayHtml} =~ s|</body>.*||si;
 	
-	if ($crimp->{PageTitle} eq '') {
-		&printdebug('','warn','The Page has no title');
+	if ($pageTitle eq '') {
+		$self->{crimp}->printdebug('','warn','The Page has no title');
 	} else {
-		&printdebug('','pass',"PageTitle: $crimp->{PageTitle}");
-		$crimp->{PageTitle} = join '', ' - ', $crimp->{PageTitle};
-		$template =~ s|(</title>)|$crimp->{PageTitle}\1|i;;
+		$self->{crimp}->printdebug('','pass','PageTitle: '.$pageTitle);
+		$template =~ s|(</title>)|$pageTitle\1|i;;
 	}
 	
-	$template =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
+	$template =~ s/<!--PAGE_CONTENT-->/$self->{crimp}->{DisplayHtml}/gi;
 	
-	$crimp->{DisplayHtml} = $template;
+	$self->{crimp}->{DisplayHtml} = $template;
 }
 
 1;

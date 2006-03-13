@@ -1,41 +1,30 @@
-$ID = q$Id: SiteMenu.pm,v 1.7 2006-03-01 22:59:26 diddledan Exp $;
-&printdebug('Module SiteMenu',
-	'',
-	'Authors: The CRIMP Team',
-	"Version: $ID",
-	'http://crimp.sourceforge.net/');
-	
-	# $crimp->{SiteMenu} should be a separate div to $crimp->{MenuList}
+package Crimp::SiteMenu;
 
-
-my $where = $crimp->{SiteMenu};
-if (sysopen(FILE,join('/',$crimp->{VarDirectory},$where),O_RDONLY)) {
-	my @file = <FILE>;
-	close(FILE);
-	&addMenuContent("@file", 'top');
-#	my $newMenu = '';
-
-#	$newMenu = "$newMenu$_\n" foreach (@file);
-
-#	$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, $newMenu;
-	&printdebug('', 'pass', 'Created Site Menu from file:',join('','&nbsp;&nbsp;',$where));
-} else {
-	&printdebug('', 'warn', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+sub new {
+	my ($class, $crimp) = @_;
+	my $self = { id => q$Id: SiteMenu.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	bless $self, $class;
 }
 
-#if ($crimp->{MenuList}) {
-#	#$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '<ul>';
-#	foreach my $linkElement (@{$crimp->{MenuList}}) {
-#		$crimp->{MenuDiv} = join '', $crimp->{MenuDiv},$linkElement,'<br/>';
-#	}
-#	#$crimp->{MenuDiv} = join '', $crimp->{MenuDiv}, '</ul>';
-#} else {
-#	&printdebug('','warn','Called without a set of links specified by any previous module');
-#}
-
-#$crimp->{MenuDiv} = join '', '<div id="crimpFileList">', $crimp->{MenuDiv}, '</div>' if $crimp->{MenuDiv};
-#$crimp->{DisplayHtml} =~ s|(<body>)|\1$crimp->{MenuDiv}|i;
-
-
+sub execute {
+	my $self = shift;
+	
+	$self->{crimp}->printdebug('Module SiteMenu',
+		'',
+		'Authors: The CRIMP Team',
+		"Version: $self->{id}",
+		'http://crimp.sourceforge.net/');
+	
+	my $where = $self->{crimp}->{SiteMenu};
+	if (sysopen(FILE,join('/',$self->{crimp}->VarDirectory,$where),O_RDONLY)) {
+		my @file = <FILE>;
+		close(FILE);
+		$self->{crimp}->addMenuContent("@file", 'top');
+		
+		$self->{crimp}->printdebug('', 'pass', 'Created Site Menu from file:',join('','&nbsp;&nbsp;',$where));
+	} else {
+		$self->{crimp}->printdebug('', 'warn', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+	}
+}
 
 1;

@@ -1,177 +1,162 @@
-$ID = q$Id: VirtualRedirect.pm,v 1.24 2006-02-09 20:25:36 deadpan110 Exp $;
-&printdebug('Module VirtualRedirect',
-						'',
-						'Authors: The CRIMP Team',
-						"Version: $ID",
-						'http://crimp.sourceforge.net/'
-						);
+package Crimp::VirtualRedirect;
 
-#Crimp Module Virtual Redirect
-#our $crimp;
-
-#parse url and remove the config file section $crimp->{UserConfig}
-if ($crimp->{DisplayHtml} ne '' ){
-  &printdebug('','warn', 'DisplayHtml has already been filled with content');
+sub new {
+	my ($class, $crimp) = @_;
+	my $self = { id => q$Id: VirtualRedirect.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	bless $self, $class;
 }
 
-@HttpRequest = split(/\//,$crimp->{HttpRequest});
-
-my $path = '';
-foreach $HttpRequest (@HttpRequest){
-	#print "$crimp->{HttpRequest} :: $HttpRequest :: $crimp->{UserConfig}<br>";
-	if ($crimp->{UserConfig} ne "/$HttpRequest"){$path = join '/', $path, $HttpRequest;}
-}
-#strip off preceeding slashes, as these should be defined in the crimp.ini file
-$path =~ s|^/+||;
-#add on any trailing slashes that may be required - another nasty hack by Fremen
-if (($crimp->{HttpRequest} =~ m|/$|) && (!($path =~ m|/$|))) { $path = join '', $path, '/'; }
-
-#print "path : $path<br>";
-#print "<BASE href='http://test.co.uk$crimp->{UserConfig}'>";
-
-use LWP::UserAgent;
-$ua = LWP::UserAgent->new;
-
-if ($crimp->{DefaultProxy}){
-	&printdebug('','',"Using proxy server $crimp->{DefaultProxy}");
-	$ua->proxy(['http', 'ftp'], $crimp->{DefaultProxy});
-}
-
-$ua->agent("Mozilla/5.0 (CRIMP user $crimp->{RemoteHost}\@$crimp->{ServerName})"); # pretend we are very capable browser
-$ua->timeout("30");
-
-#create a variable to hold the url we want to retreive, so that it can be
-#recalled later faster than recreating it each time
-#(use a join here as it's faster)
-$urltoget = join '',$crimp->{VirtualRedirect},$path,$crimp->{HttpQuery};
-$req = HTTP::Request->new(GET => $urltoget);
-$req->header('Accept' => '*/*');
-$res = $ua->request($req);
-$error = $res->status_line;
-if ($res->is_success) {
-	#printdebug("File exists on remote server");
+sub execute {
+	my $self = shift;
 	
-	&printdebug('','pass',"Started With: $crimp->{VirtualRedirect}",'Fetching the following content:',$urltoget);
+	$self->{crimp}->printdebug('Module VirtualRedirect',
+		'',
+		'Authors: The CRIMP Team',
+		"Version: $self->{id}",
+		'http://crimp.sourceforge.net/');
 	
-	my $CrimpContent = $res->content;
-	#get the page title
-	$CrimpContent =~ s!<title>(.*?)</title>!!is;
-	$crimp->{PageTitle} = $1;
-	#remove the headers
-	$CrimpContent =~ s|<!DOCTYPE.*?>||is;
-	$CrimpContent =~ s!<html.*?>.*?<body.*?>!!is;
-	#remove the footer
-	$CrimpContent =~ s!</body>.*!!is;
-	
-	$crimp->{DisplayHtml} = $crimp->{DefaultHtml};
-	$crimp->{DisplayHtml} =~ s/<title>/<title>$crimp->{PageTitle}/i;
-	$crimp->{DisplayHtml} =~ s/<body>/<body>$CrimpContent/i;
-
-	$crimp->{DisplayHtml} =~ s/<body>/<body><div id="crimpPageContent">\n/i;
-	$crimp->{DisplayHtml} =~ s|(</body>)|</div>\n\1|i;;
-
-
-
-	#################################
-	# BEGIN LINK / IMAGE CORRECTION #
-
-	eval {require HTML::TokeParser;};
-	if (!$@) {
-		# check that the path doesn't contain any filenames (directories only please)
-		if ($path =~ m!/?[\w\-_\.]+$!) {
-			$path = s!/?[\w\-_\.]+$!/!;
-		}
-		if ($path eq '') { $path = '/'; }
-		my $token_parser = HTML::TokeParser->new(\$crimp->{DisplayHtml});
-		my @image_urls;
-		my @link_urls;
-		my %seenimgs = {};
-		while (my $token = $token_parser->get_tag('img')) {
-			my $url = $token->[1]{'src'} || next;
-			if (!($url =~ m|^http[s]?://|i)) { push(@image_urls, $url) unless ($seenimgs{$url}++); }
-		}
-		my %seenlinks = {};
-		#reset token_parser
-		$token_parser = HTML::TokeParser->new(\$crimp->{DisplayHtml});
-		while (my $token = $token_parser->get_tag('a')) {
-			my $url = $token->[1]{'href'} || next;
-			if (!($url =~ m|^.+?:(//)?|i)) { push(@link_urls, $url) unless ($seenlinks{$url}++); }
-			elsif ($url =~ m|^$crimp->{VirtualRedirect}|i) { push(@link_urls, $url) unless ($seenlinks{$url}++); }
-		}
-
-		my $i = 0;
-		my $baseurl = $crimp->{VirtualRedirect};
-		$baseurl =~ m|^(http[s]?://.+?)[/]?|i;
-		$baseurl = $1;
-		for $image_url (@image_urls) {
-			my $newurl='';
-			if ($image_url =~ m|^/.+|) { $newurl = $baseurl; }
-			else { $newurl = join '', $crimp->{VirtualRedirect}, $path, '/'; }
-			my $newimageurl = join '', $newurl, $image_url;
-			$newimageurl =~ s|^(http[s]?://)||i;
-			my $newimageproto = $1;
-			$newimageurl =~ s|/{2,}|/|g;
-			$crimp->{DisplayHtml} =~ s/$image_url/$newimageproto$newimageurl/g;
-			$i++;
-		}
-		&printdebug('', 'pass', 'Converting Image URLs', "&nbsp;&nbsp;&nbsp;&nbsp;Using $url", "&nbsp;&nbsp;&nbsp;&nbsp;Converted $i image tags to point to the correct web location");
-
-		#my $proto = 'http://';
-		#if ($ENV{'SERVER_PORT'} eq '443') { $proto = 'https://'; }
-		#$url = join '', $proto, $crimp->{ServerName}, '/';
-		my $j = 0;
-		$crimp->{VirtualRedirect} =~ m|^(http[s]?://.*?)[/]?|;
-		my $baseurl = $1;
-		for $link_url (@link_urls) {
-			my $newlinkurl = '';
-			my $protocol = $crimp->{ServerProtocol};
-			if (!($url =~ m|^.+?:(//)?|i)) {
-				if ($link_url =~ m|^/.*|) {
-					# we need to determine if the link is within our control or not.
-					# currently all we do is rewrite if the VirtualRedirect Config value is just the base domain.
-					if ($crimp->{VirtualRedirect} =~ m|^$baseurl(.?)$|) { $newlinkurl = join '/',$crimp->{UserConfig},$link_url; }
-					else {
-						# check it falls within the VirtualRedirect subtree, and rewrite if so, else set to "$baseurl$link_url"
-						$newlinkurl = join '', $baseurl, $link_url;
-					}
-				} else { $newlinkurl = join '/', $crimp->{UserConfig}, $link_url; }
-			} else {
-				$newlinkurl = $link_url;
-				$newlinkurl =~ s|$crimp->{VirtualRedirect}||i;
-				$newlinkurl = join '/', $crimp->{UserConfig}, $newlinkurl;
-			}
-
-			$newlinkurl =~ s!^(http[s]?://)!!i;
-			my $newlinkproto = $1;
-			$newlinkurl =~ s|/+|/|g;
-			$link_url =~ s|\?|\\\?|gi;
-			$newlinkurl = join '', $newlinkproto, $newlinkurl if ($newlinkproto =~ m!^(http[s]?://)!i);
-			$crimp->{DisplayHtml} =~ s/(href=['"]?)$link_url(['"]?)/\1$newlinkurl\2/g;
-			$j++;
-		}
-		&printdebug('', 'pass', 'Correcting Links', "&nbsp;&nbsp;&nbsp;&nbsp;Successfuly converted $j links to point to the right place.");
-		#foreach $item (keys %ENV) { &printdebug("$item = $ENV{$item}"); }
-	} else {
-		&printdebug('', 'warn', 'Couldn\'t correct the image and link urls of this page:', $@, 'Make sure you have installed the HTML::TokeParser module');
+	#parse url and remove the config file section $crimp->{UserConfig}
+	@HttpRequest = split(/\//,$crimp->{HttpRequest});
+	my $path = '';
+	foreach (@HttpRequest) {
+		$path = join('/', $path, $_) if ($self->{crimp}->userConfig ne "/$_");
 	}
-
-	# END LINK / IMAGE CORRECTION #
-	###############################
 	
-	#$new_content =~ s/<!--PAGE_CONTENT-->/$crimp->{DisplayHtml}/gi;
-	$crimp->{ExitCode} = '200';
-} else {
-	# the LWP::UserAgent couldn't get the document - let's tell the user why
-	&printdebug('', 'warn', "Could not get '$urltoget':", "Error: $error");
+	#strip off preceeding slashes, as these should be defined in the crimp.ini file
+	$path =~ s|^/+||;
+	#add on any trailing slashes that may be required - another nasty hack by Fremen
+	if (($self->{crimp}->HttpRequest =~ m|/$|) && (!($path =~ m|/$|))) { $path = join '', $path, '/'; }
+	
+	eval "use LWP::UserAgent";
+	if ($@) {
+		$self->{crimp}->printdebug('','warn','Could not load LWP::UserAgent:','&nbsp;&nbsp;'.$@);
+		return;
+	}
+	
+	$ua = LWP::UserAgent->new;
+	
+	if ($self->{crimp}->DefaultProxy){
+		$self->{crimp}->printdebug('','','Using proxy server '.$self->{crimp}->DefaultProxy);
+		$ua->proxy(['http', 'ftp'], $self->{crimp}->DefaultProxy);
+	}
+	
+	$ua->agent('Mozilla/5.0 (CRIMP user '.$self->{crimp}->{_RemoteHost}.'@'.$self->{crimp}->{_ServerName}.')'); # pretend we are very capable browser
+	$ua->timeout(30);
+	
+	#create a variable to hold the url we want to retreive, so that it can be
+	#recalled later. faster than recreating it each time
+	#(use a join here as it's faster)
+	$urltoget = join '',$self->{crimp}->{VirtualRedirect},$path,$self->{crimp}->{_HttpQuery};
+	$req = HTTP::Request->new(GET => $urltoget);
+	$req->header('Accept' => '*/*');
+	$res = $ua->request($req);
+	$error = $res->status_line;
+	if ($res->is_success) {
+		$self->{crimp}->printdebug('','pass',"Started With: $self->{crimp}->{VirtualRedirect}",'Fetching the following content:','&nbsp;&nbsp;'.$urltoget);
+		
+		my $CrimpContent = $res->content;
+		
+		#################################
+		# BEGIN LINK / IMAGE CORRECTION #
+		
+		eval "require HTML::TokeParser";
+		if (!$@) {
+			# check that the path doesn't contain any filenames (directories only please)
+			$path = s!/[\w\-_\.]+$!/! if ($path =~ m!/[\w\-_\.]+$!)
+			$path ||= '/';
+			
+			my $token_parser = HTML::TokeParser->new(\$CrimpContent);
+			my @image_urls;
+			my @link_urls;
+			my %seenimgs = {};
+			while (my $token = $token_parser->get_tag('img')) {
+				my $url = $token->[1]{'src'} || next;
+				if (!($url =~ m|^http[s]?://|i)) { push(@image_urls, $url) unless ($seenimgs{$url}++); }
+			}
+			my %seenlinks = {};
+			#reset token_parser
+			$token_parser = HTML::TokeParser->new(\$CrimpContent);
+			while (my $token = $token_parser->get_tag('a')) {
+				my $url = $token->[1]{'href'} || next;
+				if (!($url =~ m|^.+?:(//)?|i)) { push(@link_urls, $url) unless ($seenlinks{$url}++); }
+				elsif ($url =~ m|^$self->{crimp}->{VirtualRedirect}|i) { push(@link_urls, $url) unless ($seenlinks{$url}++); }
+			}
+			
+			my $i = 0;
+			my $baseurl = $self->{crimp}->{VirtualRedirect};
+			$baseurl =~ m|^(http[s]?://.+?)[/]?|i;
+			$baseurl = $1;
+			for $image_url (@image_urls) {
+				my $newbaseurl='';
+				if ($image_url =~ m|^/.+|) { $newbaseurl = $baseurl; }
+				else { $newbaseurl = join '', $crimp->{VirtualRedirect}, $path, '/'; }
+				my $newimageurl = join '', $newbaseurl, $image_url;
+				$newimageurl =~ s|^(http[s]?://)||i;
+				my $newimageproto = $1;
+				$newimageurl =~ s|/{2,}|/|g;
+				$CrimpContent =~ s/(<img.*?src=['"]?)$image_url(['"]?.*?>)/\1$newimageproto$newimageurl\2/g;
+				$i++;
+			}
+			
+			$self->{crimp}->printdebug('', 'pass', 'Converting Image URLs', "&nbsp;&nbsp;&nbsp;&nbsp;Using $url", "&nbsp;&nbsp;&nbsp;&nbsp;Converted $i unique image tags to point to the correct web location");
+			
+			my $j = 0;
+			$self->{crimp}->{VirtualRedirect} =~ m|^(http[s]?://.*?)[/]?|;
+			my $baseurl = $1;
+			for $link_url (@link_urls) {
+				my $newlinkurl = '';
+				my $protocol = $self->{crimp}->{_ServerProtocol};
+				if (!($url =~ m|^.+?:(//)?|i)) {
+					if ($link_url =~ m|^/.*|) {
+						# we need to determine if the link is within our control or not.
+						# currently all we do is rewrite if the VirtualRedirect Config value is just the base domain.
+						if ($self->{crimp}->{VirtualRedirect} =~ m|^$baseurl(.?)$|) { $newlinkurl = join '/',$self->{crimp}->userConfig,$link_url; }
+						else {
+							# check it falls within the VirtualRedirect subtree, and rewrite if so, else set to "$baseurl$link_url"
+							$newlinkurl = join '', $baseurl, $link_url;
+						}
+					} else { $newlinkurl = join '/', $self->{crimp}->userConfig, $link_url; }
+				} else {
+					$newlinkurl = $link_url;
+					$newlinkurl =~ s|$self->{crimp}->{VirtualRedirect}||i;
+					$newlinkurl = join '/', $self->{crimp}->userConfig, $newlinkurl;
+				}
+				
+				$newlinkurl =~ s!^(http[s]?://)!!i;
+				my $newlinkproto = $1;
+				$newlinkurl =~ s|/+|/|g;
+				$link_url =~ s|\?|\\\?|gi;
+				$newlinkurl = join '', $newlinkproto, $newlinkurl if ($newlinkproto =~ m!^(http[s]?://)!i);
+				$CrimpContent =~ s/(<a.*?href=['"]?)$link_url(['"]?.*?>)/\1$newlinkurl\2/g;
+				$j++;
+			}
+			
+			$self->{crimp}->printdebug('', 'pass', 'Correcting Links', "&nbsp;&nbsp;&nbsp;&nbsp;Successfuly converted $j unique links to point to the right place.");
+		} else {
+			&printdebug('', 'warn', 'Couldn\'t correct the image and link urls of this page:', $@, 'Make sure you have installed the HTML::TokeParser module');
+		}
 
-
-	$crimp->{DisplayHtml} = &PageRead(join('/',$crimp->{ErrorDirectory},$crimp->{DefaultLang},'404-VirtualRedirect.html'));
-
-
-	$crimp->{ExitCode} = '404';
-	return 1;
-
+		# END LINK / IMAGE CORRECTION #
+		###############################
+		
+		#get the page title
+		$CrimpContent =~ s!<title>(.*?)</title>!!is;
+		$self->{crimp}->PageTitle($1);
+		#remove the headers
+		$CrimpContent =~ s|<!DOCTYPE.*?>||is;
+		$CrimpContent =~ s!<html.*?>.*?<body.*?>!!is;
+		#remove the footer
+		$CrimpContent =~ s!</body>.*!!is;
+		
+		$self->{crimp}->addPageContent($CrimpContent);
+		$self->{crimp}->ExitCode('200');
+	} else {
+		# the LWP::UserAgent couldn't get the document - let's tell the user why
+		$self->{crimp}->printdebug('', 'warn', "Could not get '$urltoget':", "Error: $error");
+		$self->{crimp}->{DisplayHtml} = &PageRead(join('/',$crimp->{ErrorDirectory},$crimp->{DefaultLang},'404-VirtualRedirect.html'));
+		$self->{crimp}->ExitCode('404');
+	}
 }
 
-#on success
+#on successful loading
 1;

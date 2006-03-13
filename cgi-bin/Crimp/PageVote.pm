@@ -1,4 +1,4 @@
-$ID = q$Id: PageVote.pm,v 1.2 2006-02-08 15:39:00 diddledan Exp $;
+$ID = q$Id: PageVote.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $;
 &printdebug('Module PageVote',
 			'',
 			'Authors: The CRIMP Team',
