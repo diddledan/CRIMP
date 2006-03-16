@@ -2,7 +2,7 @@ package Crimp::RandomContent;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: RandomContent.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: RandomContent.pm,v 2.1 2006-03-16 15:41:54 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -22,7 +22,7 @@ sub execute {
 	
 	$self->{crimp}->printdebug('','',"Started With: $self->{crimp}->{RandomContent}");
 	
-	my $file = join '/', $self->{crimp}->VarDirectory, $self->{crimp}->{RandomContent}
+	my $file = join '/', $self->{crimp}->VarDirectory, $self->{crimp}->{RandomContent};
 	if ( -f $file ) {
 		srand(time);
 		sysopen (FILE,$file,O_RDONLY) || &printdebug('', 'fail', 'Couldnt open file for reading', "file: $file", "error: $!");
