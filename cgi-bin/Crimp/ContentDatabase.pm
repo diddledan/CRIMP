@@ -2,8 +2,8 @@ package Crimp::ContentDatabase;
 
 sub new {
   my ($class, $crimp) = @_;
-  my $self = { id => q$Id: ContentDatabase.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
-  bless $self, $crimp;
+  my $self = { id => q$Id: ContentDatabase.pm,v 2.1 2006-03-16 15:40:04 diddledan Exp $, crimp => $crimp, };
+  bless $self, $class;
 }
 
 sub execute {
@@ -22,14 +22,14 @@ sub execute {
     return;
   }
   
-  
   #get the configuration values
-  $db_type = $self->{crimp}->{Config}->{$self->{crimp}->userConfig}->{DBType};
-  $db_db = $self->{crimp}->{Config}->{$self->{crimp}->userConfig}->{DBName};
-  $db_table = $self->{crimp}->{Config}->{$self->{crimp}->userConfig}->{DBTable};
-  $db_host = $self->{crimp}->{Config}->{$self->{crimp}->userConfig}->{DBHost};
-  $db_user = $self->{crimp}->{Config}->{$self->{crimp}->userConfig}->{DBUserName};
-  $db_pass = $self->{crimp}->{Config}->{$self->{crimp}->userConfig}->{DBUserPass};
+  my $UserConfig = $self->{crimp}->userConfig;
+  $db_type = $self->{crimp}->{Config}->{$UserConfig}->{DBType};
+  $db_db = $self->{crimp}->{Config}->{$UserConfig}->{DBName};
+  $db_table = $self->{crimp}->{Config}->{$UserConfig}->{DBTable};
+  $db_host = $self->{crimp}->{Config}->{$UserConfig}->{DBHost};
+  $db_user = $self->{crimp}->{Config}->{$UserConfig}->{DBUserName};
+  $db_pass = $self->{crimp}->{Config}->{$UserConfig}->{DBUserPass};
   
   #connect to the database
   my $dbh = DBI->connect("DBI:$db_type:database=$db_db:host=$db_host", $db_user, $db_pass, {'RaiseError' => 1, 'PrintError' => 0});
@@ -44,7 +44,7 @@ sub execute {
   #strip all preceeding slashes (/)
   $path =~ s|^/+||;
   #make sure the path is _ALWAYS_ set - 'root' = the base page for the section
-  $path ||= 'root'
+  $path ||= 'root';
   
   #prepare the query
   $sth = $dbh->prepare("SELECT content,title FROM `$db_table` WHERE path='$path' LIMIT 1");
