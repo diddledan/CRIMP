@@ -1,8 +1,9 @@
 package Crimp::ContentListing;
+use File::stat;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: ContentListing.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: ContentListing.pm,v 2.1 2006-03-17 16:13:04 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -39,16 +40,16 @@ sub execute {
 	
 	my $FileDir = $self->{crimp}->{ContentListing};
 	
-	my @HttpRequest = split(/\//,$crimp->{HttpRequest});
+	my @HttpRequest = split(/\//,$self->{crimp}->HttpRequest);
 	my $BaseUrl = '';
 	
-	foreach (@HttpRequest) {
-		if (-d "$FileDir/$_") {
-			$FileDir = join '/', $FileDir, $_;
-			$BaseUrl = join '/', $BaseUrl, $_;
+	foreach my $part (@HttpRequest) {
+		if (-d "$FileDir/$part") {
+			$FileDir = join '/', $FileDir, $part;
+			$BaseUrl = join '/', $BaseUrl, $part;
 		}
-		if (($_ ne '') && (grep /.download/, $_)){
-			$DownloadFile = $_;
+		if (($part ne '') && (grep /.download/, $part)){
+			$DownloadFile = $part;
 			$DownloadFile =~ s/\.download$//;
 		}
 	}
@@ -64,7 +65,7 @@ sub execute {
 		$self->{crimp}->FileWrite('ContentListing',$self->{crimp}->userConfig,$FileServed);
 		
 		#close;
-		$self->{crimp}->redirect("$BaseUrl/$DownloadFile") if ($crimp->{ExitCode} ne '500');
+		$self->{crimp}->redirect("$BaseUrl/$DownloadFile") if ($self->{crimp}->ExitCode ne '500');
 		return;
 	}
 	
@@ -96,33 +97,32 @@ sub execute {
 				$newurl = join '', $newurl,'.download';
 				$FileType = $file;
 				
-				$FileDate = ctime(stat("$FileDir/$file")->mtime);
-				$FileSize = -s "$FileDir/$flie";
-				$FileSize = int(1+$FileSize/10.24);
-				$FileSize = $FileSize/100;
+				my $myfile = join '/', $FileDir, $file;
+				$FileDate = ctime(stat($myfile)->mtime);
+				$FileSize = int(1+(-s $myfile)/10.24)/100;
 				
 				# should really use given/when statements here - I'll do that when I get around to it (Fremen)
-				if($FileType =~ m/(.patch)$/) {
+				if($FileType =~ m/(\.patch)$/) {
 					$FileType = "<img src='/icons/small/patch.gif' alt='[Patch]'/>";
-				} elsif($FileType =~ m/(.gif|.jpg|.png|.bmp|.ico)$/) {
+				} elsif($FileType =~ m/(\.gif|\.jpg|\.png|\.bmp|\.ico)$/) {
 					$FileType = "<img src='/icons/small/image.gif' alt='[Image]'/>";
-				} elsif($FileType =~ m/(.mp3|.wav|.ogg)$/) {
+				} elsif($FileType =~ m/(\.mp3|\.wav|\.ogg)$/) {
 					$FileType = "<img src='/icons/small/sound.gif' alt='[Audio]'/>";
-				} elsif($FileType =~ m/(.mov|.avi|.mpg|.ram)$/) {
+				} elsif($FileType =~ m/(\.mov|\.avi|\.mpg|\.ram)$/) {
 					$FileType = "<img src='/icons/small/movie.gif' alt='[Movie]'/>";
-				} elsif($FileType =~ m/(.txt|.rtf|.html)$/) {
+				} elsif($FileType =~ m/(\.txt|\.rtf|\.html)$/) {
 					$FileType = "<img src='/icons/small/text.gif' alt='[Text]'/>";
-				} elsif($FileType =~ m/(.doc|.pdf|.odt)$/) {
+				} elsif($FileType =~ m/(\.doc|\.pdf|\.odt)$/) {
 					$FileType = "<img src='/icons/small/doc.gif' alt='[Document]'/>";
-				} elsif($FileType =~ m/(.tar)$/) {
+				} elsif($FileType =~ m/(\.tar)$/) {
 					$FileType = "<img src='/icons/small/tar.gif' alt='[Archive]'/>";
-				} elsif($FileType =~ m/(.sum)$/) {
+				} elsif($FileType =~ m/(\.sum|md5sum|\.md5)$/) {
 					$FileType = "<img src='/icons/small/key.gif' alt='[Checksum]'/>";
-				} elsif($FileType =~ m/(.bz2|.gz|.zip|.rpm)$/) {
+				} elsif($FileType =~ m/(\.bz2|\.gz|\.zip|\.rpm)$/) {
 					$FileType = "<img src='/icons/small/compressed.gif' alt='[Compressed]'/>";
-				} elsif($FileType =~ m/(.bin|.exe)$/) {
+				} elsif($FileType =~ m/(\.bin|\.exe)$/) {
 					$FileType = "<img src='/icons/small/binary.gif' alt='[Binary]'/>";
-				} elsif ($FileType eq $DirChk) {
+				} elsif ($FileType eq $file) {
 					$FileType = "<img src='/icons/small/unknown.gif' alt='[Unknown]'/>";
 				}
 				
