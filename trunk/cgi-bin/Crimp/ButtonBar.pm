@@ -3,7 +3,7 @@ package Crimp::ButtonBar;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: ButtonBar.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: ButtonBar.pm,v 2.1 2006-03-17 16:39:05 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 }
 
@@ -26,7 +26,7 @@ sub execute {
 	$querystring =~ s|debug=.*?(&)?||i;
 	$querystring = join('', '?', $querystring) if not $querystring =~ m|^\?|;
 	$querystring = join('', $querystring, '&') if $querystring =~ m|^\?.+|;
-	my $debug = join '', $self->{crimp}->HttpRequest, ${querystring}, 'debug=on#crimpDebug';
+	my $debug = join '', $self->{crimp}->HttpRequest, $querystring, 'debug=on#crimpDebug';
 	
 	@ButtonBar = <<ENDEOF;
 <a href="<!--help-->"><img
@@ -44,7 +44,7 @@ ENDEOF
 		$self->{crimp}->printdebug('','pass','Using Default ButtonBar');
 	} else {
 		# Use a Custom ButtonBar
-		my $requested = "$self->{crimp}->HtmlDirectory/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/style.htm";
+		my $requested = $self->{crimp}->HtmlDirectory."/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/style.htm";
 		if ( -f $requested ) {
 			sysopen (FILE,$requested,O_RDONLY) || $self->{crimp}->printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
 			$self->{crimp}->printdebug('','pass',"Using $self->{crimp}->{ButtonBar} ButtonBar");
