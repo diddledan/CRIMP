@@ -33,7 +33,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.0 2006-03-13 23:48:31 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.1 2006-03-17 15:47:20 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -135,7 +135,7 @@ sub sendDocument {
   my $self = shift;
   
   #This is where we finish the document or file
-  $crimp->{ExitCode} = '200' if ($crimp->{ExitCode} eq '204');
+  $self->ExitCode('200') if ($self->ExitCode eq '204');
   $self->ContentType('text/html') if ($self->ContentType eq '');
 
   &printdebug('Crimp Exit','pass',
@@ -229,7 +229,7 @@ sub execute {
   ## call the builtins in order ##
   ################################
 
-  if ($crimp->{PageRead} ne '') {
+  if ($self->{_PageRead} ne '') {
     $self->{DisplayHtml} = $self->PageRead($self->{_PageRead});
   }
 
@@ -246,14 +246,14 @@ sub execute {
     $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++));
   }
   foreach (@{$self->{_IniCommands}}) {
-    $self->executePlugin($_) if (($_ eq 'DocumentTemplate') || (!($crimp->{skipRemainingPlugins} || $executedCommands{$_}++)));
+    $self->executePlugin($_) if (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++)));
   }
 
   #add the extra CRIMP-specific HTML headers
-  $self->addHeaderContent(join('','<meta name="generator" content="CRIMP ',$version,' Build ', $Version,'" />'));
-  $self->addHeaderContent(join('','<meta name="robots" content="',$crimp->{RobotsMeta},'" />'));
-  $self->addHeaderContent(join('','<meta name="keywords" content="',$crimp->{KeywordsMeta},'" />')) if ($crimp->{KeywordsMeta} ne '');
-  $self->addHeaderContent(join('','<meta name="description" content="',$crimp->{DescriptionMeta},'" />')) if ($crimp->{DescriptionMeta} ne '');
+  $self->addHeaderContent(join('','<meta name="generator" content="CRIMP ',$self->{version},' Build ', $self->{VER},'" />'));
+  $self->addHeaderContent(join('','<meta name="robots" content="',$self->{_RobotsMeta},'" />'));
+  $self->addHeaderContent(join('','<meta name="keywords" content="',$self->{_KeywordsMeta},'" />')) if ($self->{_KeywordsMeta} ne '');
+  $self->addHeaderContent(join('','<meta name="description" content="',$self->{_DescriptionMeta},'" />')) if ($self->{_DescriptionMeta} ne '');
   $self->addHeaderContent('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
 
   #############
@@ -676,7 +676,7 @@ sub FileRead {
 	my $filename=shift;
 	my $entry=shift;
 	my $string=shift;
-	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
+	my $fileopen = join '/',$self->VarDirectory,$filename;
 
 	$self->printdebug('','',"FileRead: [$filename] $entry");
 
@@ -703,8 +703,8 @@ sub FileWrite {
 	my $entry=shift;
 	my $string=shift;
   my $try = shift;
-	my $filelock = join '/',$crimp->{VarDirectory},'lock',$filename;
-	my $fileopen = join '/',$crimp->{VarDirectory},$filename;
+	my $filelock = join '/',$self->VarDirectory,'lock',$filename;
+	my $fileopen = join '/',$self->VarDirectory,$filename;
 	
 	sysopen(LOCKED,$filelock, O_WRONLY | O_EXCL | O_CREAT) or return $self->RetryWait($filename,$entry,$string,$try||0);
   $self->printdebug('','',"FileWrite: [$filename] $entry");#Keep on one line
