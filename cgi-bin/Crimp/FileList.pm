@@ -3,7 +3,7 @@ package Crimp::FileList;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: FileList.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: FileList.pm,v 2.1 2006-03-20 00:49:19 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 	return $self;
 }
@@ -32,7 +32,7 @@ sub execute {
 		$DirList = '<b>Directories:</b>';
 		$FileList = '<b>Documents:</b>';
 		
-		if ($crimp->{FileList} eq 'horizontal') { 
+		if ($self->{crimp}->{FileList} eq 'horizontal') { 
 			$DirLayout = ' | ';
 			$DirList = join '', $DirList, ' ';
 			$FileList = join '', $FileList, ' ';
