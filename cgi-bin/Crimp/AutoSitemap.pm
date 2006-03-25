@@ -1,8 +1,8 @@
-package Crimp::AutoSiteMap;
+package Crimp::AutoSitemap;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: AutoSitemap.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: AutoSitemap.pm,v 2.1 2006-03-25 16:57:21 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
