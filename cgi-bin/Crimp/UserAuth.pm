@@ -1,8 +1,9 @@
 package Crimp::UserAuth;
+use CGI qw(:standard);
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: UserAuth.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: UserAuth.pm,v 2.1 2006-03-27 19:34:27 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
