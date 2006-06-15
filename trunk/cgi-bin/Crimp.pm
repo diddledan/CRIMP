@@ -33,7 +33,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.1 2006-03-17 15:47:20 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.2 2006-06-15 14:46:09 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -670,6 +670,19 @@ ENDEOF
   return $FileRead;
 }
 
+# Garbage Collector for lock files used by FileWrite
+sub lockFileGC {
+	my $self = shift;
+	my $lockfile = shift;
+	
+	my $timeout = 60; #seconds
+	if ($@) { $self->printdebug('','WARN','Lock File Garbase Collection Failed.',$@); }
+	
+	my $FileDate = (stat($lockfile))[9];
+	my $now = time();
+	if (($now - $FileDate) > $timeout) { $self->printdebug('','PASS','Lock File '.$lockfile.' expunged'); unlink($lockfile); }
+}
+
 ####################################################################
 sub FileRead {
   my $self = shift;
@@ -704,6 +717,7 @@ sub FileWrite {
 	my $string=shift;
   my $try = shift;
 	my $filelock = join '/',$self->VarDirectory,'lock',$filename;
+	$self->lockFileGC($filelock);
 	my $fileopen = join '/',$self->VarDirectory,$filename;
 	
 	sysopen(LOCKED,$filelock, O_WRONLY | O_EXCL | O_CREAT) or return $self->RetryWait($filename,$entry,$string,$try||0);
