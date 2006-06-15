@@ -1,9 +1,8 @@
 package Crimp::ContentListing;
-use File::stat;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: ContentListing.pm,v 2.1 2006-03-17 16:13:04 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: ContentListing.pm,v 2.2 2006-06-15 14:04:28 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
