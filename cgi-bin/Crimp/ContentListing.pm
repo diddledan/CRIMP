@@ -2,7 +2,7 @@ package Crimp::ContentListing;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: ContentListing.pm,v 2.2 2006-06-15 14:04:28 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: ContentListing.pm,v 2.3 2006-06-15 15:07:42 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -17,7 +17,7 @@ sub execute {
 	
 	$self->{crimp}->printdebug('','',"Started With: $self->{crimp}->{ContentListing}");
 	
-	eval "use File::stat;use Time::localtime";
+	eval "use Time::localtime";
 	if ($@) {
 		$self->{crimp}->printdebug('','warn','Could not load necessary modules for this plugin:','&nbsp;&nbsp;'.$@);
 		return;
@@ -97,7 +97,7 @@ sub execute {
 				$FileType = $file;
 				
 				my $myfile = join '/', $FileDir, $file;
-				$FileDate = ctime(stat($myfile)->mtime);
+				$FileDate = ctime((stat($myfile))[9]);
 				$FileSize = int(1+(-s $myfile)/10.24)/100;
 				
 				# should really use given/when statements here - I'll do that when I get around to it (Fremen)
@@ -134,7 +134,7 @@ sub execute {
 	$self->{crimp}->printdebug('','pass',"Documents found: $FileCount");
 	
 	$BaseUrl =~ s!/{2,}!/!g;
-	$BaseUrl =~ m!.*/(.*?)$!;
+	$BaseUrl =~ m!.*/(.+?)/?$!;
 	$dirname = $1;
 	$self->{crimp}->PageTitle($BaseUrl);
 	
