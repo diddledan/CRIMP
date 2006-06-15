@@ -3,11 +3,14 @@ package Crimp::PageVote;
 sub new {
 	my ($class, $crimp) = @_;
         my $self = {
-        	id => q$Id: PageVote.pm,v 2.1 2006-06-02 19:08:36 diddledan Exp $,
+        	id => q$Id: PageVote.pm,v 2.2 2006-06-15 16:26:42 diddledan Exp $,
                 crimp => $crimp,
                 YesVoteRating => 0,
 		NoVoteRating => 0,
+		YesPageRating => 0,
+		NoPageRating => 0,
 		PageRating => 0,
+		LocalPageRating => 0,
 		YesVotePage => 0,
 		YesVoteSite => 0,
 		NoVotePage => 0,
@@ -55,15 +58,18 @@ sub execute {
 	####################################################################
 
 	$self->{crimp}->printdebug('','',"Results (for use in comment tags within a template):",
-						"&nbsp;&nbsp;&nbsp;YesRate (%): $self->{YesVoteRating}",
-						"&nbsp;&nbsp;&nbsp;NoRate (%): $self->{NoVoteRating}",
-						"&nbsp;&nbsp;&nbsp;TotalRate (%): $self->{PageRating}",
-						"&nbsp;&nbsp;&nbsp;YesVotesTotal: $self->{YesVotePage}",
-						"&nbsp;&nbsp;&nbsp;YesSiteTotal: $self->{YesVoteSite}",
-						"&nbsp;&nbsp;&nbsp;NoVotesTotal: $self->{NoVotePage}",
-						"&nbsp;&nbsp;&nbsp;NoSiteTotal: $self->{NoVoteSite}",
-						"&nbsp;&nbsp;&nbsp;StarRating (1 to 10): $self->{StarRating}",
-						"&nbsp;&nbsp;&nbsp;TotalRating (1 to 10): $self->{TotalRating}",
+						"   YesRate (%)          : $self->{YesVoteRating}",
+						"   NoRate (%)           : $self->{NoVoteRating}",
+						"   TotalRate (%)        : $self->{PageRating}",
+						"   YesPageRate (%)      : $self->{YesPageRating}",
+						"   NoPageRate (%)       : $self->{NoPageRating}",
+						"   TotalPageRate (%)    : $self->{LocalPageRating}",
+						"   YesVotesTotal        : $self->{YesVotePage}",
+						"   YesSiteTotal         : $self->{YesVoteSite}",
+						"   NoVotesTotal         : $self->{NoVotePage}",
+						"   NoSiteTotal          : $self->{NoVoteSite}",
+						"   StarRating (1 to 10) : $self->{StarRating}",
+						"   TotalRating (1 to 10): $self->{TotalRating}",
 						);
 
 	my @PageVote = <<ENDEOF;
@@ -148,6 +154,10 @@ ENDEOF
 	$PageVote =~ s/<!--NoRate-->/$self->{NoVoteRating}/gi;
 	$PageVote =~ s/<!--TotalRate-->/$self->{PageRating}/gi;
 
+	$PageVote =~ s/<!--YesPageRate-->/$self->{YesPageRating}/gi;
+	$PageVote =~ s/<!--NoPageRate-->/$self->{NoPageRating}/gi;
+	$PageVote =~ s/<!--TotalPageRate-->/$self->{LocalPageRating}/gi;
+
 	$PageVote =~ s/<!--YesVotesTotal-->/$self->{YesVotePage}/gi;
 	$PageVote =~ s/<!--NoVotesTotal-->/$self->{NoVotePage}/gi;
 
@@ -178,7 +188,7 @@ sub PageVote {
 	$self->{crimp}->printdebug('','','Status: Checking for User');
 	my $MyVote = shift;
 
-	my $UserID = join '',$self->{crimp}->{RemoteHost},$self->{crimp}->{HttpRequest};
+	my $UserID = join '',$self->{crimp}->{RemoteHost},$self->{crimp}->HttpRequest;
 	my $CurrTime = time;
 	my $UserTime = $self->{crimp}->FileRead('PageVoteUserTime',$UserID,$CurrTime);
 
@@ -204,13 +214,13 @@ sub CountVote {
 
 	my $MyVote = shift;
 
-	my $VoteCountPage = $self->{crimp}->FileRead(join('','PageVote',$MyVote),$self->{crimp}->{HttpRequest},0);
+	my $VoteCountPage = $self->{crimp}->FileRead(join('','PageVote',$MyVote),$self->{crimp}->HttpRequest,0);
 	my $VoteCountSite = $self->{crimp}->FileRead(join('','PageVote',$MyVote),'TotalVote',0);
 
 	$VoteCountPage++;
 	$VoteCountSite++;
 
-	my $VotePage = $self->{crimp}->FileWrite(join('','PageVote',$MyVote),$self->{crimp}->{HttpRequest},$VoteCountPage);
+	my $VotePage = $self->{crimp}->FileWrite(join('','PageVote',$MyVote),$self->{crimp}->HttpRequest,$VoteCountPage);
 	my $VoteSite = $self->{crimp}->FileWrite(join('','PageVote',$MyVote),'TotalVote',$VoteCountSite);
 } #end sub (CountVote)
 
@@ -218,10 +228,10 @@ sub GetVote {
 	my $self = shift;
 
 	$self->{crimp}->printdebug('','',"Status: Getting Results");
-	$self->{YesVotePage} = $self->{crimp}->FileRead("PageVoteYes",$self->{crimp}->{HttpRequest},0);
+	$self->{YesVotePage} = $self->{crimp}->FileRead("PageVoteYes",$self->{crimp}->HttpRequest,0);
 	$self->{YesVoteSite} = $self->{crimp}->FileRead("PageVoteYes",'TotalVote',0);
 
-	$self->{NoVotePage} = $self->{crimp}->FileRead("PageVoteNo",$self->{crimp}->{HttpRequest},0);
+	$self->{NoVotePage} = $self->{crimp}->FileRead("PageVoteNo",$self->{crimp}->HttpRequest,0);
 	$self->{NoVoteSite} = $self->{crimp}->FileRead("PageVoteNo",'TotalVote',0);
 
 	$self->{YesVoteRating} = 0;
@@ -229,17 +239,29 @@ sub GetVote {
 	$self->{PageRating} = 0;
 
 	my $TotalVoteSite = $self->{YesVoteSite} + $self->{NoVoteSite};
+	my $TotalVotePage = $self->{YesVotePage} + $self->{NoVotePage};
 
 	#BEWARE 'DIVIDE by ZERO' ERRORS if altered
-	if ($TotalVoteSite != 0) {
+	if ($TotalVotePage != 0) {
 		if ($self->{YesVotePage} != 0) {
-			$self->{YesVoteRating} = int(($self->{YesVotePage} / $TotalVoteSite) * 100);
+			$self->{YesPageRating} = int(($self->{YesVotePage} / $TotalVotePage) * 100);
 		}
 		if ($self->{NoVotePage} != 0) {
-			$self->{NoVoteRating} = int(($self->{NoVotePage}  / $TotalVoteSite) * 100);
+			$self->{NoPageRating} = int(($self->{NoVotePage} / $TotalVotePage) * 100);
+		}
+		$self->{LocalPageRating} = int($self->{YesPageRating} - $self->{NoPageRating});
+	}
+		# overall site rating
+	if ($TotalVoteSite != 0) {
+		if ($self->{YesVotePage} != 0) {
+			$self->{YesVoteRating} = int(($self->{YesVoteSite} / $TotalVoteSite) * 100);
+		}
+		if ($self->{NoVotePage} != 0) {
+			$self->{NoVoteRating} = int(($self->{NoVoteSite} / $TotalVoteSite) * 100);
 		}
 		$self->{PageRating} = int($self->{YesVoteRating} - $self->{NoVoteRating});
 	}
+	#END BEWARE
 
 	if (($self->{YesVotePage} != 0) || ($self->{NoVotePage} != 0)) {
 		$self->{StarRating} = int(((((($self->{YesVotePage} - $self->{NoVotePage}) / ($self->{YesVotePage} + $self->{NoVotePage})) * 100 ) + 100 ) / 2 ) / 10 );
@@ -249,18 +271,20 @@ sub GetVote {
 
 	$self->{TotalRating} = int((($self->{PageRating} + 100)/2)/10);
 
-
-	# $self->{YesVoteRating}	percentage of yes votes from total yes votes
-	# $self->{NoVoteRating}		percentage of no votes from total no votes
-	# $self->{PageRating}		Actual percentage rating of page against entire site (-100 - +100)*
+	# $self->{YesVoteRating}	percentage of yes votes for this page from all votes recorded sitewide
+	# $self->{NoVoteRating}		percentage of no votes for this page from all votes recorded sitewide
+	# $self->{YesPageRating}	percentage of yes votes for this page only
+	# $self->{NoPageRating}		percentage of no votes for this page only
+	# $self->{PageRating}		Actual value rating of page from entire site perspective *
+	# $self->{LocalPageRating}	Actual value rating of page derived from only votes on this page *
 	# $self->{YesVotePage}		Actual count of yes votes for page
 	# $self->{YesVoteSite}		Actual count of yes votes for entire site
 	# $self->{NoVotePage}		Actual count of no votes for page
 	# $self->{NoVoteSite}		Actual count of no votes for entire site
-	# $self->{StarRating}		yes votes vs no votes (0 - 10)**
-	# $self->{TotalRating}		overall site rating of page (0 - 10)**
+	# $self->{StarRating}		yes votes vs no votes (0 - 10) **
+	# $self->{TotalRating}		overall site rating of page (0 - 10) **
 	#
-	#    *		0 means average site rating
+	#    *		-100 to +100. +100 being all positive, -100 being all negative, 0 being 50/50
 	#    **		5 means neutral rating
 } #end sub (GetVote)
 
