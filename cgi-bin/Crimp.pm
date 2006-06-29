@@ -33,7 +33,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.2 2006-06-15 14:46:09 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.3 2006-06-29 16:21:10 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -640,12 +640,7 @@ sub PageRead {
   $self->printdebug('Module PageRead','',
                     'BuiltIn Module',
                     "File: $filename");
-  
-  if (!-f $filename) {
-    $filename = join '/', $self->{_ErrorDirectory}, '404.html';
-    $self->printdebug('', 'warn', 'File does not exist',
-                      "Using $self->{_ErrorDirectory}/404.html instead");
-  }
+
   if ( -f $filename ) {
     sysopen (FILE,$filename,O_RDONLY) || $self->printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
     @FileRead=<FILE>;
@@ -653,17 +648,19 @@ sub PageRead {
     $self->printdebug('','pass',"Returning content from $filename"); 
     return "@FileRead";
   }
-    
+
+  $filename = join '/', $self->{_ErrorDirectory}, '404.html';
+  $self->printdebug('', 'warn', "File <$filename> does not exist",
+                    "Using $self->{_ErrorDirectory}/404.html instead");
   $self->ExitCode('404');
-  $self->printdebug('','warn',"File: $filename does not exist");
-  
+
   $newhtml = <<ENDEOF;
 <h1>404 - Page Not Found</h1>
 <p>The document you are looking for has not been found.
 Additionally a 404 Not Found error was encountered while trying to
 use an error document for this request</p>
 ENDEOF
-  
+
   $FileRead = $self->{_DefaultHtml};
   $FileRead =~ s/(<body>)/\1$newhtml/i;
   $FileRead =~ s/(<title>)/\1404 - Page Not Found/i;
@@ -676,11 +673,14 @@ sub lockFileGC {
 	my $lockfile = shift;
 	
 	my $timeout = 60; #seconds
-	if ($@) { $self->printdebug('','WARN','Lock File Garbase Collection Failed.',$@); }
+	if ($@) { $self->printdebug('','warn','Lock File Garbase Collection Failed.',$@); }
 	
 	my $FileDate = (stat($lockfile))[9];
-	my $now = time();
-	if (($now - $FileDate) > $timeout) { $self->printdebug('','PASS','Lock File '.$lockfile.' expunged'); unlink($lockfile); }
+	if ($FileDate > 0) {
+		my $now = time();
+		my $diff = $now - $FileDate;
+		if ($diff > $timeout) { $self->printdebug('','pass',"Lock File $lockfile expunged ($now - $FileDate = $diff ( > $timeout ))"); unlink($lockfile); }
+	}
 }
 
 ####################################################################
