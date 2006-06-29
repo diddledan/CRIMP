@@ -2,7 +2,7 @@ package Crimp::FlatBlog;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: FlatBlog.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, MenuList => [] };
+	my $self = { id => q$Id: FlatBlog.pm,v 2.1 2006-06-29 18:03:29 diddledan Exp $, crimp => $crimp, MenuList => [] };
 	bless $self, $class;
 }
 
@@ -108,24 +108,27 @@ sub execute {
 		#how many entries per page
 		my $limit = 5;
 		
+		$self->{new_content} =~ s/<!--HEADING_LEVEL=([0-6])-->//gi;
+		$heading_level = $1 || 1;
+		
 		#hacky hack to make sure that _all_ entries are available for
 		# display without having an empty entry in the blog file.
-		$self->{new_content} = join '', $self->{new_content}, '<h1>';
+		$self->{new_content} = "$self->{new_content}<h$heading_level>";
 		
 		my $offset = 0;
 		if ($self->{crimp}->queryParam('show') eq 'all') {
 			$self->{crimp}->PageTitle("$BlogTitle - Showing ALL Entries");
-			while ($self->{new_content} =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
+			while ($self->{new_content} =~ s|<h$heading_level>(.*?)</h$heading_level>(.*?)<h$heading_level>|<h$heading_level>|si) {
 				my $EntryTitle = $1;
 				my $EntryText = $2;
 				my $EntryUrl = join '/',$self->{crimp}->userConfig, uri_escape($EntryTitle);
 				$EntryUrl =~ s|/{2,}|/|g;
-				$self->{crimp}->addPageContent("<h1><a href='$EntryUrl'>$EntryTitle</a></h1>\n$EntryText\n");
+				$self->{crimp}->addPageContent("<h$heading_level><a href='$EntryUrl'>$EntryTitle</a></h$heading_level>\n$EntryText\n");
 			}
 		} elsif ($self->{crimp}->queryParam('show') eq 'index') {
 			$self->{crimp}->PageTitle("$BlogTitle - INDEX");
-			$self->{crimp}->addPageContent("<h1>$BlogTitle Index</h1>");
-			while ($self->{new_content} =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si) {
+			$self->{crimp}->addPageContent("<h$heading_level>$BlogTitle Index</h$heading_level>");
+			while ($self->{new_content} =~ s|<h$heading_level>(.*?)</h$heading_level>(.*?)<h$heading_level>|<h$heading_level>|si) {
 				my ($title, $text) = ($1, $2);
 				my $newurl = join '/', $self->{crimp}->userConfig, uri_escape($title);
 				$newurl =~ s|/{2,}|/|g;
@@ -139,14 +142,14 @@ sub execute {
 			$BaseContent = uri_unescape($BaseContent);
 			
 			#show the single entry
-			$self->{new_content} =~ m|<h1>($BaseContent)</h1>(.*?)<h1>|si;
+			$self->{new_content} =~ m|<h$heading_level>($BaseContent)</h$heading_level>(.*?)<h$heading_level>|si;
 			my $EntryTitle = $1;
 			my $EntryContent = $2;
 			#if the requested document doesnt exist - get the first one
 			
 			if (!$EntryTitle && !$EntryContent) {
 				# redirect the user to the correct URL
-				$self->{new_content} =~ m|<h1>(.*?)</h1>|si;
+				$self->{new_content} =~ m|<h$heading_level>(.*?)</h$heading_level>|si;
 				$EntryTitle = uri_escape($1);
 				my $redirectUrl = $self->{crimp}->userConfig;
 				$redirectUrl = "$redirectUrl/$EntryTitle?show=0";
@@ -161,7 +164,7 @@ sub execute {
 			
 			$self->{crimp}->PageTitle("$BlogTitle - $EntryTitle");
 			my $newurl = join '/', $self->{crimp}->userConfig, uri_escape($EntryTitle);
-			$self->{crimp}->addPageContent("<h1>$EntryTitle<br/></h1>\n$EntryContent");
+			$self->{crimp}->addPageContent("<h$heading_level>$EntryTitle<br/></h$heading_level>\n$EntryContent");
 			
 			#show menu entries
 			push @{$self->{MenuList}}, '<b>Entries:</b>';
@@ -171,7 +174,7 @@ sub execute {
 				push @{$self->{MenuList}}, "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Prev]</b></a>";
 			}
 			$self->do_blog_list($offset,$limit);
-			if ($self->{new_content} =~ m|</h1>|i) {
+			if ($self->{new_content} =~ m|</h$heading_level>|i) {
 				$newoffset = $offset + $limit;
 				push @{$self->{MenuList}}, "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Next]</b></a>";
 			}
@@ -192,10 +195,10 @@ sub do_blog_list {
 	my ($self,$offset,$limit) = @_;
 	if ($offset > 0) {
 		my $offset_counter = 0;
-		while (($offset_counter++ < $offset) && ($self->{new_content} =~ s|<h1>.*?<h1>|<h1>|si)) {};
+		while (($offset_counter++ < $offset) && ($self->{new_content} =~ s|<h$heading_level>.*?<h$heading_level>|<h$heading_level>|si)) {};
 	}
 	for (my $counter = 0; $counter < $limit; $counter++) {
-		$self->{new_content} =~ s|<h1>(.*?)</h1>(.*?)<h1>|<h1>|si;
+		$self->{new_content} =~ s|<h$heading_level>(.*?)</h$heading_level>(.*?)<h$heading_level>|<h$heading_level>|si;
 		if ($1 && $2) {
 			my ($title, $text) = ($1, $2);
 			my $newurl = join '/', $self->{crimp}->userConfig, uri_escape($1);
