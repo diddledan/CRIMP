@@ -33,7 +33,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.3 2006-06-29 16:21:10 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.4 2006-07-14 20:16:24 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -57,6 +57,7 @@ sub new {
     _ContentType => 'text/html',
     _PageTitle => 'CRIMP',
     _ExitCode => '204',
+    _ConfDebugMode => '',
     _DebugMode => 'off',
     _PageRead => '',
     _VarDirectory => '../cgi-bin/Crimp/var',
@@ -146,7 +147,8 @@ sub sendDocument {
   print header($self->ContentType,$self->ExitCode,$self->{_cookies});
 
   if ($self->{_DebugMode} eq 'on') {
-    my $PRINT_DEBUG = join '','<a name="crimpDebug" id="crimpDebug"></a>','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table>\n";
+    my $PRINT_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table></div></div>\n";
+    $PRINT_DEBUG = "$PRINT_DEBUG<script type='text/javascript'><!--\nshowDebug();\n//--></script>\n" if ($self->{_ConfDebugMode} eq "page");
     $self->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;
   }
 
@@ -255,6 +257,8 @@ sub execute {
   $self->addHeaderContent(join('','<meta name="keywords" content="',$self->{_KeywordsMeta},'" />')) if ($self->{_KeywordsMeta} ne '');
   $self->addHeaderContent(join('','<meta name="description" content="',$self->{_DescriptionMeta},'" />')) if ($self->{_DescriptionMeta} ne '');
   $self->addHeaderContent('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
+  $self->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/browserdetector.js"></script>');
+  $self->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/debug.js"></script>');
 
   #############
   ## The End ##
@@ -348,7 +352,8 @@ sub applyConfig {
   my $self = shift;
   
   #switch to debug mode if set in crimp.ini
-  if ($self->{_DebugMode} ne 'on'){
+  $self->{_ConfDebugMode} = $self->{Config}->{_}->{DebugMode};
+  if ($self->{_DebugMode} ne 'on') {
     if (($self->{Config}->{_}->{DebugMode} eq 'page') && ($self->queryParam('debug') eq 'on')) {
       $self->{_DebugMode} = 'on';
     } else {
@@ -625,7 +630,7 @@ sub printdebug {
   if ($exit) {
   #Call Multi lang 500 - Server Error Page
     print header('text/html', 500);
-    my $FAIL_DEBUG = join '','<a name="crimpDebug" id="crimpDebug"></a>','<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#000000">', $self->{PRINT_DEBUG}, "</table>\n";
+    my $FAIL_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#000000">', $self->{PRINT_DEBUG}, "</table></div></div>\n";
     $self->{DisplayHtml} = $self->PageRead("Crimp/errors/500.html");
     $self->{DisplayHtml} =~ s|(</body>)|$FAIL_DEBUG\1|i;
     print $self->{DisplayHtml};
