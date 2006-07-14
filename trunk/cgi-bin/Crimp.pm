@@ -33,7 +33,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.4 2006-07-14 20:16:24 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.5 2006-07-14 21:33:23 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -148,7 +148,7 @@ sub sendDocument {
 
   if ($self->{_DebugMode} eq 'on') {
     my $PRINT_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table></div></div>\n";
-    $PRINT_DEBUG = "$PRINT_DEBUG<script type='text/javascript'><!--\nshowDebug();\n//--></script>\n" if ($self->{_ConfDebugMode} eq "page");
+    $PRINT_DEBUG = "$PRINT_DEBUG<script type='text/javascript'><!--\nshowDebug();\n//--></script>\n" if ($self->queryParam('debug') eq 'on');
     $self->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;
   }
 
