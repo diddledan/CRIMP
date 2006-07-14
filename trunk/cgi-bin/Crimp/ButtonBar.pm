@@ -3,7 +3,7 @@ package Crimp::ButtonBar;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: ButtonBar.pm,v 2.1 2006-03-17 16:39:05 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: ButtonBar.pm,v 2.2 2006-07-14 20:16:24 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 }
 
@@ -37,7 +37,7 @@ sub execute {
  src="/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/pics/edit.gif" alt="Edit"
  style="border: 0px solid ; width: 26px; height: 25px;"/></a><a href="<!--debug-->"><img
  src="/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/pics/debug.gif" alt="Debug"
- style="border: 0px solid ; width: 26px; height: 25px;"/></a>
+ style="border: 0px solid ; width: 26px; height: 25px;" onClick="showDebug(); return false;"/></a>
 ENDEOF
 	
 	if ($self->{crimp}->{ButtonBar} eq 'Default') {
