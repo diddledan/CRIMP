@@ -33,7 +33,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.6 2006-07-15 11:05:42 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.7 2006-07-15 16:27:57 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -55,7 +55,7 @@ sub new {
     _HttpQuery =>  $ENV{'REDIRECT_QUERY_STRING'},
     _PostQuery => undef,
     _ContentType => 'text/html',
-    _PageTitle => 'CRIMP',
+    _PageTitle => 'Powered By CRIMP',
     _ExitCode => '204',
     _ConfDebugMode => '',
     _DebugMode => 'off',
@@ -275,9 +275,30 @@ sub redirect {
   print CGI::redirect($url);
 }
 
+sub stripHtmlHeaderFooter {
+	my $self = shift;
+	my $html = shift;
+
+	#parse headers storing the title of the page
+	$html =~ m|<title>(.*?)</title>|si;
+	my $title = $1;
+	#remove everything down to <body>
+	$html =~ s|.*?<body.*?>||si;
+	#remove everything after </body>
+	$html =~ s|</body>.*||si;
+	return ($title, $html);
+}
+
 sub PageTitle {
-  my ($self, $pt) = @_;
-  $self->{_PageTitle} = $pt if defined $pt;
+  my ($self, $pt, $override) = @_;
+  if (defined $pt) {
+    if (defined $override) {
+      $self->{_PageTitle} = $pt;
+    } else {
+      my $seperator = $self->{Config}->{_}->{TitleSeperator} || ' - ';
+      $self->{_PageTitle} = $pt.$seperator.$self->{_PageTitle};
+    }
+  }
   return $self->{_PageTitle};
 }
 
@@ -367,6 +388,7 @@ sub applyConfig {
   $self->HtmlDirectory($self->{Config}->{_}->{HtmlDirectory}) if $self->{Config}->{_}->{HtmlDirectory};
   $self->CgiDirectory($self->{Config}->{_}->{CgiDirectory}) if $self->{Config}->{_}->{CgiDirectory};
   $self->DefaultProxy($self->{Config}->{_}->{DefaultProxy}) if $self->{Config}->{_}->{DefaultProxy};
+  $self->PageTitle($self->{Config}->{_}->{SiteTitle}, 1) if $self->{Config}->{_}->{SiteTitle};
 }
 
 sub loadConfig {
