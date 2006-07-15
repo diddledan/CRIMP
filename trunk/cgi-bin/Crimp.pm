@@ -33,7 +33,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.7 2006-07-15 16:27:57 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.8 2006-07-15 16:58:19 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -296,7 +296,11 @@ sub PageTitle {
       $self->{_PageTitle} = $pt;
     } else {
       my $seperator = $self->{Config}->{_}->{TitleSeperator} || ' - ';
-      $self->{_PageTitle} = $pt.$seperator.$self->{_PageTitle};
+      if ($self->{Config}->{_}->{TitleOrder} eq 'forward') {
+        $self->{_PageTitle} = $self->{_PageTitle}.$seperator.$pt;
+      } else {
+        $self->{_PageTitle} = $pt.$seperator.$self->{_PageTitle};
+      }
     }
   }
   return $self->{_PageTitle};

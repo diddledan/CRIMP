@@ -1,6 +1,12 @@
-#Global Options
-#all files must default to standard redirection
-#default options configure files for the local server only
+# Global Options
+# all files must default to standard redirection
+# default options configure files for the local server only
+
+# Title Display Order set to "forward" to list the title as "SiteTitle - PageTitle - SubPageTitle ....."
+# or leave unset to have it in reverse order
+#TitleOrder = forward
+# Main SiteTitle (the last, or first if 'TitleOrder' is set, entry on the titlebar)
+#SiteTitle = CRIMP
 
 DebugMode = page
 
@@ -11,8 +17,6 @@ ButtonBar = Default
 
 #declare a sitewide navigation menu (not currently used)
 #SiteMenu = SiteWide.mnu
-
-#SiteTitle = CRIMP
 
 #lets add some festive cheer - comment out to disable
 #Snow = on
