@@ -2,7 +2,7 @@ package Crimp::ContentListing;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: ContentListing.pm,v 2.4 2006-07-15 16:40:52 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: ContentListing.pm,v 2.5 2006-07-15 16:45:25 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -43,7 +43,7 @@ sub execute {
 	my $BaseUrl = '';
 	
 	foreach (@HttpRequest) {
-		if (-d "$FileDir/$part") {
+		if (-d "$FileDir/$_") {
 			$FileDir = join '/', $FileDir, $_;
 			$BaseUrl = join '/', $BaseUrl, $_;
 		}
@@ -69,7 +69,7 @@ sub execute {
 	}
 	
 	if ( !-d $FileDir ) {
-		&printdebug('', 'warn', 'Configured file is _NOT_ a directory. Bailing out.');
+		$self->{crimp}->printdebug('', 'warn', 'Configured file is _NOT_ a directory. Bailing out.');
 		return;
 	}
 	
