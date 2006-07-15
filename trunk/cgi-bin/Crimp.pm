@@ -33,7 +33,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.5 2006-07-14 21:33:23 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.6 2006-07-15 11:05:42 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -147,7 +147,7 @@ sub sendDocument {
   print header($self->ContentType,$self->ExitCode,$self->{_cookies});
 
   if ($self->{_DebugMode} eq 'on') {
-    my $PRINT_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table></div></div>\n";
+    my $PRINT_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table></div><div id='closeDebugBtn'><a href='#' onClick='hideDebug()'><img src='/crimp_assets/pics/close.gif' style='border: 0;' alt='close' title='close debug view' /></a></div></div>\n<script type='text/javascript'><!--\ndebugInit();\n//--></script>\n";
     $PRINT_DEBUG = "$PRINT_DEBUG<script type='text/javascript'><!--\nshowDebug();\n//--></script>\n" if ($self->queryParam('debug') eq 'on');
     $self->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;
   }
@@ -257,7 +257,9 @@ sub execute {
   $self->addHeaderContent(join('','<meta name="keywords" content="',$self->{_KeywordsMeta},'" />')) if ($self->{_KeywordsMeta} ne '');
   $self->addHeaderContent(join('','<meta name="description" content="',$self->{_DescriptionMeta},'" />')) if ($self->{_DescriptionMeta} ne '');
   $self->addHeaderContent('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
-  $self->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/browserdetector.js"></script>');
+  $self->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/prototype/prototype.js"></script>');
+  $self->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/moo/moo.fx.js"></script>');
+  $self->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/moo/moo.fx.pack.js"></script>');
   $self->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/debug.js"></script>');
 
   #############
