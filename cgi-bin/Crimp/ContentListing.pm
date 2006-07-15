@@ -2,7 +2,7 @@ package Crimp::ContentListing;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: ContentListing.pm,v 2.3 2006-06-15 15:07:42 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: ContentListing.pm,v 2.4 2006-07-15 16:40:52 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -42,13 +42,13 @@ sub execute {
 	my @HttpRequest = split(/\//,$self->{crimp}->HttpRequest);
 	my $BaseUrl = '';
 	
-	foreach my $part (@HttpRequest) {
+	foreach (@HttpRequest) {
 		if (-d "$FileDir/$part") {
-			$FileDir = join '/', $FileDir, $part;
-			$BaseUrl = join '/', $BaseUrl, $part;
+			$FileDir = join '/', $FileDir, $_;
+			$BaseUrl = join '/', $BaseUrl, $_;
 		}
-		if (($part ne '') && (grep /.download/, $part)){
-			$DownloadFile = $part;
+		if (($_ ne '') && (grep /.download/, $_)){
+			$DownloadFile = $_;
 			$DownloadFile =~ s/\.download$//;
 		}
 	}
