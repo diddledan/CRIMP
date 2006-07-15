@@ -4,7 +4,7 @@ package Crimp::ContentDirectory;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: ContentDirectory.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: ContentDirectory.pm,v 2.1 2006-07-15 16:27:57 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 	return $self;
 }
@@ -35,10 +35,13 @@ sub execute {
 
 	# Use error page
 	if (( !-f $requested )||( -d $requested )||( !-r $requested)) {
-		$self->{crimp}->printdebug('', 'warn', 'Couldnt open file for reading',
-								"Error: $!");
+		$self->{crimp}->printdebug('', 'warn', 'Couldnt open file for reading', "Error: $!");
 
-		$self->{crimp}->addPageContent($self->{crimp}->PageRead(join('/',$self->{crimp}->{_ErrorDirectory},$self->{crimp}->{_DefaultLang},'404-ContentDirectory.html')));
+		my $content = $self->{crimp}->PageRead(join('/',$self->{crimp}->{_ErrorDirectory},$self->{crimp}->{_DefaultLang},'404-ContentDirectory.html'));
+		my $title = '';
+		($title, $content) = $self->{crimp}->stripHtmlHeaderFooter($content);
+		$self->{crimp}->PageTitle($title);
+		$self->{crimp}->addPageContent($content);
 		$self->{crimp}->ExitCode('404');
 
 		# finish execution of this sub;
@@ -52,10 +55,11 @@ sub execute {
 		
 		if (@display_content) {
 			my $newcontent = '';
-			foreach (@display_content) {
-				$newcontent = "$newcontent$_";
-			}
-			$self->{crimp}->addPageContent($newcontent);
+			$newcontent = $newcontent.$_ foreach (@display_content);
+
+			my ($title, $content) = $self->{crimp}->stripHtmlHeaderFooter($newcontent);
+			$self->{crimp}->PageTitle($title) if $title;
+			$self->{crimp}->addPageContent($content);
 			
 			####
 			

@@ -3,7 +3,7 @@ package Crimp::DocumentTemplate;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: DocumentTemplate.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: DocumentTemplate.pm,v 2.1 2006-07-15 16:27:57 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 	return $self;
 }
@@ -68,20 +68,8 @@ sub insertContent {
 	my $self = shift;
 	my $template = shift;
 
-	#remove xml header if present
-	$self->{crimp}->{DisplayHtml} =~ s|<\?xml.*?\?>||si;
-	#remove doctype if present
-	$self->{crimp}->{DisplayHtml} =~ s|<!DOCTYPE.*?>||si;
-	#remove headers storing the title of the page
-	$self->{crimp}->{DisplayHtml} =~ s|<title>(.*?)</title>||si;
-	#if we insert content then this is important
-	my $pageTitle = $1;
-	
-	#strip from <html> down to the opening <body> tag
-	$self->{crimp}->{DisplayHtml} =~ s|<html.*?>.*?<body.*?>||si;
-	#remove the closing </body> tag and any cruft after - alas, that's nothing to do with the dogshow
-	$self->{crimp}->{DisplayHtml} =~ s|</body>.*||si;
-	
+	my ($null,$content) = $self->{crimp}->stripHtmlHeaderFooter($self->{crimp}->{DisplayHtml});
+	my $pageTitle = $self->{crimp}->PageTitle();
 	if ($pageTitle eq '') {
 		$self->{crimp}->printdebug('','warn','The Page has no title');
 	} else {
@@ -89,7 +77,7 @@ sub insertContent {
 		$template =~ s|(</title>)|$pageTitle\1|i;;
 	}
 	
-	$template =~ s/<!--PAGE_CONTENT-->/$self->{crimp}->{DisplayHtml}/gi;
+	$template =~ s/<!--PAGE_CONTENT-->/$content/gi;
 	
 	$self->{crimp}->{DisplayHtml} = $template;
 }
