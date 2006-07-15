@@ -2,7 +2,7 @@ package Crimp::ContentDatabase;
 
 sub new {
   my ($class, $crimp) = @_;
-  my $self = { id => q$Id: ContentDatabase.pm,v 2.1 2006-03-16 15:40:04 diddledan Exp $, crimp => $crimp, };
+  my $self = { id => q$Id: ContentDatabase.pm,v 2.2 2006-07-15 16:38:01 diddledan Exp $, crimp => $crimp, };
   bless $self, $class;
 }
 
@@ -24,12 +24,12 @@ sub execute {
   
   #get the configuration values
   my $UserConfig = $self->{crimp}->userConfig;
-  $db_type = $self->{crimp}->{Config}->{$UserConfig}->{DBType};
-  $db_db = $self->{crimp}->{Config}->{$UserConfig}->{DBName};
-  $db_table = $self->{crimp}->{Config}->{$UserConfig}->{DBTable};
-  $db_host = $self->{crimp}->{Config}->{$UserConfig}->{DBHost};
-  $db_user = $self->{crimp}->{Config}->{$UserConfig}->{DBUserName};
-  $db_pass = $self->{crimp}->{Config}->{$UserConfig}->{DBUserPass};
+  $db_type = $self->{crimp}->{Config}->{$UserConfig}->{DBType} || $self->{crimp}->{_}->{DBType};
+  $db_db = $self->{crimp}->{Config}->{$UserConfig}->{DBName} || $self->{crimp}->{_}->{DBName};
+  $db_table = $self->{crimp}->{Config}->{$UserConfig}->{ContentDatabaseTable};
+  $db_host = $self->{crimp}->{Config}->{$UserConfig}->{DBHost} || $self->{crimp}->{_}->{DBHost};
+  $db_user = $self->{crimp}->{Config}->{$UserConfig}->{DBUserName} || $self->{crimp}->{_}->{DBUserName};
+  $db_pass = $self->{crimp}->{Config}->{$UserConfig}->{DBUserPass} || $self->{crimp}->{_}->{DBUserPass};
   
   #connect to the database
   my $dbh = DBI->connect("DBI:$db_type:database=$db_db:host=$db_host", $db_user, $db_pass, {'RaiseError' => 1, 'PrintError' => 0});
@@ -47,7 +47,7 @@ sub execute {
   $path ||= 'root';
   
   #prepare the query
-  $sth = $dbh->prepare("SELECT content,title FROM `$db_table` WHERE path='$path' LIMIT 1");
+  $sth = $dbh->prepare("SELECT content FROM `$db_table` WHERE path='$path' LIMIT 1");
   #execute the query in an eval block so that we can catch any errors
   eval {$sth->execute()};
   
@@ -71,11 +71,11 @@ sub execute {
           $self->{crimp}->printdebug('', 'warn', 'Errors running the script from the database for this page:', $@);
         }
       } else {
-        $content = $ref->{'content'};
+        ($title,$content) = $self->{crimp}->stripHtmlHeaderFooter($ref->{'content'});
         $self->{crimp}->printdebug('', 'pass', 'Content retreived from database and sent to the templating engine.'); 
       }
       $self->{crimp}->ExitCode('200');
-      $self->{crimp}->PageTitle($ref->{'title'});
+      $self->{crimp}->PageTitle($title);
       $self->{crimp}->addPageContent($content);
     } else {
       $self->{crimp}->addPageContent('Error 404, not found.');
