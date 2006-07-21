@@ -24,6 +24,7 @@
 package Crimp;
 
 use CGI qw(:standard);
+use CGI::Cookie;
 use Config::Tiny;
 use Fcntl;
 use URI::Escape;
@@ -33,11 +34,11 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.8 2006-07-15 16:58:19 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.9 2006-07-21 17:06:28 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
-  
+
   my $self = {
     version => $version,
     VER => $VER,
@@ -73,7 +74,8 @@ sub new {
     _MenuDiv => '',
     _GetData => undef,
     _PostData => undef,
-    _cookies => [],
+    _sendCookies => [],
+    _receivedCookies => (),
     DisplayHtml => undef,
     Config => undef,
   };
@@ -92,6 +94,7 @@ sub new {
   
   (%{$self->{_PostData}}, $self->{PostQuery}) = @{$self->parsePOSTed()};
   %{$self->{_GetData}} = $self->parseGETed();
+  $self->{rceivedCookies} = $self->parseCookies();
   $self->{_HttpQuery} = join '', '?', $self->{_HttpQuery} if ($self->{_HttpQuery});
   
   @{$self->{_IniCommands}} = $self->parsePlugins();
@@ -144,7 +147,7 @@ sub sendDocument {
     "ExitCode: $self->{ExitCode}"
   );
   
-  print header($self->ContentType,$self->ExitCode,$self->{_cookies});
+  print header($self->ContentType,$self->ExitCode,$self->{_sendCookies});
 
   if ($self->{_DebugMode} eq 'on') {
     my $PRINT_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table></div><div id='closeDebugBtn'><a href='#' onClick='hideDebug()'><img src='/crimp_assets/pics/close.gif' style='border: 0;' alt='close' title='close debug view' /></a></div></div>\n<script type='text/javascript'><!--\ndebugInit();\n//--></script>\n";
@@ -356,7 +359,13 @@ sub ExitCode {
 sub addCookie {
   my ($self, $cookie) = @_;
   return if not defined $cookie;
-  push @{$self->{_cookies}}, $cookie;
+  push @{$self->{_sendCookies}}, $cookie;
+  $self->printdebug('','pass','Adding Cookie')
+}
+
+sub getCookie {
+	my ($self, $cookiename) = @_;
+	return %{$self->{_receivedCookies}}->{$cookiename};
 }
 
 sub userConfig {
@@ -486,6 +495,29 @@ sub parsePlugins {
     $self->printdebug('Available Plugins', 'pass', $iniout);
   }
   return @inicmds;
+}
+
+sub parseCookies {
+	my $self = shift;
+
+	my %cookies = fetch CGI::Cookie();
+	my @keys = keys %cookies;
+	foreach (@keys) {
+		my $key = $_;
+		my $value = $cookies{$key};
+		$key =~ s/([^\\])\+/\1 /g;
+		$key = uri_unescape($key);
+		
+		$value =~ s/([^\\])\+/\1 /g;
+		$value = uri_unescape($value);
+		my $junk;
+		($value, $junk) = split(';', $value);
+		$self->{_receivedCookies}->{$key} = $value;
+$self->printdebug('','',"name: $key;; value: $value;;");
+	}
+	my @newkeys = keys %{$self->{_receivedCookies}};
+	my $n = $#newkeys + 1;
+	$self->printdebug('Cookie Initialisation','pass',"Found $n cookies", 'Cookie Names:', '&nbsp;&nbsp;'.join(",\n&nbsp;&nbsp;", @newkeys));
 }
 
 sub parseGETed {
