@@ -34,7 +34,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.9 2006-07-21 17:06:28 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.10 2006-07-21 17:18:47 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -513,7 +513,6 @@ sub parseCookies {
 		my $junk;
 		($value, $junk) = split(';', $value);
 		$self->{_receivedCookies}->{$key} = $value;
-$self->printdebug('','',"name: $key;; value: $value;;");
 	}
 	my @newkeys = keys %{$self->{_receivedCookies}};
 	my $n = $#newkeys + 1;
