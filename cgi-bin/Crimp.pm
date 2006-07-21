@@ -34,7 +34,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.10 2006-07-21 17:18:47 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.11 2006-07-21 19:13:08 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -149,7 +149,7 @@ sub sendDocument {
   
   print header($self->ContentType,$self->ExitCode,$self->{_sendCookies});
 
-  if ($self->{_DebugMode} eq 'on') {
+  if ($self->{_DebugMode} eq 'on' && $self->{Config}->{$self->userConfig}->{DebugMode} ne 'off') {
     my $PRINT_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table></div><div id='closeDebugBtn'><a href='#' onClick='hideDebug()'><img src='/crimp_assets/pics/close.gif' style='border: 0;' alt='close' title='close debug view' /></a></div></div>\n<script type='text/javascript'><!--\ndebugInit();\n//--></script>\n";
     $PRINT_DEBUG = "$PRINT_DEBUG<script type='text/javascript'><!--\nshowDebug();\n//--></script>\n" if ($self->queryParam('debug') eq 'on');
     $self->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;
@@ -245,13 +245,13 @@ sub execute {
   my %executedCommands = {};
   $self->{skipRemainingPlugins} = 0;
   foreach (split ',', $self->{Config}->{$self->userConfig}->{PluginOrder}) {
-    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++));
+    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->{Config}->{$self->userConfig}->{$_} eq 'off'));
   }
   foreach (split ',', $self->{Config}->{_}->{PluginOrder}) {
-    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++));
+    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->{Config}->{$self->userConfig}->{$_} eq 'off'));
   }
   foreach (@{$self->{_IniCommands}}) {
-    $self->executePlugin($_) if (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++)));
+    $self->executePlugin($_) if (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++ || ($self->{Config}->{$self->userConfig}->{$_} eq 'off'))));
   }
 
   #add the extra CRIMP-specific HTML headers
