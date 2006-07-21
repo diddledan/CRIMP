@@ -3,7 +3,7 @@ use CGI qw(:standard);
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: UserAuth.pm,v 2.1 2006-03-27 19:34:27 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: UserAuth.pm,v 2.2 2006-07-21 17:05:32 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -20,10 +20,13 @@ sub execute {
 	
 	$self->{crimp}->printdebug('','','Using plain text passwd backend');
 	
-	my ($username, $password, $cookie);
-	if ($cookie = cookie(join ':', $self->{crimp}->userConfig, 'authtok')) {
-		($username, $password) = split /:/, $cookie;
-	}
+	my ($username, $password, $cookie, $usrcfg);
+	$cookie = $self->{crimp}->getCookie(join(':', $self->{crimp}->userConfig, 'authtok'));
+$self->{crimp}->printdebug('','warn',$cookie);
+	my $removestr = join ':', $self->{crimp}->{UserConfig},'authtok=';
+	($usrcfg, $username, $password) = split /:/, $cookie if $cookie;
+	($junk, $username) = split /=/, $username if $username;
+	
 	$username ||= $self->{crimp}->queryParam(username);
 	$password ||= $self->{crimp}->queryParam(password);
 	
@@ -35,11 +38,11 @@ sub execute {
 		$self->setupLoginForm('Username and Password must <em>both</em> be specified!');
 	} elsif ($self->doFileAuth($username, $password)) {
 		$self->{crimp}->printdebug('','pass',"User '$username' is authenticated to access this section");
-		$self->{crimp}->addCookie, cookie(-name => join(':',$self->{crimp}->userConfig,'authtok'),
+		$self->{crimp}->addCookie(cookie(-name => join(':', $self->{crimp}->userConfig, 'authtok'),
 			-value => join(':',$username,$password),
-			-path => $self->{crimp}->userConfig);
+			-path => $self->{crimp}->userConfig));
 	} else {
-		$self->{crimp}->setupLoginForm('Username and password do not match our database.');
+		$self->setupLoginForm('Username and password do not match our database.');
 	}
 }
 
