@@ -3,7 +3,7 @@ package Crimp::PageVote;
 sub new {
 	my ($class, $crimp) = @_;
         my $self = {
-        	id => q$Id: PageVote.pm,v 2.2 2006-06-15 16:26:42 diddledan Exp $,
+        	id => q$Id: PageVote.pm,v 2.3 2006-07-27 23:12:07 diddledan Exp $,
                 crimp => $crimp,
                 YesVoteRating => 0,
 		NoVoteRating => 0,
@@ -25,7 +25,7 @@ sub new {
 sub execute {
 	my $self = shift;
 
-        $self->{crimp}->printdebug('Module PageVote',
+        $self->{crimp}->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
 			"Version: $ID",

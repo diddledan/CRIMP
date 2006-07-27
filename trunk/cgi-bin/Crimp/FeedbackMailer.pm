@@ -3,7 +3,7 @@ package Crimp::FeedbackMailer;
 sub new {
 	my ($class, $crimp) = @_;
 	my $self = {
-		id => q$Id: FeedbackMailer.pm,v 1.1 2006-07-22 22:45:24 diddledan Exp $,
+		id => q$Id: FeedbackMailer.pm,v 1.2 2006-07-27 23:12:06 diddledan Exp $,
 		crimp => $crimp,
 		sendmail => '/usr/sbin/sendmail -t',
 		errImg => '<img src="/crimp_assets/pics/error.gif" alt="error" title="error" style="vertical-align: middle;" />',
@@ -14,7 +14,7 @@ sub new {
 sub execute {
 	my $self = shift;
 	my $crimp = $self->{crimp};
-	$crimp->printdebug('Module FeedbackMailer',
+	$crimp->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
 			"Version: $self->{id}",

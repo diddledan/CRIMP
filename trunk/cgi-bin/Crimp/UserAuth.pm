@@ -3,14 +3,14 @@ use CGI qw(:standard);
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: UserAuth.pm,v 2.3 2006-07-21 17:19:54 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: UserAuth.pm,v 2.4 2006-07-27 23:12:07 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
 sub execute {
 	my $self = shift;
 	
-	$self->{crimp}->printdebug('Module UserAuth','',
+	$self->{crimp}->printdebug('','',
 				'Authors: The CRIMP Team',
 				"Version: $self->{id}",
 				'http://crimp.sourceforge.net/',

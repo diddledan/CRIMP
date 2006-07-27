@@ -23,18 +23,12 @@
 
 package Crimp;
 
-use CGI qw(:standard);
-use CGI::Cookie;
-use Config::Tiny;
-use Fcntl;
-use URI::Escape;
-
 #constructor
 sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.12 2006-07-27 16:21:40 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.13 2006-07-27 23:12:03 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -76,8 +70,10 @@ sub new {
     _PostData => undef,
     _sendCookies => [],
     _receivedCookies => (),
+    _ConfigMode => 'xml',
     DisplayHtml => undef,
     Config => undef,
+    FullConfig => undef,
   };
   
   bless $self, $class;
@@ -91,6 +87,14 @@ sub new {
                     "Public Version: $self->{VER}",
                     "Internal Version: $self->{id}",
                     'http://crimp.sourceforge.net/');
+
+  use CGI qw(:standard);
+  eval {use CGI::Cookie;use Fcntl;use URI::Escape;};
+  if ($@) {
+    $self->errorPage('','500');
+    $self->printdebug('Initialisation Failure','fail','Could not load all required modules:',"&nbsp;&nbsp;$@");
+    return;
+  }
   
   (%{$self->{_PostData}}, $self->{PostQuery}) = @{$self->parsePOSTed()};
   %{$self->{_GetData}} = $self->parseGETed();
@@ -98,6 +102,7 @@ sub new {
   $self->{_HttpQuery} = join '', '?', $self->{_HttpQuery} if ($self->{_HttpQuery});
   
   @{$self->{_IniCommands}} = $self->parsePlugins();
+  $self->loadPlugins();
   
   $self->{_ServerProtocol} =~ s|^(http[s]?).*$|\1://|i;
   $self->{_ErrorDirectory} = '../cgi-bin/Crimp/errors';
@@ -203,32 +208,13 @@ sub execute {
   );
 
   # RobotsMeta
-  if ($self->{Config}->{$self->userConfig}->{RobotsMeta} ne '') {
-    $self->{_RobotsMeta} = $self->{Config}->{$self->userConfig}->{RobotsMeta};
-  } elsif ($self->{Config}->{_}->{RobotsMeta} ne '') {
-    $self->{_RobotsMeta} = $self->{Config}->{_}->{RobotsMeta};
-  }
-  
+  $self->{_RobotsMeta} = $self->Config('RobotsMeta') if ($self->Config('RobotsMeta'));
   # KeywordsMeta
-  if ($self->{Config}->{$self->userConfig}->{KeywordsMeta} ne '') {
-    $self->{_KeywordsMeta} = $self->{Config}->{$self->userConfig}->{KeywordsMeta};
-  } elsif ($self->{Config}->{_}->{KeywordsMeta} ne '') {
-    $self->{_KeywordsMeta} = $self->{Config}->{_}->{KeywordsMeta};
-  }
-
+  $self->{_KeywordsMeta} = $self->Config('KeywordsMeta') if ($self->Config('KeywordsMeta'));
   # DescriptionMeta
-  if ($self->{Config}->{$self->userConfig}->{DescriptionMeta} ne '') {
-    $self->{_DescriptionMeta} = $self->{Config}->{$self->userConfig}->{DescriptionMeta};
-  } elsif ($self->{Config}->{_}->{DescriptionMeta} ne '') {
-    $self->{_DescriptionMeta} = $self->{Config}->{_}->{DescriptionMeta};
-  }
-
+  $self->{_DescriptionMeta} = $self->Config('DescriptionMeta') if ($self->Config('DescriptionMeta'));
   # PageRead
-  if ($self->{Config}->{$self->userConfig}->{PageRead} ne '') {
-    $self->{_PageRead} = $self->{Config}->{$self->userConfig}->{PageRead};
-  } elsif ($self->{Config}->{_}->{PageRead} ne '') {
-    $self->{_PageRead} = $self->{Config}->{_}->{PageRead};
-  }
+  $self->{_PageRead} = $self->Config('PageRead') if ($self->Config('PageRead'));
 
   ####################################################################
   ## call the builtins in order ##
@@ -244,14 +230,15 @@ sub execute {
 
   my %executedCommands = {};
   $self->{skipRemainingPlugins} = 0;
+
   foreach (split ',', $self->{Config}->{$self->userConfig}->{PluginOrder}) {
-    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_) eq 'off'));
+    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_, 'switch') eq 'off'));
   }
   foreach (split ',', $self->{Config}->{_}->{PluginOrder}) {
-    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_) eq 'off'));
+    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_, 'switch') eq 'off'));
   }
   foreach (@{$self->{_IniCommands}}) {
-    $self->executePlugin($_) if (($self->Config($_) ne 'off') && (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++))));
+    $self->executePlugin($_) if (($self->Config($_, 'switch') ne 'off') && (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++))));
   }
 
   #add the extra CRIMP-specific HTML headers
@@ -298,8 +285,8 @@ sub PageTitle {
     if (defined $override) {
       $self->{_PageTitle} = $pt;
     } else {
-      my $seperator = $self->{Config}->{_}->{TitleSeperator} || ' - ';
-      if ($self->{Config}->{_}->{TitleOrder} eq 'forward') {
+      my $seperator = $self->Config('TitleSeperator') || ' - ';
+      if ($self->Config('TitleOrder') eq 'forward') {
         $self->{_PageTitle} = $self->{_PageTitle}.$seperator.$pt;
       } else {
         $self->{_PageTitle} = $pt.$seperator.$self->{_PageTitle};
@@ -307,6 +294,31 @@ sub PageTitle {
     }
   }
   return $self->{_PageTitle};
+}
+
+sub errorPage {
+	my ($self, $plugin, $errCode) = @_;
+	$plugin &&= "-$plugin";
+	$errCode ||= '404';
+
+	my @errFiles = (
+		"$self->{_ErrorDirectory}/$self->{_DefaultLang}/$errCode$plugin.html",
+		"$self->{_ErrorDirectory}/$errCode$plugin.html",
+		"$self->{_ErrorDirectory}/$self->{_DefaultLang}/$errCode.html",
+		"$self->{_ErrorDirectory}/$errCode.html",
+	);
+
+	for (@errFiles) {
+		if (-e $_) {
+			my $content = $self->PageRead($_);
+			my $title;
+			($title, $content) = $self->stripHtmlHeaderFooter($content);
+			$self->addPageContent($content);
+			$self->PageTitle($title);
+			$self->ExitCode($errCode);
+			return;
+		}
+	}
 }
 
 sub DefaultProxy {
@@ -385,11 +397,85 @@ sub queryParam {
 
 sub Config {
 	#return the configuration for the specified key from the crimp.ini file
-	my ($self, $key) = @_;
-	return $self->{Config}->{$self->userConfig}->{$key} if $self->{Config}->{$self->userConfig}->{$key};
-	return $self->{Config}->{_}->{$key} if $self->{Config}->{_}->{$key};
+	my ($self, $plugin, $key) = @_;
+	$key ||= 'value';
+	if ($self->{_ConfigMode} eq 'ini') {
+		return $self->{Config}->{$self->userConfig}->{$key} if $self->{Config}->{$self->userConfig}->{$key};
+		return $self->{Config}->{_}->{$key} if $self->{Config}->{_}->{$key};
+	}
+	return $self->{Config}->{$self->userConfig}->{plugin}->{$plugin}->{$key} if $self->{Config}->{$self->userConfig}->{plugin}->{$plugin}->{$key};
+	return $self->{Config}->{$self->userConfig}->{$plugin} if $self->{Config}->{$self->userConfig}->{$plugin};
+	return $self->{Config}->{_}->{plugin}->{$plugin}->{$key} if $self->{Config}->{_}->{plugin}->{$plugin}->{$key};
+	return $self->{Config}->{_}->{$plugin} if $self->{Config}->{_}->{$plugin};
+	return $self->{FullConfig}->{$key} if $self->{FullConfig}->{$key};
 	return undef;
 }
+
+sub addHeaderContent {
+	my $self = shift;
+	my $new_header = shift;
+	$self->{PRINT_HEAD} = join '',$self->{PRINT_HEAD},$new_header,"\n";
+}
+
+sub addPageContent {
+	my $self = shift;
+  
+	my $PageContent = shift;
+	my $PageLocation = shift; #(top / bottom / null = bottom)
+	my $pagehtml = '';
+
+	$self->{DisplayHtml} = $self->{_DefaultHtml} if not defined $self->{DisplayHtml};
+
+	if (($PageLocation eq 'top') && ($self->{DisplayHtml} =~ m/<!--startPageContent-->/)) {
+		$self->printdebug('','','Adding PageContent (top)');
+		$self->{DisplayHtml} =~ s|(<!--startPageContent-->)|\1\n$PageContent\n\n|;
+	} elsif ($self->{DisplayHtml} =~ m/(<!--endPageContent-->)/) {
+		$self->printdebug('','',"Adding PageContent");
+		$pagehtml = join("\n",'<br />',$PageContent,'<!--endPageContent-->');
+		$self->{DisplayHtml} =~ s|(<!--endPageContent-->)|<br />\n$PageContent\n\1|;
+	} else {
+		$self->printdebug('','',"Creating PageContent");
+		$pagehtml = join("\n","\n",
+			'<div id="crimpPageContent">',
+			'<!--startPageContent-->',
+			$PageContent,
+			'<!--endPageContent-->',
+			"</div>\n");
+		$self->{DisplayHtml} =~ s/(<body>)/\1$pagehtml/i;
+	}
+	return 1;
+}
+
+sub addMenuContent {
+	my $self = shift;
+  
+	my $MenuContent = shift;
+	my $MenuLocation = shift; #(top / bottom / null = bottom)
+	my $menuhtml = '';
+	if (!$self->{DisplayHtml}){
+		$self->printdebug('','warn',"Cannot add MenuContent to an empty page");
+		return 1;
+	}
+
+	if (($MenuLocation eq 'top') && ($self->{DisplayHtml} =~ m/<!--startMenuContent-->/)) {
+		$self->printdebug('','','Adding MenuContent (top)');
+		$self->{DisplayHtml} =~ s|(<!--startMenuContent-->)|\1\n$menuhtml\n<br />\n|;
+	} elsif ($self->{DisplayHtml} =~ m/(<!--endMenuContent-->)/){
+		$self->printdebug('','','Adding MenuContent (bottom)');
+		$self->{DisplayHtml} =~ s|(<!--endMenuContent-->)|<br />\n$MenuContent\n\1|;
+	} else {
+		$self->printdebug('','',"Creating MenuContent");
+		$menuhtml = join("\n","\n",
+			'<div id="crimpMenuContent">',
+			'<!--startMenuContent-->',
+			$MenuContent,
+			'<!--endMenuContent-->',
+			"</div>\n");	
+		$self->{DisplayHtml} =~ s/<body>/<body>$menuhtml/i;
+	}
+	return 1;
+}
+
 ###### END HELPER ROUTINES ######
 
 sub applyConfig {
@@ -405,37 +491,36 @@ sub applyConfig {
     }
   }
   
-  $self->ErrorDirectory($self->{Config}->{_}->{ErrorDirectory}) if $self->{Config}->{_}->{ErrorDirectory};
-  $self->HtmlDirectory($self->{Config}->{_}->{HtmlDirectory}) if $self->{Config}->{_}->{HtmlDirectory};
-  $self->CgiDirectory($self->{Config}->{_}->{CgiDirectory}) if $self->{Config}->{_}->{CgiDirectory};
-  $self->DefaultProxy($self->{Config}->{_}->{DefaultProxy}) if $self->{Config}->{_}->{DefaultProxy};
-  $self->PageTitle($self->{Config}->{_}->{SiteTitle}, 1) if $self->{Config}->{_}->{SiteTitle};
+  $self->ErrorDirectory($self->Config('ErrorDirectory')) if $self->Config('ErrorDirectory');
+  $self->HtmlDirectory($self->Config('HtmlDirectory')) if $self->Config('HtmlDirectory');
+  $self->CgiDirectory($self->Config('CgiDirectory')) if $self->Config('CgiDirectory');
+  $self->DefaultProxy($self->Config('DefaultProxy')) if $self->Config('DefaultProxy');
+  $self->PageTitle($self->Config('SiteTitle'), 1) if $self->Config('SiteTitle');
 }
 
 sub loadConfig {
-  my $self = shift;
-  
-  if (!-f 'Config/Tiny.pm'){
-    $self->{DebugMode => 'on'};
-    $self->printdebug(
-        'Crimp Files not found',
-        'fail',
-        'Please check the following files exist in the cgi-bin directory',
-        'Config/Tiny.pm'
-    );
-  }
+	my $self = shift;
 
-  $self->{Config} = Config::Tiny->new();
-  $self->{Config} = Config::Tiny->read( 'crimp.ini' );
-  
-  if (!$self->{Config}) {
-    $self->printdebug(
-        'Crimp Files not found',
-        'fail',
-        'Please check the following files exist in the cgi-bin directory',
-        'crimp.ini'
-    );
-  }
+	if (-e 'crimp.xml') {
+		eval {use XML::Simple};
+		$self->printdebug('CRIMP Configuration', 'fail', 'XML::Simple module error', '&nbsp;&nbsp;'.$@) if ($@);
+		my $xmlConfig = new XML::Simple(ForceArray => 1, ContentKey => 'value');
+		eval {$self->{FullConfig} = $xmlConfig->XMLin('crimp.xml')};
+		$self->printdebug('CRIMP Configuration', 'fail', 'Could not parse configuration file:', '&nbsp;&nbsp;'.$@) if ($@);
+		$self->{Config} = $self->{FullConfig}->{section};
+		$self->{_ConfigMode} eq 'xml';
+		return;
+	}
+	if (-e 'crimp.ini') {
+		eval {use Config::Tiny};
+		my $iniConfig = Config::Tiny->new();
+		$self->{Config} = $iniConfig->read('crimp.ini');
+		$self->{_ConfigMode} = 'ini';
+		return;
+	}
+
+	$self->errorPage('','500');
+	$self->printdebug('Configuration Failure','fail','Check for existence of either crimp.ini or crimp.xml file in the ../cgi-bin/');
 }
 
 sub beep {
@@ -569,120 +654,54 @@ sub parsePOSTed {
 }
 
 ####################################################################
-sub addHeaderContent {
-  my $self = shift;
-	my $new_header = shift;
-	$self->{PRINT_HEAD} = join '',$self->{PRINT_HEAD},$new_header,"\n";
-}
 
-####################################################################
-sub addPageContent {
-  my $self = shift;
-  
-	my $PageContent = shift;
-	my $PageLocation = shift; #(top / bottom / null = bottom)
-	my $pagehtml = '';
-
-	$self->{DisplayHtml} = $self->{_DefaultHtml} if not defined $self->{DisplayHtml};
-
-	if (($PageLocation eq 'top') && ($self->{DisplayHtml} =~ m/<!--startPageContent-->/)) {
-		$self->printdebug('','','Adding PageContent (top)');
-		$self->{DisplayHtml} =~ s|(<!--startPageContent-->)|\1\n$PageContent\n\n|;
-	} elsif ($self->{DisplayHtml} =~ m/(<!--endPageContent-->)/) {
-		$self->printdebug('','',"Adding PageContent");
-		$pagehtml = join("\n",'<br />',$PageContent,'<!--endPageContent-->');
-		$self->{DisplayHtml} =~ s|(<!--endPageContent-->)|<br />\n$PageContent\n\1|;
-	} else {
-		$self->printdebug('','',"Creating PageContent");
-		$pagehtml = join("\n","\n",
-			'<div id="crimpPageContent">',
-			'<!--startPageContent-->',
-			$PageContent,
-			'<!--endPageContent-->',
-			"</div>\n");
-		$self->{DisplayHtml} =~ s/(<body>)/\1$pagehtml/i;
-	}
-	return 1;
-}
-
-####################################################################
-sub addMenuContent {
-  my $self = shift;
-  
-	my $MenuContent = shift;
-	my $MenuLocation = shift; #(top / bottom / null = bottom)
-	my $menuhtml = '';
-	if (!$self->{DisplayHtml}){
-		$self->printdebug('','warn',"Cannot add MenuContent to an empty page");
-		return 1;
-	}
-
-	if (($MenuLocation eq 'top') && ($self->{DisplayHtml} =~ m/<!--startMenuContent-->/)) {
-		$self->printdebug('','','Adding MenuContent (top)');
-		$self->{DisplayHtml} =~ s|(<!--startMenuContent-->)|\1\n$menuhtml\n<br />\n|;
-	} elsif ($self->{DisplayHtml} =~ m/(<!--endMenuContent-->)/){
-		$self->printdebug('','','Adding MenuContent (bottom)');
-		$self->{DisplayHtml} =~ s|(<!--endMenuContent-->)|<br />\n$MenuContent\n\1|;
-	} else {
-		$self->printdebug('','',"Creating MenuContent");
-		$menuhtml = join("\n","\n",
-			'<div id="crimpMenuContent">',
-			'<!--startMenuContent-->',
-			$MenuContent,
-			'<!--endMenuContent-->',
-			"</div>\n");	
-		$self->{DisplayHtml} =~ s/<body>/<body>$menuhtml/i;
-	}
-	return 1;
-}
-
-####################################################################
-sub loadPlugin() {
+sub loadPlugins {
 	# this sub declared for future use once all supplied modules are using the new OO system
+	my $self = shift;
+	my @inicmds = @{$self->{_IniCommands}};
+	my $count = $#inicmds;
+	$self->printdebug('Module Initialisation','',"Preloading $count plugins");
+	for (@inicmds) {
+		eval "use Crimp::$_";
+		if ($@) { $self->printdebug('','warn',"&nbsp;&nbsp;Failed loading '$_' plugin:","&nbsp;&nbsp;&nbsp;&nbsp;$@"); }
+		else { $self->printdebug('','pass',"&nbsp;&nbsp;Successfully loaded '$_' plugin"); }
+	}
 }
 
 ####################################################################
-sub executePlugin() {
-  my $self = shift;
+sub executePlugin {
+	my $self = shift;
 	my $plugin = shift;
-  
-	if (!$self->{$plugin}) {
-		if ($self->{Config}->{$self->userConfig}->{$plugin}) {
-			$self->{$plugin} = $self->{Config}->{$self->userConfig}->{$plugin};
-		} elsif ($self->{Config}->{_}->{$plugin}) {
-			$self->{$plugin} = $self->{Config}->{_}->{$plugin};
-		}
-	}
 
-	#Load Module
-	if ($self->{$plugin} ne '') {
-		my $absolutePlugin = join '::', 'Crimp', $plugin;
-		eval "require $absolutePlugin";
-		if ($@) { $self->printdebug("Module '$absolutePlugin' unable to load",'warn',$@,"Check 'crimp.ini' for the following:","&nbsp;&nbsp;$plugin = $self->{$plugin}"); }
-		else {
-      $myplugin = undef;
-			eval { $myplugin = $absolutePlugin->new($self) };
-			if ($@) { $self->printdebug("Module '$absolutePlugin'", 'warn', 'This plugin hasn\'t been upgraded yet or there was an error initialising:', $@); }
-			else {
-        eval { $myplugin->execute };
-        $self->printdebug("Module '$absolutePlugin'", 'warn', 'Plugin failed to execute:', $@) if ($@);
-      }
+	if ($self->Config($plugin) || $self->Config($plugin, 'switch') eq 'on') {
+		$self->printdebug('Executing Plugin','',"<b>($plugin)</b>");
+		$self->{$plugin} = $self->Config($plugin);
+
+		my $myplugin = undef;
+		my $absolutePlugin = "Crimp::$plugin";
+		eval { $myplugin = $absolutePlugin->new($self) };
+		if ($@) {
+			$self->printdebug('', 'warn', 'There was an error initialising:', "&nbsp;&nbsp;$@");
+			return;
 		}
+		eval { $myplugin->execute() };
+		$self->printdebug('', 'warn', 'Plugin failed to execute:', "&nbsp;&nbsp;$@") if ($@);
+		return;
 	}
 }
 
 ####################################################################
 sub printdebug {
-  my $self = shift;
-	my $solut = '';
-	my $logger = '';
+	my $self = shift;
 	my $mssge = shift;
 	my $stats = shift;
+	my $solut = '';
+	my $logger = '';
 	my $exit = 0;
 	
 	while (my $extra = shift) {
 		if ($solut eq '' && $mssge eq '') { $solut = "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
-		else { $solut = join '',$solut,'<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #ccc;">',$extra,'</span>'; }
+		else { $solut = "$solut<br/>&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: #ccc;'>$extra</span>"; }
 		$logger = join ', ',$logger,$extra;
 	}
 	
@@ -709,9 +728,9 @@ sub printdebug {
 sub PageRead {
   my $self = shift;
   my $filename = shift;
-  $self->printdebug('Module PageRead','',
-                    'BuiltIn Module',
-                    "File: $filename");
+  $self->printdebug('','',
+                    '(<b>(PageRead - BuiltIn Module)</b>',
+                    "&nbsp;&nbsp;File: $filename");
 
   if ( -f $filename ) {
     sysopen (FILE,$filename,O_RDONLY) || $self->printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
@@ -722,8 +741,8 @@ sub PageRead {
   }
 
   $filename = join '/', $self->{_ErrorDirectory}, '404.html';
-  $self->printdebug('', 'warn', "File <$filename> does not exist",
-                    "Using $self->{_ErrorDirectory}/404.html instead");
+  $self->printdebug('', 'warn', "&nbsp;&nbsp;File <$filename> does not exist",
+                    "&nbsp;&nbsp;&nbsp;&nbsp;Using $self->{_ErrorDirectory}/404.html instead");
   $self->ExitCode('404');
 
   $newhtml = <<ENDEOF;
@@ -745,7 +764,7 @@ sub lockFileGC {
 	my $lockfile = shift;
 	
 	my $timeout = 60; #seconds
-	if ($@) { $self->printdebug('','warn','Lock File Garbase Collection Failed.',$@); }
+	if ($@) { $self->printdebug('','warn','Lock File Garbage Collection Failed.',$@); }
 	
 	my $FileDate = (stat($lockfile))[9];
 	if ($FileDate > 0) {

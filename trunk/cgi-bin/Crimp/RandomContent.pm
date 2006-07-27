@@ -2,13 +2,13 @@ package Crimp::RandomContent;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: RandomContent.pm,v 2.1 2006-03-16 15:41:54 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: RandomContent.pm,v 2.2 2006-07-27 23:12:07 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
 sub execute {
 	my $self = shift;
-	$self->{crimp}->printdebug('Module RandomContent',
+	$self->{crimp}->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
 			"Version: $self->{id}",

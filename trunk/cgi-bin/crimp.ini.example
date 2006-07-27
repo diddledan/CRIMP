@@ -8,9 +8,10 @@
 # Main SiteTitle (the last, or first if 'TitleOrder' is set, entry on the titlebar)
 #SiteTitle = CRIMP
 
-DebugMode = page
+DebugMode = on
 
-DocumentTemplate = ../template/default-crimp.html
+TemplateDir = ../template
+DocumentTemplate = default-crimp.html
 
 ButtonBar = Default
 #ButtonBar = BlackRounded
@@ -110,13 +111,12 @@ ContentDirectory = ../cgi-bin/Crimp/docs/
 
 [/db]
 # set to on here, although any setting (not null) will cause the module to work
-ContentDatabase = on
+ContentDatabase = someDBTable
 DBType = mysql
-DBName = test
-DBTable = test
 DBHost = localhost
-DBUserName = test
-DBUserPass = test
+DBName = CRIMPDB
+DBUser = daniel
+DBPass = mypass
 
 [/admin]
 # set to on here, although any setting (not null) will cause the module to work
