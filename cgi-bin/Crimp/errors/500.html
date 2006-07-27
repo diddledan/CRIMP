@@ -1,14 +1,18 @@
+<html>
+<head><title>500 - Server Error</title></head>
+<body>
 <h1>500 - Server Error</h1>
 <p align="center"><strong><em>A FATAL ERROR has occured, CRIMP cannot continue.</em></strong><br />
-Please check the output of <a href="#crimpDebug">Debug View</a> below. </p>
+Please check the output of <a href="#" onClick="showDebug()">Debug View</a>.</p>
 <h2>Possible Reasons and Solutions </h2>
 <ol>
-  <li>This is a new install of CRIMP and the <strong>crimp.ini</strong> file is missing.  </li>
-  <ul>
-    <li>Rename the <strong>crimp.ini.example</strong> file to <strong>crimp.ini</strong> within the cgi-bin directory.<br />
-      <br />
-    </li>
-  </ul>
+  <li>This is a new install of CRIMP and the <strong>crimp.ini</strong> file is missing.
+    <ul>
+      <li>Rename the <strong>crimp.ini.example</strong> file to <strong>crimp.ini</strong> within the cgi-bin directory.<br />
+        <br />
+      </li>
+    </ul>
+  </li>
   <li>The <strong>Config::Tiny</strong> perl module is missing.
     <ul>
       <li>Check your CRIMP install for <strong>Config/Tiny.pm</strong> within the cgi-bin directory.<br />
@@ -31,3 +35,4 @@ Please check the output of <a href="#crimpDebug">Debug View</a> below. </p>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Daniel "Fremen" Llewellyn [diddledan@users.sourceforge.net]
 </font></address>
 <br />
+</body></html>
