@@ -34,7 +34,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.11 2006-07-21 19:13:08 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.12 2006-07-27 16:21:40 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -245,13 +245,13 @@ sub execute {
   my %executedCommands = {};
   $self->{skipRemainingPlugins} = 0;
   foreach (split ',', $self->{Config}->{$self->userConfig}->{PluginOrder}) {
-    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->{Config}->{$self->userConfig}->{$_} eq 'off'));
+    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_) eq 'off'));
   }
   foreach (split ',', $self->{Config}->{_}->{PluginOrder}) {
-    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->{Config}->{$self->userConfig}->{$_} eq 'off'));
+    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_) eq 'off'));
   }
   foreach (@{$self->{_IniCommands}}) {
-    $self->executePlugin($_) if (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++ || ($self->{Config}->{$self->userConfig}->{$_} eq 'off'))));
+    $self->executePlugin($_) if (($self->Config($_) ne 'off') && (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++))));
   }
 
   #add the extra CRIMP-specific HTML headers
@@ -381,6 +381,14 @@ sub queryParam {
   return $self->{_PostData}->{$parameter} if $self->{_PostData}->{$parameter};
   return $self->{_GetData}->{$parameter} if $self->{_GetData}->{$parameter};
   return undef;
+}
+
+sub Config {
+	#return the configuration for the specified key from the crimp.ini file
+	my ($self, $key) = @_;
+	return $self->{Config}->{$self->userConfig}->{$key} if $self->{Config}->{$self->userConfig}->{$key};
+	return $self->{Config}->{_}->{$key} if $self->{Config}->{_}->{$key};
+	return undef;
 }
 ###### END HELPER ROUTINES ######
 
