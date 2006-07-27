@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<crimp>
+	<!-- Special section for global configuration values -->
+	<section
+	  name="_"
+	  PluginOrder="UserAuth,VirtualRedirect,ContentDirectory,ContentDatabase,BreadCrumbs,FileList,SiteMenu"
+	  TemplateDir="../template"
+	  DebugMode="on"
+	  SiteTitle="Powered By CRIMP"
+	  TitleOrder="forward"
+	  DBType="mysql"
+	  DBHost="localhost"
+	  DBName="CRIMPDB"
+	  DBUser="daniel"
+	  DBPass="mypass">
+		<!-- xmas time? -->
+		<plugin name="Snow" switch="off" />
+		<!-- define a global ButtonBar and BreadCrumbs setting -->
+		<plugin name="ButtonBar" switch="on" value="Default" />
+		<plugin name="BreadCrumbs" switch="on" value="top" />
+		<!-- default template (relative to templatedir set above) -->
+		<plugin name="DocumentTemplate" switch="on" value="default-crimp.html" />
+	</section>
+<!--
+  Section specific settings below:
+ -->
+	<section name="/">
+		<plugin name="FileList" switch="on" value="horizontal" />
+		<plugin name="ContentDirectory" switch="on" value="../cgi-bin/Crimp/docs" />
+	</section>
+	<!-- get the crimp news -->
+	<section name="/crimp-news">
+		<plugin name="CrimpNews" switch="on" />
+	</section>
+	<!-- changelog -->
+	<section name="/changes">
+		<plugin name="FileList" switch="on" value="vertical" />
+		<plugin name="ContentDirectory" switch="on" value="../cgi-bin/Crimp/Changes" />
+		<plugin name="DocumentTemplate" switch="off" />
+	</section>
+
+	<!-- EXAMPLES -->
+
+	<section name="/blog">
+		<plugin name="FlatBlog" switch="on" value="flatblog.html" />
+	</section>
+	<section name="/google">
+		<!-- for VirtualRedirect, always include the trailing slash on a non file
+		  this is for the url rewriting which takes place on the links and images -->
+		<plugin name="VirtualRedirect" switch="on" value="http://www.google.com/" />
+	</section>
+	<section name="/db">
+		<!-- value specified below is the database table to use -->
+		<plugin name="ContentDatabase" switch="on" value="someDBTable" />
+	</section>
+</crimp>

@@ -2,14 +2,14 @@ package Crimp::ContentListing;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: ContentListing.pm,v 2.5 2006-07-15 16:45:25 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: ContentListing.pm,v 2.6 2006-07-27 23:12:04 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
 sub execute {
 	my $self = shift;
 	
-	$self->{crimp}->printdebug('Module ContentListing',
+	$self->{crimp}->printdebug('',
 		'',
 		'Authors: The CRIMP Team',
 		"Version: $ID",

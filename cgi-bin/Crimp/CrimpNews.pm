@@ -2,17 +2,17 @@ package Crimp::CrimpNews;
 
 sub new {
 	my ($class,$crimp) = @_;
-	my $self = { id => q$Id: CrimpNews.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: CrimpNews.pm,v 2.1 2006-07-27 23:12:04 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
 sub execute {
 	my $self = shift;
 	
-	$self->{crimp}->printdebug('Module CrimpNews',
+	$self->{crimp}->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
-			"Version: $self->{id},
+			"Version: $self->{id}",
 			'http://crimp.sourceforge.net/'
 			);
 	

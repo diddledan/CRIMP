@@ -3,65 +3,66 @@ package Crimp::ButtonBar;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: ButtonBar.pm,v 2.2 2006-07-14 20:16:24 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: ButtonBar.pm,v 2.3 2006-07-27 23:12:04 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 }
 
 sub execute {
 	my $self = shift;
+	my $crimp = $self->{crimp};
 	
-	$self->{crimp}->printdebug('Module ButtonBar',
+	$crimp->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
 			'Version: '.$self->{id},
 			'http://crimp.sourceforge.net/'
 			);
 	
-	$self->{crimp}->printdebug('','',"Started With: $self->{crimp}->{ButtonBar}");
+	$crimp->printdebug('','',"Started With: $crimp->{ButtonBar}");
 	
 	my $help ="#";
 	my $view = "#";
 	my $edit = "#";
-	my $querystring = $self->{crimp}->{_HttpQuery};
+	my $querystring = $crimp->{_HttpQuery};
 	$querystring =~ s|debug=.*?(&)?||i;
 	$querystring = join('', '?', $querystring) if not $querystring =~ m|^\?|;
 	$querystring = join('', $querystring, '&') if $querystring =~ m|^\?.+|;
-	my $debug = join '', $self->{crimp}->HttpRequest, $querystring, 'debug=on#crimpDebug';
+	my $debug = join '', $crimp->HttpRequest, $querystring, 'debug=on#crimpDebug';
 	
 	@ButtonBar = <<ENDEOF;
 <a href="<!--help-->"><img
- src="/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/pics/help.gif" alt="Help"
+ src="/crimp_assets/ButtonBar/$crimp->{ButtonBar}/pics/help.gif" alt="Help"
  style="border: 0px solid ; width: 26px; height: 25px;"/></a><a href="<!--view-->"><img
- src="/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/pics/view.gif" alt="View"
+ src="/crimp_assets/ButtonBar/$crimp->{ButtonBar}/pics/view.gif" alt="View"
  style="border: 0px solid ; width: 26px; height: 25px;"/></a><a href="<!--edit-->"><img
- src="/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/pics/edit.gif" alt="Edit"
+ src="/crimp_assets/ButtonBar/$crimp->{ButtonBar}/pics/edit.gif" alt="Edit"
  style="border: 0px solid ; width: 26px; height: 25px;"/></a><a href="<!--debug-->"><img
- src="/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/pics/debug.gif" alt="Debug"
+ src="/crimp_assets/ButtonBar/$crimp->{ButtonBar}/pics/debug.gif" alt="Debug"
  style="border: 0px solid ; width: 26px; height: 25px;" onClick="showDebug(); return false;"/></a>
 ENDEOF
 	
-	if ($self->{crimp}->{ButtonBar} eq 'Default') {
-		$self->{crimp}->printdebug('','pass','Using Default ButtonBar');
+	if ($crimp->{ButtonBar} eq 'Default') {
+		$crimp->printdebug('','pass','Using Default ButtonBar');
 	} else {
 		# Use a Custom ButtonBar
-		my $requested = $self->{crimp}->HtmlDirectory."/crimp_assets/ButtonBar/$self->{crimp}->{ButtonBar}/style.htm";
+		my $requested = $crimp->HtmlDirectory."/crimp_assets/ButtonBar/$crimp->{ButtonBar}/style.htm";
 		if ( -f $requested ) {
-			sysopen (FILE,$requested,O_RDONLY) || $self->{crimp}->printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
-			$self->{crimp}->printdebug('','pass',"Using $self->{crimp}->{ButtonBar} ButtonBar");
+			sysopen (FILE,$requested,O_RDONLY) || $crimp->printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
+			$crimp->printdebug('','pass',"Using $crimp->{ButtonBar} ButtonBar");
 			@ButtonBar=<FILE>;
 			close(FILE);
 		} else {
-			$self->{crimp}->printdebug('','warn',"$self->{crimp}->{ButtonBar} ButtonBar does not exist",'Using Default ButtonBar');	
+			$crimp->printdebug('','warn',"$crimp->{ButtonBar} ButtonBar does not exist",'Using Default ButtonBar');	
 		}
 	}
 	
 	# Put it all together
 	
-	$self->{crimp}->{DisplayHtml} =~ s/<!--BUTTONBAR-->/@ButtonBar/gi;
-	$self->{crimp}->{DisplayHtml} =~ s/<!--help-->/$help/gi;
-	$self->{crimp}->{DisplayHtml} =~ s/<!--view-->/$view/gi;
-	$self->{crimp}->{DisplayHtml} =~ s/<!--edit-->/$edit/gi;
-	$self->{crimp}->{DisplayHtml} =~ s/<!--debug-->/$debug/gi;
+	$crimp->{DisplayHtml} =~ s/<!--BUTTONBAR-->/@ButtonBar/gi;
+	$crimp->{DisplayHtml} =~ s/<!--help-->/$help/gi;
+	$crimp->{DisplayHtml} =~ s/<!--view-->/$view/gi;
+	$crimp->{DisplayHtml} =~ s/<!--edit-->/$edit/gi;
+	$crimp->{DisplayHtml} =~ s/<!--debug-->/$debug/gi;
 }
 
 1,

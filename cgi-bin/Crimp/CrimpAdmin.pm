@@ -1,5 +1,5 @@
-my $ID = q$Id: CrimpAdmin.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $;
-&printdebug('Module CrimpAdmin',
+my $ID = q$Id: CrimpAdmin.pm,v 2.1 2006-07-27 23:12:04 diddledan Exp $;
+&printdebug('',
 				'',
 				'Authors: The Crimp Team',
 				"Version: $ID",

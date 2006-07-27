@@ -16,7 +16,7 @@ sub new {
   # this variable will also hold our crimp object, so that any crimp subs or variables can be called
   # with $varname->{crimp}->sub(); or $varname->{crimp}->{variable};. we call this $self for
   # decriptiveness sake as it referrs to this module.
-  my $self = { id => q$Id: Snow.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp, };
+  my $self = { id => q$Id: Snow.pm,v 2.1 2006-07-27 23:12:07 diddledan Exp $, crimp => $crimp, };
   bless $self, $class;
   #the bless command makes the variable part of the namespace.
 }
@@ -33,8 +33,10 @@ sub execute {
 sub doit {
   # bring in the $self object again
   my $self = shift;
+  # define the $crimp variable for quicker access
+  my $crimp = $self->{crimp};
   #call one of CRIMP's subs to add our content
-  $self->{crimp}->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/snow.js"></script>');
+  $crimp->addHeaderContent('<script type="text/javascript" src="/crimp_assets/js/snow.js"></script>');
 }
 
 #return a true value to indicate proper loading of the module

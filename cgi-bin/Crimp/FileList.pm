@@ -3,7 +3,7 @@ package Crimp::FileList;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: FileList.pm,v 2.1 2006-03-20 00:49:19 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: FileList.pm,v 2.2 2006-07-27 23:12:07 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 	return $self;
 }
@@ -11,7 +11,7 @@ sub new {
 sub execute {
 	my $self = shift;
 	
-	$self->{crimp}->printdebug('Module FileList',
+	$self->{crimp}->printdebug('',
 				'',
 				'Authors: The CRIMP Team',
 				'Version: '.$self->{id},

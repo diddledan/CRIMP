@@ -3,26 +3,27 @@ package Crimp::BreadCrumbs;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: BreadCrumbs.pm,v 2.0 2006-03-13 23:48:34 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: BreadCrumbs.pm,v 2.1 2006-07-27 23:12:04 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 }
 
 sub execute {
 	my $self = shift;
+	my $crimp = $self->{crimp};
 	
-	$self->{crimp}->printdebug('Module BreadCrumbs',
+	$crimp->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
 			'Version: '.$self->{id},
 			'http://crimp.sourceforge.net/'
 			);
 	
-	$self->{crimp}->printdebug('','','Started With: '.$self->{crimp}->{BreadCrumbs});
+	$crimp->printdebug('','','Started With: '.$crimp->{BreadCrumbs});
 	
 	my $BreadLink = '';
 	my $BreadCrumbs = "<a href='/$BreadLink'>home</a>";
 	
-	@HttpRequest = split(/\//,$self->{crimp}->HttpRequest);
+	@HttpRequest = split(/\//,$crimp->HttpRequest);
 	foreach (@HttpRequest) {
 		if ($_ ne '' && $_ ne 'index.html'){
 		
@@ -32,30 +33,31 @@ sub execute {
 		}
 	}
 	
-	if (	($self->{crimp}->{BreadCrumbs} eq 'top')
-				|| ($self->{crimp}->{BreadCrumbs} eq 'bottom')
-				|| ($self->{crimp}->{BreadCrumbs} eq 'both')	) {
+	if (	($crimp->{BreadCrumbs} eq 'top')
+				|| ($crimp->{BreadCrumbs} eq 'bottom')
+				|| ($crimp->{BreadCrumbs} eq 'both')	) {
 		
-		if (($self->{crimp}->{BreadCrumbs} eq 'top') || ($self->{crimp}->{BreadCrumbs} eq 'both')) {
+		if (($crimp->{BreadCrumbs} eq 'top') || ($crimp->{BreadCrumbs} eq 'both')) {
 			$newhtml = "<div id='crimpBreadCrumbs'><b>Location: $BreadCrumbs</b><br/></div>";
 			$self->addBreadCrumbs($newhtml, 'top');
-			$self->{crimp}->printdebug('','pass','BreadCrumbs inserted at the top of the page');
+			$crimp->printdebug('','pass','BreadCrumbs inserted at the top of the page');
 		}
-		if (($self->{crimp}->{BreadCrumbs} eq 'bottom') || ($self->{crimp}->{BreadCrumbs} eq 'both')) {
+		if (($crimp->{BreadCrumbs} eq 'bottom') || ($crimp->{BreadCrumbs} eq 'both')) {
 			$newhtml = "<div id='crimpBreadCrumbsbottom'><br/><b>Location: $BreadCrumbs</b></div>";
 			$self->addBreadCrumbs($newhtml, 'bottom');
-			$self->{crimp}->printdebug('','pass','BreadCrumbs inserted at the bottom of the page');
+			$crimp->printdebug('','pass','BreadCrumbs inserted at the bottom of the page');
 		}
 	} else {
-		$self->{crimp}->printdebug('','warn','BreadCrumbs neets to be set with \'top\', \'bottom\' or \'both\'');
+		$crimp->printdebug('','warn','BreadCrumbs neets to be set with \'top\', \'bottom\' or \'both\'');
 	}
 }
 
 sub addBreadCrumbs {
 	my ($self, $html, $location) = @_;
+	my $crimp = $self->{crimp};
 	return if not defined $location;
-	$self->{crimp}->{DisplayHtml} =~ s|(<body.*?>)|\1$html|is if ($location eq 'top');
-	$self->{crimp}->{DisplayHtml} =~ s|(</body>)|$html\1|i if ($location eq 'bottom');
+	$crimp->{DisplayHtml} =~ s|(<body.*?>)|\1$html|is if ($location eq 'top');
+	$crimp->{DisplayHtml} =~ s|(</body>)|$html\1|i if ($location eq 'bottom');
 }
 
 1;

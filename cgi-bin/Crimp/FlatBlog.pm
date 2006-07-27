@@ -2,14 +2,14 @@ package Crimp::FlatBlog;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: FlatBlog.pm,v 2.1 2006-06-29 18:03:29 diddledan Exp $, crimp => $crimp, MenuList => [] };
+	my $self = { id => q$Id: FlatBlog.pm,v 2.2 2006-07-27 23:12:07 diddledan Exp $, crimp => $crimp, MenuList => [] };
 	bless $self, $class;
 }
 
 sub execute {
 	my $self = shift;
 	
-	$self->{crimp}->printdebug('Module FlatBlog',
+	$self->{crimp}->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
 			"Version: $ID",
