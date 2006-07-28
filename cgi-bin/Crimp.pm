@@ -28,7 +28,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.13 2006-07-27 23:12:03 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.14 2006-07-28 19:09:10 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -88,7 +88,8 @@ sub new {
                     "Internal Version: $self->{id}",
                     'http://crimp.sourceforge.net/');
 
-  use CGI qw(:standard);
+  use CGI;
+
   eval {use CGI::Cookie;use Fcntl;use URI::Escape;};
   if ($@) {
     $self->errorPage('','500');
@@ -258,7 +259,7 @@ sub execute {
 }
 
 ###### HELPER ROUTINES ######
-sub redirect {
+sub redirectTo {
   my ($self, $url) = @_;
   return if not defined $url;
   $self->printdebug('','pass',"redirecting to $url");
