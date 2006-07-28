@@ -1,4 +1,4 @@
-#!perl
+#!perl -W
 # CRIMP - Content Redirection Internet Management Program
 # Copyright (C) 2005-2006 The CRIMP Team
 # Authors:        The CRIMP Team
