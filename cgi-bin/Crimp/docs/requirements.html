@@ -21,7 +21,7 @@ To run CRIMP, please check that you can meet the following requirements. <br />
 </ul>
 <table width="100%" border="0" cellspacing="10" cellpadding="10">
   <tr>
-    <td bgcolor="#EEEEEE"><pre>Use of &quot;.htaccess&quot; files<br />AllowOverride FileInfo (or preferably set to All)</pre></td>
+    <td bgcolor="#EEEEEE"><pre>Use of &quot;.htaccess&quot; files<br />Options FollowSymLinks<br />AllowOverride FileInfo (or preferably set to All if your host allows it)</pre></td>
   </tr>
 </table>
 <ul>
@@ -31,7 +31,7 @@ To run CRIMP, please check that you can meet the following requirements. <br />
 </ul>
 <table width="100%" border="0" cellspacing="10" cellpadding="10">
   <tr>
-    <td bgcolor="#EEEEEE"><pre>CGI<br />Fcntl</pre></td>
+    <td bgcolor="#EEEEEE"><pre>CGI<br />CGI::Cookie<br />Fcntl<br />URI::Escape</pre></td>
   </tr>
 </table>
 </body>
