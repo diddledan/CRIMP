@@ -28,7 +28,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.14 2006-07-28 19:09:10 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.15 2006-07-31 22:03:00 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -71,6 +71,7 @@ sub new {
     _sendCookies => [],
     _receivedCookies => (),
     _ConfigMode => 'xml',
+    _PluginHandles => undef,
     DisplayHtml => undef,
     Config => undef,
     FullConfig => undef,
@@ -101,9 +102,6 @@ sub new {
   %{$self->{_GetData}} = $self->parseGETed();
   $self->{rceivedCookies} = $self->parseCookies();
   $self->{_HttpQuery} = join '', '?', $self->{_HttpQuery} if ($self->{_HttpQuery});
-  
-  @{$self->{_IniCommands}} = $self->parsePlugins();
-  $self->loadPlugins();
   
   $self->{_ServerProtocol} =~ s|^(http[s]?).*$|\1://|i;
   $self->{_ErrorDirectory} = '../cgi-bin/Crimp/errors';
@@ -137,7 +135,19 @@ sub new {
   
   $self->loadConfig();
   $self->applyConfig();
-  
+
+  my @plugins = $self->parsePlugins();
+
+  #move DocumentTemplate to the end so that it is always called last (nasty hack I know)
+  push @plugins, 'DocumentTemplate' if (@plugins = grep !/DocumentTemplate/, @plugins);
+  #move MenuButtons to the end so that it is always called After DocumentTemplate
+  #(Following Fremen's nasty hack)
+  push @plugins, 'ButtonBar' if (@plugins = grep !/ButtonBar/, @plugins);
+
+  %{$self->{_PluginHandles}} = $self->loadPlugins($self, 'Crimp', @plugins);
+
+  @{$self->{_IniCommands}} = @plugins;
+
   return $self;
 }
 
@@ -153,7 +163,7 @@ sub sendDocument {
     "ExitCode: $self->{ExitCode}"
   );
   
-  print header($self->ContentType,$self->ExitCode,$self->{_sendCookies});
+  print CGI::header($self->ContentType,$self->ExitCode,$self->{_sendCookies});
 
   if ($self->{_DebugMode} eq 'on' && $self->{Config}->{$self->userConfig}->{DebugMode} ne 'off') {
     my $PRINT_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table></div><div id='closeDebugBtn'><a href='#' onClick='hideDebug()'><img src='/crimp_assets/pics/close.gif' style='border: 0;' alt='close' title='close debug view' /></a></div></div>\n<script type='text/javascript'><!--\ndebugInit();\n//--></script>\n";
@@ -232,14 +242,18 @@ sub execute {
   my %executedCommands = {};
   $self->{skipRemainingPlugins} = 0;
 
+  my $pluginname;
   foreach (split ',', $self->{Config}->{$self->userConfig}->{PluginOrder}) {
-    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_, 'switch') eq 'off'));
+    $pluginname = join '::','Crimp',$_;
+    $self->executePlugin($_, $self->{_PluginHandles}->{$pluginname}) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_, 'switch') eq 'off'));
   }
   foreach (split ',', $self->{Config}->{_}->{PluginOrder}) {
-    $self->executePlugin($_) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_, 'switch') eq 'off'));
+    $pluginname = join '::','Crimp',$_;
+    $self->executePlugin($_, $self->{_PluginHandles}->{$pluginname}) unless (($self->{skipRemainingPlugins}) || ($executedCommands{$_}++) || ($self->Config($_, 'switch') eq 'off'));
   }
   foreach (@{$self->{_IniCommands}}) {
-    $self->executePlugin($_) if (($self->Config($_, 'switch') ne 'off') && (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++))));
+    $pluginname = join '::','Crimp',$_;
+    $self->executePlugin($_, $self->{_PluginHandles}->{$pluginname}) if (($self->Config($_, 'switch') ne 'off') && (($_ eq 'DocumentTemplate') || (!($self->{skipRemainingPlugins} || $executedCommands{$_}++))));
   }
 
   #add the extra CRIMP-specific HTML headers
@@ -314,7 +328,7 @@ sub errorPage {
 			my $content = $self->PageRead($_);
 			my $title;
 			($title, $content) = $self->stripHtmlHeaderFooter($content);
-			$self->addPageContent($content);
+			$self->{DisplayHtml} = $content;
 			$self->PageTitle($title);
 			$self->ExitCode($errCode);
 			return;
@@ -398,11 +412,18 @@ sub queryParam {
 
 sub Config {
 	#return the configuration for the specified key from the crimp.ini file
-	my ($self, $plugin, $key) = @_;
+	my ($self, $plugin, $key, @base) = @_;
 	$key ||= 'value';
+
 	if ($self->{_ConfigMode} eq 'ini') {
 		return $self->{Config}->{$self->userConfig}->{$key} if $self->{Config}->{$self->userConfig}->{$key};
 		return $self->{Config}->{_}->{$key} if $self->{Config}->{_}->{$key};
+	}
+	if (@base) {
+		foreach(@base) {
+			return $_->{plugin}->{$plugin}->{$key} if $_->{plugin}->{$plugin}->{$key};
+			return $_->{$plugin} if $_->{$plugin};
+		}
 	}
 	return $self->{Config}->{$self->userConfig}->{plugin}->{$plugin}->{$key} if $self->{Config}->{$self->userConfig}->{plugin}->{$plugin}->{$key};
 	return $self->{Config}->{$self->userConfig}->{$plugin} if $self->{Config}->{$self->userConfig}->{$plugin};
@@ -509,7 +530,7 @@ sub loadConfig {
 		eval {$self->{FullConfig} = $xmlConfig->XMLin('crimp.xml')};
 		$self->printdebug('CRIMP Configuration', 'fail', 'Could not parse configuration file:', '&nbsp;&nbsp;'.$@) if ($@);
 		$self->{Config} = $self->{FullConfig}->{section};
-		$self->{_ConfigMode} eq 'xml';
+		$self->{_ConfigMode} = 'xml';
 		return;
 	}
 	if (-e 'crimp.ini') {
@@ -541,52 +562,50 @@ sub beep {
 
 sub parsePlugins {
   my $self = shift;
+  my $module = shift;
+
+  $module ||= 'Crimp';
+  my $dir = $module;
+  $dir =~ s|::|/|g;
   
-  opendir(DIR, 'Crimp') or $self->printdebug('Plugins DIR', 'fail', "Could not open the plugins' dir for reading $!");
+  opendir(DIR, "$dir") or $self->printdebug("$module Plugins Dir", 'fail', "Could not open the plugins dir for reading $!");
   rewinddir(DIR);
   my @plugins = readdir(DIR);
   closedir(DIR);
 
   my @inicmds;
-  foreach $plugin (@plugins) {
+  foreach (@plugins) {
     # is the file we found a 'dot' file (.something - meaning hidden)?
     # if not, check it ends in '.pm'
-    if ( ( !( $plugin =~ m/^\.+/ ) ) && ( $plugin =~ m/\.pm$/ ) ) {
+    if ( ( !( $_ =~ m/^\.+/ ) ) && ( $_ =~ m/\.pm$/ ) ) {
       #remove the extension
-      $plugin =~ s/\.pm$//;
+      $_ =~ s/\.pm$//;
       #add it to the list
-      push @inicmds, $plugin;
+      push @inicmds, $_;
     }
   }
 
-  if (@inicmds = grep !/DocumentTemplate/, @inicmds) {
-    #move DocumentTemplate to the end so that it is always called last (nasty hack I know)
-    push @inicmds, 'DocumentTemplate';
+  if ( ! @inicmds ) {
+	$level = 'warn';
+	$level = 'fail' if ( $module eq 'Crimp' );
+	$self->printdebug("$module Plugins", $level, 'There appear to be no plugins in the plugin directory.');
   }
-
-  if (@inicmds = grep !/ButtonBar/, @inicmds) {
-    #move MenuButtons to the end so that it is always called After DocumentTemplate
-    #(Following Fremen's nasty hack)
-    push @inicmds, 'ButtonBar';
-  }
-
-  if ( ! @inicmds ) { $self->printdebug('Plugins', 'fail', 'There appear to be no plugins in the plugin directory.'); }
   else {
     # print Available plugins to debug (so many per line)
     my $inicount = 0;
-    foreach $inicmds(@inicmds) {
+    foreach (@inicmds) {
       if ($inicount == 0) {
-        $iniout = $inicmds;
+        $iniout = $_;
       } else {
         if ($inicount % 7 == 0) {
-          $iniout = join('<br/>&nbsp;&nbsp;&nbsp;&nbsp;',$iniout,$inicmds);
+          $iniout = join('<br/>&nbsp;&nbsp;&nbsp;&nbsp;',$iniout,$_);
         } else {
-          $iniout = join(',',$iniout,$inicmds);
+          $iniout = join(',',$iniout,$_);
         }
       }
       $inicount++;
     }
-    $self->printdebug('Available Plugins', 'pass', $iniout);
+    $self->printdebug("Available Plugins ($module)", 'pass', $iniout);
   }
   return @inicmds;
 }
@@ -657,35 +676,38 @@ sub parsePOSTed {
 ####################################################################
 
 sub loadPlugins {
-	# this sub declared for future use once all supplied modules are using the new OO system
 	my $self = shift;
-	my @inicmds = @{$self->{_IniCommands}};
-	my $count = $#inicmds;
-	$self->printdebug('Module Initialisation','',"Preloading $count plugins");
-	for (@inicmds) {
-		eval "use Crimp::$_";
-		if ($@) { $self->printdebug('','warn',"&nbsp;&nbsp;Failed loading '$_' plugin:","&nbsp;&nbsp;&nbsp;&nbsp;$@"); }
-		else { $self->printdebug('','pass',"&nbsp;&nbsp;Successfully loaded '$_' plugin"); }
+	my $passmeon = shift;
+	my $moduleName = shift;
+	$moduleName ||= 'Crimp';
+	my @plugins = @_;
+
+	my $count = $#plugins + 1;
+	$self->printdebug("Module Initialisation ($moduleName)",'',"Preloading $count plugins");
+	my %handles;
+	for (@plugins) {
+		my $pluginname = join '::',$moduleName,$_;
+		eval "use $pluginname;";
+		if ($@) { $self->printdebug('','warn',"&nbsp;&nbsp;Failed loading '$pluginname' plugin:","&nbsp;&nbsp;&nbsp;&nbsp;$@"); next; }
+		eval {$handles{$pluginname} = $pluginname->new($passmeon);};
+		if ($@) { $self->printdebug('','warn',"&nbsp;&nbsp;Failed Loading '$pluginname' plugin:","&nbsp;&nbsp;&nbsp;&nbsp;$@"); next; }
+		$self->printdebug('','pass',"&nbsp;&nbsp;Successfully loaded '$pluginname' plugin");
 	}
+	return %handles;
 }
 
 ####################################################################
 sub executePlugin {
 	my $self = shift;
 	my $plugin = shift;
+	my $handle = shift;
+	my @configBases = @_;
 
-	if ($self->Config($plugin) || $self->Config($plugin, 'switch') eq 'on') {
+	if ($self->Config($plugin, undef, @configBases) || $self->Config($plugin, 'switch', @configBases) eq 'on') {
 		$self->printdebug('Executing Plugin','',"<b>($plugin)</b>");
-		$self->{$plugin} = $self->Config($plugin);
+		$self->{$plugin} = $self->Config($plugin, undef, @configBases);
 
-		my $myplugin = undef;
-		my $absolutePlugin = "Crimp::$plugin";
-		eval { $myplugin = $absolutePlugin->new($self) };
-		if ($@) {
-			$self->printdebug('', 'warn', 'There was an error initialising:', "&nbsp;&nbsp;$@");
-			return;
-		}
-		eval { $myplugin->execute() };
+		eval { $handle->execute() };
 		$self->printdebug('', 'warn', 'Plugin failed to execute:', "&nbsp;&nbsp;$@") if ($@);
 		return;
 	}
@@ -714,13 +736,15 @@ sub printdebug {
 	if ($mssge eq '') { $mssge = $solut; }
 	$self->{PRINT_DEBUG} = join '', $self->{PRINT_DEBUG},'<tr><td align="left" valign="top" class="crimpDebugMsg"><pre class="crimpDebug">',$mssge,'</pre></td><td align="right" valign="bottom" class="crimpDebugStatus"><pre class="crimpDebug"><span style="color: #fff;">',$stats,'</span></pre></td></tr>';
 	
-  if ($exit) {
-  #Call Multi lang 500 - Server Error Page
-    print header('text/html', 500);
-    my $FAIL_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#000000">', $self->{PRINT_DEBUG}, "</table></div></div>\n";
-    $self->{DisplayHtml} = $self->PageRead("Crimp/errors/500.html");
-    $self->{DisplayHtml} =~ s|(</body>)|$FAIL_DEBUG\1|i;
-    print $self->{DisplayHtml};
+	if ($exit) {
+		#Call Multi lang 500 - Server Error Page
+		print CGI::header('text/html', 500);
+		my $FAIL_DEBUG = join '','<div name="crimpDebug" id="crimpDebug">','<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#000000">', $self->{PRINT_DEBUG}, "</table></div>\n";
+		$self->errorPage('','500');
+		#readd header and footer
+		$self->{DisplayHtml} = "<html><head><title></title></head><body>$self->{DisplayHtml}</body></html>";
+		$self->{DisplayHtml} =~ s|(</body>)|$FAIL_DEBUG\1|i;
+		print $self->{DisplayHtml};
 		exit 1;
 	}
 }
