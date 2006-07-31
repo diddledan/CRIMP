@@ -2,7 +2,7 @@ package Crimp::VirtualRedirect;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: VirtualRedirect.pm,v 2.1 2006-07-27 23:12:07 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: VirtualRedirect.pm,v 2.2 2006-07-31 19:13:19 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -128,7 +128,7 @@ sub execute {
 				$newlinkurl =~ s|/+|/|g;
 				$link_url =~ s|\?|\\\?|gi;
 				$newlinkurl = join '', $newlinkproto, $newlinkurl if ($newlinkproto =~ m!^(http[s]?://)!i);
-				$CrimpContent =~ s/(<a.*?href=['"]?)$link_url(['"]?.*?>)/\1$newlinkurl\2/g;
+				$CrimpContent =~ s/(<a.*?href=['"]?)$link_url(["']?.*?>)/\1$newlinkurl\2/g;
 				$j++;
 			}
 			
@@ -154,8 +154,7 @@ sub execute {
 	} else {
 		# the LWP::UserAgent couldn't get the document - let's tell the user why
 		$crimp->printdebug('', 'warn', "Could not get '$urltoget':", "Error: $error");
-		$crimp->{DisplayHtml} = &PageRead(join('/',$crimp->{ErrorDirectory},$crimp->{DefaultLang},'404-VirtualRedirect.html'));
-		$crimp->ExitCode('404');
+		$crimp->errorPage('VirtualRedirect','404');
 	}
 }
 
