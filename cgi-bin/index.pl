@@ -1,4 +1,4 @@
-#!perl -W
+#!perl
 # CRIMP - Content Redirection Internet Management Program
 # Copyright (C) 2005-2006 The CRIMP Team
 # Authors:        The CRIMP Team
@@ -27,7 +27,7 @@ use strict;
 use CGI::Carp qw(fatalsToBrowser);
 use Crimp;
 
-our $crimp = Crimp->new;
+our $crimp = new Crimp;
 $crimp->execute;
 $crimp->sendDocument;
 
