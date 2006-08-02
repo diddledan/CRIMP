@@ -27,8 +27,16 @@ use strict;
 use CGI::Carp qw(fatalsToBrowser);
 use Crimp;
 
+# instantiate a new object
 our $crimp = new Crimp;
+
+# create the page
 $crimp->execute;
+
+# example of modifying output _OUTSIDE_ of CRIMP itself.
+$crimp->addPageContent("Executed as [UID: $<; GID: $(]");
+
+# send everything off to the user
 $crimp->sendDocument;
 
 ## Deadpan110's thoughts... ##
