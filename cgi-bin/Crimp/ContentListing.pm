@@ -2,7 +2,7 @@ package Crimp::ContentListing;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: ContentListing.pm,v 2.6 2006-07-27 23:12:04 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: ContentListing.pm,v 2.7 2006-08-08 12:40:03 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -64,7 +64,7 @@ sub execute {
 		$self->{crimp}->FileWrite('ContentListing',$self->{crimp}->userConfig,$FileServed);
 		
 		#close;
-		$self->{crimp}->redirect("$BaseUrl/$DownloadFile") if ($self->{crimp}->ExitCode ne '500');
+		$self->{crimp}->redirectTo("$BaseUrl/$DownloadFile") if ($self->{crimp}->ExitCode ne '500');
 		return;
 	}
 	
