@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <title>MosixStatus</title>
+</head>
+<body>
+<h2>MosixStatus</h2>
+Synopsis:
+<table width="100%" border="0" cellspacing="10" cellpadding="10">
+  <tr>
+    <th>crimp.ini</th>
+  </tr>
+  <tr>
+    <td bgcolor="#eeeeee"><pre>MosixStatus = nodename1:id1,nodename2:id2...</pre>
+    </td>
+  </tr>
+  <tr>
+    <th>crimp.xml</th>
+  </tr>
+    <td bgcolor="#eeeeee"><pre>&lt;plugin name="MosixStatus" value="nodename1:id1,nodename2:id2..." /&gt;</pre></td>
+  </tr>
+</table>
+Examples:
+<table width="100%" border="0" cellspacing="10" cellpadding="10">
+  <tr><th>crimp.ini</th></tr>
+  <tr><td bgcolor="#eeeeee"><pre>
+[/mosixstatus]
+MosixStatus = neo:110,trinity:120,tank:130,dozer:140
+</pre></td></tr>
+  <tr><th>crimp.xml</th></tr>
+  <tr><td bgcolor="#eeeeee"><pre>
+&lt;section name="/mosixstatus"&gt;
+	&lt;plugin name="MosixStatus" value="neo:110,trinity:120,tank:130,dozer:140" /&gt;
+&lt;/section&gt;
+</pre></td></tr>
+</table>
+</body></html>
