@@ -5,7 +5,7 @@ sub new {
 	my $self = {
 		sidebar => $sidebar,
 		crimp => $sidebar->{crimp},
-		id => q$Id: rssTitles.pm,v 1.1 2006-07-31 22:03:09 diddledan Exp $,
+		id => q$Id: rssTitles.pm,v 1.2 2006-08-15 19:05:37 diddledan Exp $,
 	};
 
 	bless $self, $class;
@@ -44,7 +44,7 @@ sub execute {
 	my $rss = new XML::RSS;
 	$rss->parse($res->content);
 	my $count = 0;
-	my $content = '';
+	my $content = '<h2>'.$rss->channel('title').'</h2>';
 	foreach my $item (@{$rss->{'items'}}) {
 		$content .= "<li><a href='$item->{'link'}'>$item->{'title'}</a></li>" if $count++ <= 5;
 	}
