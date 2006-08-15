@@ -28,7 +28,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.15 2006-07-31 22:03:00 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.16 2006-08-15 19:05:35 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -103,7 +103,7 @@ sub new {
   $self->{rceivedCookies} = $self->parseCookies();
   $self->{_HttpQuery} = join '', '?', $self->{_HttpQuery} if ($self->{_HttpQuery});
   
-  $self->{_ServerProtocol} =~ s|^(http[s]?).*$|\1://|i;
+  $self->{_ServerProtocol} =~ s|^(http[s]?).*$|$1://|i;
   $self->{_ErrorDirectory} = '../cgi-bin/Crimp/errors';
   $self->{_DefaultLang} = 'eng';
   $self->{_DefaultHtml} = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -168,16 +168,19 @@ sub sendDocument {
   if ($self->{_DebugMode} eq 'on' && $self->{Config}->{$self->userConfig}->{DebugMode} ne 'off') {
     my $PRINT_DEBUG = join '','<div name="crimpDebugContainer" id="crimpDebugContainer"><div name="crimpDebug" id="crimpDebug">','<table class="crimpDebug">', $self->{PRINT_DEBUG}, "</table></div><div id='closeDebugBtn'><a href='#' onClick='hideDebug()'><img src='/crimp_assets/pics/close.gif' style='border: 0;' alt='close' title='close debug view' /></a></div></div>\n<script type='text/javascript'><!--\ndebugInit();\n//--></script>\n";
     $PRINT_DEBUG = "$PRINT_DEBUG<script type='text/javascript'><!--\nshowDebug();\n//--></script>\n" if ($self->queryParam('debug') eq 'on');
-    $self->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG\1|i;
+    $self->{DisplayHtml} =~ s|(</body>)|$PRINT_DEBUG$1|i;
   }
 
-  $self->{DisplayHtml} =~ s|(<body>)|\1$self->{_MenuDiv}\n|i;
-  $self->{DisplayHtml} =~ s|(</head>)|\n$self->{PRINT_HEAD}\1|i;
+  $self->{DisplayHtml} =~ s|(<body>)|$1$self->{_MenuDiv}\n|i;
+  $self->{DisplayHtml} =~ s|(</head>)|\n$self->{PRINT_HEAD}$1|i;
 
   ####################################################################
   ## CRIMP Cheat codes ##
   #######################
   $self->{DisplayHtml} =~ s/<!--VERSION-->/$self->{VER}/gi;
+	my $hostname = `hostname`;
+	$self->{DisplayHtml} =~ s/<!--HOSTNAME-->/$hostname/gi;
+	$self->{DisplayHtml} =~ s/<!--UIDGID-->/[UID: $<; GID: $(]/gi;
 
   ####################################################################
 
@@ -392,7 +395,7 @@ sub addCookie {
 
 sub getCookie {
 	my ($self, $cookiename) = @_;
-	return %{$self->{_receivedCookies}}->{$cookiename};
+	return $self->{_receivedCookies}->{$cookiename};
 }
 
 sub userConfig {
@@ -450,11 +453,11 @@ sub addPageContent {
 
 	if (($PageLocation eq 'top') && ($self->{DisplayHtml} =~ m/<!--startPageContent-->/)) {
 		$self->printdebug('','','Adding PageContent (top)');
-		$self->{DisplayHtml} =~ s|(<!--startPageContent-->)|\1\n$PageContent\n\n|;
+		$self->{DisplayHtml} =~ s|(<!--startPageContent-->)|$1\n$PageContent\n\n|;
 	} elsif ($self->{DisplayHtml} =~ m/(<!--endPageContent-->)/) {
 		$self->printdebug('','',"Adding PageContent");
 		$pagehtml = join("\n",'<br />',$PageContent,'<!--endPageContent-->');
-		$self->{DisplayHtml} =~ s|(<!--endPageContent-->)|<br />\n$PageContent\n\1|;
+		$self->{DisplayHtml} =~ s|(<!--endPageContent-->)|<br />\n$PageContent\n$1|;
 	} else {
 		$self->printdebug('','',"Creating PageContent");
 		$pagehtml = join("\n","\n",
@@ -463,7 +466,7 @@ sub addPageContent {
 			$PageContent,
 			'<!--endPageContent-->',
 			"</div>\n");
-		$self->{DisplayHtml} =~ s/(<body>)/\1$pagehtml/i;
+		$self->{DisplayHtml} =~ s/(<body>)/$1$pagehtml/i;
 	}
 	return 1;
 }
@@ -481,10 +484,10 @@ sub addMenuContent {
 
 	if (($MenuLocation eq 'top') && ($self->{DisplayHtml} =~ m/<!--startMenuContent-->/)) {
 		$self->printdebug('','','Adding MenuContent (top)');
-		$self->{DisplayHtml} =~ s|(<!--startMenuContent-->)|\1\n$menuhtml\n<br />\n|;
+		$self->{DisplayHtml} =~ s|(<!--startMenuContent-->)|$1\n$menuhtml\n<br />\n|;
 	} elsif ($self->{DisplayHtml} =~ m/(<!--endMenuContent-->)/){
 		$self->printdebug('','','Adding MenuContent (bottom)');
-		$self->{DisplayHtml} =~ s|(<!--endMenuContent-->)|<br />\n$MenuContent\n\1|;
+		$self->{DisplayHtml} =~ s|(<!--endMenuContent-->)|<br />\n$MenuContent\n$1|;
 	} else {
 		$self->printdebug('','',"Creating MenuContent");
 		$menuhtml = join("\n","\n",
@@ -618,10 +621,10 @@ sub parseCookies {
 	foreach (@keys) {
 		my $key = $_;
 		my $value = $cookies{$key};
-		$key =~ s/([^\\])\+/\1 /g;
+		$key =~ s/([^\\])\+/$1 /g;
 		$key = uri_unescape($key);
 		
-		$value =~ s/([^\\])\+/\1 /g;
+		$value =~ s/([^\\])\+/$1 /g;
 		$value = uri_unescape($value);
 		my $junk;
 		($value, $junk) = split(';', $value);
@@ -640,9 +643,9 @@ sub parseGETed {
   my $n = 0;
   foreach (@TempArray) {
     my ($name, $value) = split /=/;
-    $name =~ s/([^\\])\+/\1 /g;
+    $name =~ s/([^\\])\+/$1 /g;
     $name = uri_unescape($name);
-    $value =~ s/([^\\])\+/\1 /g;
+    $value =~ s/([^\\])\+/$1 /g;
     $value = uri_unescape($value);
     $GetQuery{$name} = $value;
     $n++;
@@ -661,9 +664,9 @@ sub parsePOSTed {
   my $n = 0;
   foreach my $item (@TempArray) {
     my ($name, $value) = split /=/, $item;
-    $name =~ s/([^\\])\+/\1 /g;
+    $name =~ s/([^\\])\+/$1 /g;
     $name = uri_unescape($name);
-    $value =~ s/([^\\])\+/\1 /g;
+    $value =~ s/([^\\])\+/$1 /g;
     $value = uri_unescape($value);
     $PostQuery{$name} = $value;
     $n++;
@@ -743,7 +746,7 @@ sub printdebug {
 		$self->errorPage('','500');
 		#readd header and footer
 		$self->{DisplayHtml} = "<html><head><title></title></head><body>$self->{DisplayHtml}</body></html>";
-		$self->{DisplayHtml} =~ s|(</body>)|$FAIL_DEBUG\1|i;
+		$self->{DisplayHtml} =~ s|(</body>)|$FAIL_DEBUG$1|i;
 		print $self->{DisplayHtml};
 		exit 1;
 	}
@@ -758,7 +761,7 @@ sub PageRead {
                     "&nbsp;&nbsp;File: $filename");
 
   if ( -f $filename ) {
-    sysopen (FILE,$filename,O_RDONLY) || $self->printdebug('', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
+    sysopen (FILE,$filename,O_RDONLY) || $self->printdebug('', 'fail', 'Couldnt open file for reading', "file: $filename", "error: $!");
     @FileRead=<FILE>;
     close(FILE);
     $self->printdebug('','pass',"Returning content from $filename"); 
@@ -778,8 +781,8 @@ use an error document for this request</p>
 ENDEOF
 
   $FileRead = $self->{_DefaultHtml};
-  $FileRead =~ s/(<body>)/\1$newhtml/i;
-  $FileRead =~ s/(<title>)/\1404 - Page Not Found/i;
+  $FileRead =~ s/(<body>)/$1$newhtml/i;
+  $FileRead =~ s/(<title>)/${1}404 - Page Not Found/i;
   return $FileRead;
 }
 
