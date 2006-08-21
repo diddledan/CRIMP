@@ -1,8 +1,10 @@
 package Crimp::CrimpNews;
 
+use Fcntl;
+
 sub new {
 	my ($class,$crimp) = @_;
-	my $self = { id => q$Id: CrimpNews.pm,v 2.1 2006-07-27 23:12:04 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: CrimpNews.pm,v 2.2 2006-08-21 17:55:22 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
