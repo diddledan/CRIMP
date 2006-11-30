@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: perl.php,v 1.2 2006-11-30 19:39:55 diddledan Exp $
+ *Revision info: $Id: perl.php,v 1.3 2006-11-30 22:22:21 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -87,7 +87,7 @@ class perl extends plugin implements iPlugin {
         
         $level = ( $retval == 0 ) ? PASS : WARN;
         $dbg->addDebug("perl-php-wrapper.pl exited with code '$retval'", $level);
-        
+        $dbg->addDebug('PHP code to be evaluated:<br />'.htmlspecialchars($returned));
         eval($returned);
     }
 }
