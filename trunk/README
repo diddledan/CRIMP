@@ -1,6 +1,9 @@
 Welcome to CRIMP
 
-Configuration is all done in the cgi-bin/crimp.ini file
+Configuration is all done in the cgi-bin/crimp.ini file when using the
+perl version of CRIMP, but we are upgrading to PHP, so the configuration
+goes in public_html/_crimp/config.xml.
+Configuration examples are in *.example files
 
 
 -------
@@ -16,7 +19,7 @@ See the examples below for usage.
 ContentDirectory
 This module is configured with the path to the directory which contains
 the content that you want to be visible within the section. The default
-is ../content. Paths must either be absolute or relative to the cgi-bin
+is ./docs. Paths must either be absolute or relative to the cgi-bin
 dir. The module will automatically use a file by the name of index.html
 for any directories (eg. request for / will result in the page at
 location ../content/index.html, and a request for /wibble will use
@@ -76,7 +79,7 @@ FAQ
 ---
 
 Q. the perl code in my database is printed out as is, instead of being
-interpreted by CRIMP.
+interpreted by CRIMP's perl-based ContentDatabase plugin.
 
 A. make sure that the first line of your page(s) reads "#PERL" with nothing
 before it (and nothing else on the same line as it will be interpreted as
