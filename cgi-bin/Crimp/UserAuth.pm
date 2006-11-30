@@ -3,7 +3,7 @@ use CGI qw(:standard);
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: UserAuth.pm,v 2.4 2006-07-27 23:12:07 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: UserAuth.pm,v 2.5 2006-11-30 16:27:31 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 
@@ -24,14 +24,14 @@ sub execute {
 	$cookie = $self->{crimp}->getCookie(join(':', $self->{crimp}->userConfig, 'authtok'));
 	my $removestr = join ':', $self->{crimp}->{UserConfig},'authtok=';
 	($usrcfg, $username, $password) = split /:/, $cookie if $cookie;
-	($junk, $username) = split /=/, $username if $username;
+	(undef, $username) = split /=/, $username if $username;
 	
-	$username ||= $self->{crimp}->queryParam(username);
-	$password ||= $self->{crimp}->queryParam(password);
+	$username ||= $self->{crimp}->queryParam('username');
+	$password ||= $self->{crimp}->queryParam('password');
 	
 	$self->{crimp}->printdebug('','',"UserName: $username","PassWord: $password");
 	
-	if (!$self->{crimp}->queryParam(postback) && !$cookie) {
+	if (!$self->{crimp}->queryParam('postback') && !$cookie) {
 		$self->setupLoginForm();
 	} elsif (!$username || !$password) {
 		$self->setupLoginForm('Username and Password must <em>both</em> be specified!');
