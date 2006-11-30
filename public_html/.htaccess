@@ -6,6 +6,7 @@
 <ifModule mod_rewrite.c>
 rewriteengine on
 
+RewriteRule ^/_crimp /_crimp/index.php?crimpq=/ [L]
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ /cgi-bin/index.pl [L,QSA]
+RewriteRule ^(.*)$ /_crimp/index.php?crimpq=$1 [L,QSA]
 </ifModule>
