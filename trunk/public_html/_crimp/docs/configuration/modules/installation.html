@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
+  <title>Installation</title>
+</head>
+<body>
+<h1>Module Installation</h1>
+This is a Basic guide to installing 3rd party modules for CRIMP.<br>
+<br>
+CRIMP Modules not included with the default CRIMP install should be
+unzipped or untared into your cgi-bin directory. Depending on your web
+server or web host, these files and directories should be world
+readable unless stated within the modules own documentation.<br>
+<h2>Module Packaging</h2>
+Modules can be downloaded from 3rd party websites and are usually
+packaged in a compressed file. These packages are usually provided in 2
+formats, either a <span style="font-weight: bold;">ZIP</span> or a <span
+ style="font-weight: bold;">TARBALL</span>. Download the appropriate
+one for your requirements depending on your type of install.
+<h2>Installing over FTP</h2>
+For this type of install, your downloaded module in either <span
+ style="font-weight: bold;">ZIP</span> or <span
+ style="font-weight: bold;">TARBALL</span> format needs to be extracted
+into a temporary directory on your local machine before uploading to
+your web server.<br>
+<h3>From Windows</h3>
+Using your favorite compression utility (example: <a
+ href="http://www.winzip.com/downwz.htm">Winzip</a>), extract all the
+files to a temporary directory and open your FTP client and connect to
+your server host (or use windows file manager by typing
+'ftp://[username]@[server-host.com]' into the address bar, you will be
+prompted for your password.).<br>
+Select your extracted CRIMP directory and upload it in its entirety
+into the remote cgi-bin folder on your server host.<br>
+<br>
+*<span style="font-style: italic;">please note, connection problems are
+not discussed in this document. Please check your firewall settings!</span><br>
+<br>
+Once the module is uploaded, you can view its documentation from either
+your website (
+http://[yoursite.com]/docs/modules/[ModuleName]/install.html ) or on
+your local windows machine ( [temporary
+directory]\Crimp\docs\[ModuleName]\install.html ).<br>
+<br>
+After checking the file permissions on the uploaded files listed in the
+module install.html, you are now ready to configure it for use within
+your website.<br>
+<h3>From Linux</h3>
+Untar the tarball into a temporary directory:<br>
+<br>
+<pre>&nbsp;&nbsp;&nbsp; mkdir ~/temp</pre>
+<pre>&nbsp;&nbsp;&nbsp; cd ~/temp</pre>
+<pre>&nbsp;&nbsp;&nbsp; tar -xjpvf [ModuleName].tar.bz2&nbsp;&nbsp;&nbsp; # not sure if this is going to create ~/temp/Crimp</pre>
+<br>
+Use your FTP client&nbsp; to upload the CRIMP directory into your
+cgi-bin.<br>
+<br>
+Once the module is uploaded, you can view its documentation from either
+your website (
+http://[yoursite.com]/docs/modules/[ModuleName]/install.html ) or on
+your local linux machine ( ~/temp/Crimp/docs/[ModuleName]/install.html
+).<br>
+<br>
+After checking the file permissions on the uploaded files listed in the
+module install.html, you are now ready to configure it for use within
+your website.<br>
+<h2>Installing over SSH</h2>
+If you have SSH access to your webserver, then installing modules over
+SSH is the prefered method to add 3rd party modules to CRIMP. Windows
+users can use a SSH client (Example: <a
+ href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/download.html">Putty</a>
+which includes pscp.exe) and linux users can use their console.<br>
+<h3>Upload the Module and MD5 sum</h3>
+<h4>Windows</h4>
+If you have downloaded the Module and MD5 sum onto your local windows
+machine, you can use pscp.exe in your command console to upload the
+files.<br>
+(Start - Run : then type 'cmd' for Windows XP and NT or type 'command'
+for Windows 98/98se/ME)<br>
+Change to your Putty install directory by typing:<br>
+<br>
+<pre>&nbsp;&nbsp;&nbsp; cd [path\to\putty]</pre>
+<pre>&nbsp;&nbsp;&nbsp; pscp [path\to\ModuleName.tar.bz2] [username]@[server-host.com]:[path\to\cgi-bin]</pre>
+<pre>&nbsp;&nbsp;&nbsp; pscp [path\to\ModuleName.tar.bz2.sum] [username]@[server-host.com]:[path\to\cgi-bin]</pre>
+<br>
+Then open your SSH client and connect to your server host.<br>
+<h4>Linux</h4>
+If you have downloaded the Module and MD5 sum onto your local linux
+machine, you can use scp in your console to upload the
+files.<br>
+<br>
+<pre>&nbsp;&nbsp;&nbsp; <span class="input">scp [server-host]:~/[path/to/cgi-bin] ~/[path/to/ModuleName.tar.bz2]</span></pre>
+<pre><span class="input"></span>&nbsp;&nbsp;&nbsp; <span class="input">scp [server-host]:~/[path/to/cgi-bin] ~/[path/to/</span>ModuleName.tar.bz2.sum<span
+ class="input">]</span></pre>
+<pre><span class="input"></span>&nbsp;&nbsp;&nbsp; <span class="input">ssh [username]@[server-host]<br></span></pre>
+<h4>SSH Client<span style="font-family: monospace;"></span></h4>
+Once logged into your server host over SSH, you can run the following
+commands to install your module:<br>
+<br>
+<pre>&nbsp;&nbsp;&nbsp; cd ~/[path/to/cgi-bin]</pre>
+<pre>&nbsp;&nbsp;&nbsp; # If you have not yet downloaded the module</pre>
+<pre>&nbsp;&nbsp;&nbsp; wget http://[3rd-party-module-host]/[path/to/ModuleName.tar.bz2]</pre>
+<pre>&nbsp;&nbsp;&nbsp; wget http://[3rd-party-module-host]/[path/to/ModuleName.tar.bz2.sum]</pre>
+<pre>&nbsp;&nbsp;&nbsp; # Installation</pre>
+<pre>&nbsp;&nbsp;&nbsp; # MD5 check the module for consistancy</pre>
+<pre>&nbsp;&nbsp;&nbsp; md5sum -c [ModuleName].tar.bz2.sum</pre>
+<pre>&nbsp;&nbsp;&nbsp; # If the check returns OK then unpack the tarball</pre>
+<pre>&nbsp;&nbsp;&nbsp; tar -xjpvf [ModuleName].tar.bz2</pre>
+<br>
+The module is now installed and ready for configuration.
+<h2>Configuration</h2>
+Once the module is installed into ../cgi-bin/Crimp, the corisponding
+docs
+will be installed into the appropriate place in ../cgi-bin/Crimp/docs
+which is accessable by your website if configured in
+../cgi-bin/crimp.ini<br>
+<br>
+For further configuration of the module, check the module documentation
+at http://[yoursite.com]/docs/modules/[ModuleName]/configuration.html.<br>
+<br>
+<br>
+</body>
+</html>

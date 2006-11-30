@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>File Permissions</title>
+</head>
+
+<body>
+<h1>File Permissions</h1>
+<p>Depending on how CRIMP was installed, it is recomended that you check the file and directory permissions and set them according to your webservers requirements.</p>
+<table width="100%" border="0" cellspacing="10" cellpadding="10">
+  <tr>
+    <td bgcolor="#EEEEEE"><pre>[rw-] |- public_html/
+[r--] |  |- crimp_assets/
+      |
+[r-e] |- cgi-bin/
+[r--]    |- Crimp/
+[rw-]    |  |- var/
+             
+#This section needs updating as currently only describes
+#permissions of the files within the directories themselves
+#a complete listing is to follow </pre></td>
+  </tr>
+</table>
+</body>
+</html>
