@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- the order of plugins is important. they are executed in the same order defined here,
+    starting with the plugins defined in the requested section, followed by the globals -->
+<crimp>
+    <globals>
+        <debug>
+            <switch>on</switch>
+            <mode>inline</mode><!-- 'inline' or 'javascript' -->
+        </debug>
+        <sitetitle>Powered by CRIMP</sitetitle>
+        <!--<titleorder>forward</titleorder>-->
+        <!--<titleseparator> - </titleseparator>-->
+        <vardir>./var</vardir>
+        <errordir>./errordocs</errordir>
+        <defaultlanguage>en</defaultlanguage>
+        <templatedir>./templates</templatedir>
+        <template>default-crimp.html</template>
+        <plugin>
+            <name>breadCrumbs</name>
+            <position>top</position><!-- either 'top', 'bottom' or 'both' -->
+        </plugin>
+        <plugin>
+            <name>perl</name>
+            <plugin>buttonBar</plugin>
+            <parameter>Default</parameter>
+        </plugin>
+        <plugin>
+            <name>perl</name>
+            <plugin>Snow</plugin>
+            <parameter>on</parameter>
+        </plugin>
+    </globals>
+
+    <section>
+        <name>/</name>
+        <plugin>
+            <name>contentDirectory</name>
+            <directory>./docs</directory>
+        </plugin>
+        <!--<plugin>
+            <name>fileList</name>
+            <orientation>horizontal</orientation>
+        </plugin>-->
+    </section>
+
+    <section>
+        <name>/blog</name>
+        <plugin>
+            <name>perl</name>
+            <plugin>FlatBlog</plugin>
+            <parameter>flatblog.html</parameter>
+        </plugin>
+    </section>
+</crimp>

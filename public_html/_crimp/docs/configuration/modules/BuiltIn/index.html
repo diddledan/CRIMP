@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Built In</title>
+</head>
+
+<body>
+<h1>CRIMP Built In Modules</h1>
+CRIMP has been designed to work without the use of module plugins to give some
+basic functionality.<br />
+A few settings can be tweaked and activated using built in
+configuration commands.<br />
+<h2><span style="font-weight: bold;"></span>Command List</h2>
+The commands take the form of <span
+ style="font-weight: bold; font-style: italic;">ModuleName = Value</span> in
+the crimp.ini file.<br />
+<br />
+<table style="text-align: left; width: 100%;" border="0"
+ cellpadding="5" cellspacing="10">
+
+  <tbody>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">CgiDirectory</td>
+      <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
+        </span><span style="font-weight: bold;">../cgi-bin</span> (default)<br />
+        <div style="margin-left: 40px;">This is the location of the
+          cgi-bin directory and is not normally needed to be changed. </div>        </td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">Debug<br />      </td>
+      <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file</span><span style="font-weight: bold;"><br />
+          on</span> (default)<br />
+        <div style="margin-left: 40px;">Prints the output of CRIMP Debug
+          at the end of a page.<br />
+        </div>
+        <span style="font-weight: bold;">off</span><br />
+        <div style="margin-left: 40px;">Switches CRIMP Debug mode off
+          entirely.<br />
+        </div>
+        <span style="font-weight: bold;">page</span><br />
+        <div style="margin-left: 40px;">Only displays CRIMP Debug mode if
+          called from the browser by appending <span style="font-weight: bold;">?debug=on</span> to the url.</div></td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">DescriptionMeta</td>
+      <td bgcolor="#EEEEEE"> Some indexing engines look for META elements that give a short description. <a href="http://www.highrankings.com/metadescription.htm">The Meta Description Tag</a>   allows you to influence the description of your page for crawlers that support the tag and can be set within the <strong>crimp.ini</strong> file on a global or per directory basis.<br />
+        <span style="font-weight: bold;">Your descriptive sentence or two goes here. </span>(example)<br />
+        <div style="margin-left: 40px;">Generally, 200 to 250 characters may be indexed, though only a smaller portion of this amount may be displayed.</div>
+        <div style="margin-left: 40px;"><br />
+      </div></td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">ErrorDirectory</td>
+      <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
+        </span><span style="font-weight: bold;">../cgi-bin/Crimp/errors</span> (default)<br />
+        <div style="margin-left: 40px;">This is the location of the
+          errors directory and contains html pages of error codes and their error
+          messages. If you prefer to use custom error pages, this can be changed
+          to the new path containing the custom pages. It is not recomended you
+          alter the files within the default directory as they could be
+          overwritten while updating crimp.</div></td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">FirstRun</td>
+      <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
+        </span><span style="font-weight: bold;">on </span>(default)<br />
+        <div style="margin-left: 40px;">After following the <a
+ href="/docs/installation/index.html">CRIMP install guide</a>, this command
+          appears in the new <span style="font-weight: bold;">crimp.ini</span> file.<br />
+          Unless you need CRIMP to do its post install checks then it is safe to
+          delete this config entry.</div></td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">HtmlDirectory</td>
+      <td bgcolor="#EEEEEE"><span style="font-style: italic;">Can only be used within the
+        root section of the <span style="font-weight: bold;">crimp.ini</span> file<br />
+        </span><span style="font-weight: bold;">../public_html</span> (default)<br />
+        <div style="margin-left: 40px;">This is the location of the
+          public_html directory and is not normally needed to be changed. </div></td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">KeywordsMeta</td>
+      <td bgcolor="#EEEEEE">Some indexing engines look for META elements that define a comma-separated list of keywords/phrases. <a href="http://www.highrankings.com/metakeyword.htm">The Meta Keywords Tag</a> is sometimes useful as a way to reinforce the terms you think a page is important for ON THE FEW CRAWLERS THAT SUPPORT IT and can be set within the <strong>crimp.ini</strong> file on a global or per directory basis.<br />
+        <span style="font-weight: bold;">your keywords,go here,separated by a comma,but not a space </span>(example)<br />
+        <div style="margin-left: 40px;">Generally, 25 words or phrases, with each word or phrase separated by commas.</div></td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">PageTitle</td>
+      <td bgcolor="#EEEEEE">Not entirely sure if this is needed.</td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">PluginOrder</td>
+      <td bgcolor="#EEEEEE">Controls the plugin execution order of modules. CRIMP modules are called alphabetically by default but usually content creation modules are required to be called before any other module. <span style="font-style: italic;"><br />
+        </span><span style="font-weight: bold;">VirtualRedirect,BreadCrumbs,RandomContent</span><br />
+        <div style="margin-left: 40px;">This would make sure the VirtualRedirect module is called before the BreadCrumbs and RandomContent modules instead of alphabetical order.<br>
+          (Please note that DocumentTemplate and ButtonBar are always
+          called last if within the global section or any per directory section of the <strong>crimp.ini</strong> file and are not needed within the comma separated list.) </div></td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">RobotsMeta</td>
+      <td bgcolor="#EEEEEE">Search engine control of<em> <span
+ style="font-style: italic;">'robots implementing</span></em><span
+ style="font-style: italic;"> </span><a style="font-style: italic;"
+ href="http://www.w3.org/TR/WD-htmllink-970328#meta">The Robots META tag</a><span
+ style="font-style: italic;">'</span> which allows HTML authors to
+        indicate to visiting robots
+        whether a document may be indexed, or used to harvest more links. When
+        used on a per directory basis, enables control of visiting spiders and
+        bots.<br />
+        The list of terms in the content is <tt style="font-weight: bold;">ALL</tt>, <tt style="font-weight: bold;">INDEX</tt>, <tt
+ style="font-weight: bold;">NOFOLLOW</tt>, <tt
+ style="font-weight: bold;">NOINDEX</tt>. The name and the content
+        attribute
+        values are case insensitive.<span style="font-weight: bold;"><br />
+          index,follow </span>(default)<br />
+        <div style="margin-left: 40px;">A robot is able index this
+          document, and
+          analyse it for links.<br />
+        </div>
+        <span style="font-weight: bold;">noindex,nofollow</span><br />
+        <div style="margin-left: 40px;">A robot should neither index this
+          document, nor
+          analyse it for links.<br />
+        </div></td>
+    </tr>
+    <tr>
+      <td bgcolor="#EEEEEE" style="font-weight: bold; vertical-align: top;">VarDirectory</td>
+      <td bgcolor="#EEEEEE">Not sure if this is configurable... It shouldnt need to be
+        changed.</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
