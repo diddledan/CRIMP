@@ -28,7 +28,7 @@ sub new {
   my $class = shift;
   
   my $VER = '<!--build-date-->'; 
-  my $ID = q$Id: Crimp.pm,v 2.16 2006-08-15 19:05:35 diddledan Exp $;
+  my $ID = q$Id: Crimp.pm,v 2.17 2006-11-30 16:27:30 diddledan Exp $;
   my $version = (split(' ', $ID))[2];
   $version =~ s/,v\b//;
   $VER =~ s|<!--build-date-->|CVS $version|i if ($VER eq '<!--build-date-->');
@@ -39,7 +39,6 @@ sub new {
     id => $ID,
     PRINT_DEBUG => undef,
     PRINT_HEAD => undef,
-    _PostQuery => undef,
     _IniCommands => undef,
     _RemoteHost => $ENV{'REMOTE_ADDR'},
     _ServerName =>  $ENV{'SERVER_NAME'},
