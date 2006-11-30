@@ -1,7 +1,11 @@
 #!/usr/bin/perl -w
 ##### IMPORTANT #####
-#####
-##### THIS IS NOT A CGI APPLICATION, AND CANNOT BE USED DIRECTLY: SEE USAGE #####
+# THIS IS NOT A CGI APPLICATION, AND CANNOT BE USED DIRECTLY: SEE USAGE
+##### IMPORTANT #####
+# USAGE:
+# drop this script inside CRIMP_HOME/plugins/perl_plugins, create a subdir
+# called CRIMP_HOME/plugins/perl_plugins/Crimp <-- upper case C important!!,
+# and finally drop any perl-based crimp plugins inside this new Crimp subdir
 #
 # perl-php-wrapper.pl - this script acts as a bridge between the older
 #   perl-based CRIMP plugins and the new PHP engine.
@@ -13,30 +17,21 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-#####
-# USAGE:
-# drop this script inside CRIMP_HOME/plugins/perl_plugins, create a subdir
-# called CRIMP_HOME/plugins/perl_plugins/Crimp <-- upper case C important!!,
-# and finally drop any perl-based crimp plugins inside this new Crimp subdir
-#####
+# Revision info: $Id: perl-php-wrapper.pl,v 1.2 2006-11-30 19:53:44 diddledan Exp $
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.1 2006-11-30 16:48:09 diddledan Exp $
-#
-##################################################################################
-# This library is free software; you can redistribute it and/or                  #
-# modify it under the terms of the GNU Lesser General Public                     #
-# License as published by the Free Software Foundation; either                   #
-# version 2.1 of the License, or (at your option) any later version.             #
-#                                                                                #
-# This library is distributed in the hope that it will be useful,                #
-# but WITHOUT ANY WARRANTY; without even the implied warranty of                 #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU              #
-# Lesser General Public License for more details.                                #
-#                                                                                #
-# You should have received a copy of the GNU Lesser General Public               #
-# License along with this library; if not, write to the Free Software            #
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA #
-##################################################################################
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 use strict;
 
