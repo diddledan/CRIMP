@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.3 2006-12-01 08:36:00 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.4 2006-12-01 10:49:17 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -24,20 +24,43 @@
  *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
+/**
+ *CRIMP's main class
+ */
 class Crimp {
+    /**
+     *this is for all the content that will be sent to the user's browser
+     *upon completion of execution of all plugins.
+     */
     protected $_output;
+    /**
+     *html headers like <meta /> tags, <script></script> tags and etc.
+     */
     protected $_headers;
-    protected $_menu;
+    /**
+     *the title of the page - appended to by setTitle()
+     */
     protected $pageTitle;
+    /**
+     *the Content-type returned to the browser upon completion
+     */
+    protected $_contentType = 'text/html';
+    /**
+     *this value is sent to the browser at the end in an HTTP header.
+     *200 for OK, 404 for Not Found, 500 for Internal Server Error etc.
+     */
+    protected $_exitCode = '204';
+    /**
+     *$_HTTPRequest contains the full URL of the requested document minus the
+     *server info, eg. /path/to/some/document.html
+     */
+    protected $_HTTPRequest;
     protected $sectionNames;
     protected $RemoteHost;
     protected $serverName;
     protected $serverSoftware;
     protected $serverProtocol;
     protected $userAgent;
-    protected $_HTTPRequest;
-    protected $_contentType = 'text/html';
-    protected $_exitCode = '204';
     protected $debugMode = 'inline';
     protected $debugSwitch = false;
     protected $Config;
@@ -45,6 +68,14 @@ class Crimp {
     protected $templatedir;
     protected $defaultLang;
     protected $userConfig;
+    /**
+     *$pluginLock is for plugins to add to if they are to be called only once.
+     *basically the idea is that a plugin will create
+     *  $crimp->pluginLock['pluginname'] = true;
+     *the plugin should then check this value on loading and error out if it's
+     *set to true.
+     */
+    public $pluginLock;
     public $defaultHTML = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -58,7 +89,9 @@ class Crimp {
 </body>
 </html>';
     
-    ## constructor
+    /**
+     *constructor
+     */
     function Crimp() {
         global $dbg, $config;
         
@@ -69,7 +102,7 @@ class Crimp {
         $this->serverSoftware       = $_ENV['SERVER_SOFTWARE'];
         $this->serverProtocol       = $_ENV['SERVER_PROTOCOL'];
         $this->userAgent            = $_ENV['HTTP_USER_AGENT'];
-        $this->_HTTPRequest          = $_GET['crimpq'];
+        $this->_HTTPRequest         = $_GET['crimpq'];
         
         define('REMOTE_HOST',       $this->remoteHost);
         define('SERVER_NAME',       $this->serverName);
@@ -89,6 +122,9 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $this->parseUserConfig();
     }
     
+    /**
+     *parse the configuration to set some values
+     */
     private function applyConfig() {
         $this->errorDir     = ( isset($this->Config['globals']['errordir']) && $this->Config['globals']['errordir'] ) ? $this->Config['globals']['errordir'] : CRIMP_HOME.'/errordocs';
         define('ERROR_DIR', $this->errorDir);
@@ -104,10 +140,23 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         if ( isset($this->Config['section']['name']) )
             $this->Config['section'] = array($this->Config['section']);
         
+        /**
+         *cycle through all the defined <section> elements in the config to
+         *work out which url paths have been defined
+         */
         foreach ( $this->Config['section'] as $num => $array )
             $this->sectionNames[$array['name']] = $num;
     }
     
+    /**
+     *figure out which <section> from the config file the requested document
+     *falls under. this will find the most specific declaration, eg. if '/' and
+     *'/blog' are both defined, '/blog/blah' in the HTTPRequest will set the
+     *userConfig to '/blog'. similarly, if '/blog' and '/blog/some/document' are
+     *defined, the same HTTPRequest will still match '/blog'. this function
+     *will default to '/', so this section should _always_ have a listing in the
+     *configuration file.
+     */
     private function parseUserConfig() {
         global $dbg;
         
@@ -125,6 +174,9 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $dbg->addDebug('UserConfig: '.$this->userConfig, PASS);
     }
     
+    /**
+     *set the document's title for inclusion in the <title></title> tags
+     */
     public function setTitle($title, $overwrite = false) {
         global $dbg;
         
@@ -141,6 +193,9 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         }
     }
     
+    /**
+     *add content to the html page
+     */
     public function addContent($htmlcontent, $location = 'bottom') {
         global $dbg;
         
@@ -167,6 +222,10 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         }
     }
     
+    /**
+     *add content to the menu which appears above the page content,
+     *eg. for fileList plugin
+     */
     public function addMenu($menu, $location = 'last') {
         global $dbg;
         if ( ($location == 'first') ) {
@@ -174,10 +233,13 @@ Requested Document: {$this->_HTTPRequest}", PASS);
 	    $this->_output = preg_replace('|<!--startMenuContent-->|i', "$0\n$menu<br />\n", $this->_output);
 	} else {
 	    $dbg->addDebug('Adding MenuContent (bottom)', PASS);
-            $this->_output = preg_replace('|<!--endMenuContent-->|i', "<br />\n$Menu\n$0|", $this->_output);
+            $this->_output = preg_replace('|<!--endMenuContent-->|i', "<br />\n$menu\n$0", $this->_output);
         }
     }
     
+    /**
+     *add a new header for inclusion into the final html document
+     */
     public function addHeader($header) {
         global $dbg;
         
@@ -185,6 +247,16 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $this->_headers = implode("\n", array($this->_headers, $header));
     }
     
+    /**
+     *if we get an error, call this function and it will negotiate a language
+     *with the browser and send an error document in that language if one
+     *exists. if there isn't a document in that language, the default language
+     *is tried, and finally falling back to english. if none of these match,
+     *then a generic error message is displayed.
+     *
+     *IMPORTANT: this function stops all execution immediately. no more plugins
+     *will be called afterwards.
+     */
     public function errorPage($package, $errorCode = '500') {
         global $dbg;
         
@@ -240,6 +312,12 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         die();
     }
     
+    /**
+     *this is the meat of the application. a simple routine that calls all the
+     *defined plugins in the order listed in the config file. it starts with
+     *the plugins defined for the section requested (userConfig), then continues
+     *with those from the <globals> section of the configuration file.
+     */
     public function executePlugins() {
         global $dbg;
         
@@ -259,13 +337,18 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                                         $plugins['plugin'] );
             elseif ( isset($plugins['plugin']) )
                 foreach( $plugins['plugin'] as $plugin )
-                    $pluginSystem->execute( $plugin['name'],
-                                            CRIMP_HOME."/plugins/{$plugin['name']}.php",
-                                            $this->userConfig,
-                                            $this->_HTTPRequest,
-                                            $plugin );
+                    if ( isset($plugin['name']) )
+                        $pluginSystem->execute( $plugin['name'],
+                                                CRIMP_HOME."/plugins/{$plugin['name']}.php",
+                                                $this->userConfig,
+                                                $this->_HTTPRequest,
+                                                $plugin );
+                    else $dbg->addDebug('the plugin declaration has no "name" element', WARN);
     }
     
+    /**
+     *complete the document and send to the browser
+     */
     public function sendDocument() {
         global $dbg, $http;
         
@@ -299,7 +382,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $this->_output = preg_replace('|(</head>)|i',"$headers\n$1", $this->_output, 1);
             
             ## CHEAT CODES
-            $ver = '$Id: crimp.php,v 1.3 2006-12-01 08:36:00 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.4 2006-12-01 10:49:17 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
             ##
         }
@@ -310,10 +393,20 @@ Requested Document: {$this->_HTTPRequest}", PASS);
     }
     
     ##### HELPER FUNCTIONS #####
+    
+    /**
+     *set/get the exitCode of the application. If a value is defined, it will
+     *override any previous values, and will become the code used in the final
+     *HTTP header unless a subsequent call overwrites it again.
+     */
     public function exitCode($code = null) {
         if ( $code ) $this->_exitCode = $code;
         return $this->_exitCode;
     }
+    /**
+     *set or get the Content-type currently defined for the document. this
+     *should only be touched if we are going to send something other than html
+     */
     public function contentType($ct = null) {
         if ( $ct ) $this->_contentType = $ct;
         return $this->_contentType;
