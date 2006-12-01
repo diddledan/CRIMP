@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.2 2006-11-30 19:53:44 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.3 2006-12-01 10:31:29 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -202,18 +202,19 @@ sub Config {
 }
 
 sub addHeaderContent {
-    my ($self, $new_header) = @_;
-    print "\$crimp->addHeader('$new_header');\n";
+    my $self = shift;
+    my $new_header = $self->AddSlashes(shift);
+    print "\$crimp->addHeader(stripslashes('$new_header'));\n";
 }
 
 sub addPageContent {
     my $self = shift;
     
-    my $PageContent = shift;
+    my $PageContent = $self->AddSlashes(shift);
     my $PageLocation = shift; #(top / bottom / null = bottom)
     $PageLocation ||= 'bottom';
     
-    print "\$crimp->addContent('$PageContent', '$PageLocation');\n";
+    print "\$crimp->addContent(stripslashes('$PageContent'), '$PageLocation');\n";
 }
 
 ###### END HELPER ROUTINES ######
@@ -301,9 +302,11 @@ sub printdebug {
     
     $message = "<b>$package</b><br />$message" if $package ne '';
     
-    if ($status eq 'pass') { print "\$dbg->addDebug('$message', PASS);\n" }
-    elsif ($status eq 'warn') { print "\$dbg->addDebug('$message', WARN);\n" }
-    elsif ($status eq 'fail') { print "\$dbg->addDebug('$message', FAIL);\n\$crimp->errorPage('$package', '500');\n"; exit }
+    $message = $self->AddSlashes($message);
+    
+    if ($status eq 'pass') { print "\$dbg->addDebug(stripslashes('$message'), PASS);\n" }
+    elsif ($status eq 'warn') { print "\$dbg->addDebug(stripslashes('$message'), WARN);\n" }
+    elsif ($status eq 'fail') { print "\$dbg->addDebug(stripslashes('$message'), FAIL);\n\$crimp->errorPage('$package', '500');\n"; exit }
     else { print "\$dbg->addDebug('$message');\n" }
 }
 
@@ -442,4 +445,12 @@ sub RetryWait {
     if ($tries != 0) { sleep 1; }
     $tries++;
     return $self->FileWrite($filename,$entry,$string,$tries);
+}
+
+sub AddSlashes {
+    my $self = shift;
+    my $text = shift;
+    $text =~ s|'|\\'|g;
+    $text =~ s|"|\\"|g;
+    return $text;
 }
