@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: fileList.php,v 1.1 2006-12-01 08:36:02 diddledan Exp $
+ *Revision info: $Id: fileList.php,v 1.2 2006-12-01 10:46:01 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -56,8 +56,8 @@ class fileList extends plugin implements iPlugin {
         
         foreach ($HttpRequest as $_) {
 	    if ( is_dir("$FileDir/$_") ) {
-		$FileDir = implode('/', $FileDir, $_);
-		$BaseUrl = implode('/', $BaseUrl, $_);
+		$FileDir = $FileDir.'/'.$_;
+		$BaseUrl = $BaseUrl.'/'.$_;
 	    }
 	}
         
@@ -82,14 +82,14 @@ class fileList extends plugin implements iPlugin {
 		if (($file != '.') && ($file != '..') && ($file != 'index.html') && ($file != 'CVS')) {
 		    if ( is_dir("$FileDir/$file") ) {
 			$DirCount++;
-			$newurl = implode('/', $BaseUrl, $file);
+			$newurl = $BaseUrl.'/'.$file;
 			$newurl = preg_replace('|/+|', '/', $newurl);
 			if ($DirCount != 1) $DirList = $DirList.$DirLayout;
 			$DirList = "$DirList<a href='$newurl'>$file</a>\n";
 		    } elseif ( preg_match('/\.html$/', $file) ) {
 			$FileCount++;
 			$file = preg_replace('/\.html$/', '', $file);
-			$newurl = implode('/', $BaseUrl, $file);
+			$newurl = $BaseUrl.'/'.$file;
 			$newurl = preg_replace('|/+|', '/', $newurl);
 			$newurl = $newurl.'.html';
 			if ($FileCount != 1) $FileList = $FileList.$DirLayout;
