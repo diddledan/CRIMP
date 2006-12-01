@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.2 2006-11-30 21:55:31 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.3 2006-12-01 08:36:00 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -51,6 +51,8 @@ class Crimp {
 <title></title>
 </head>
 <body>
+<!--startMenuContent-->
+<!--endMenuContent-->
 <!--startPageContent-->
 <!--endPageContent-->
 </body>
@@ -59,6 +61,8 @@ class Crimp {
     ## constructor
     function Crimp() {
         global $dbg, $config;
+        
+        $this->_output = $this->defaultHTML;
         
         $this->remoteHost           = $_ENV['REMOTE_ADDR'];
         $this->serverName           = $_ENV['SERVER_NAME'];
@@ -142,7 +146,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         
         $br = "\n<br />\n";
         
-        if ( ! $this->_output ) {
+        if ( $this->_output == $this->defaultHTML ) {
             $dbg->addDebug('<b>addContent()</b> creating initial page', PASS);
             $this->_output = $this->defaultHTML;
             $location = 'top';
@@ -160,6 +164,17 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         } else {
             $dbg->addDebug('addContent() adding to the BOTTOM of the page', PASS);
             $this->_output = preg_replace('/(<!--endPageContent-->)/',"$br$htmlcontent\n$1",$this->_output);
+        }
+    }
+    
+    public function addMenu($menu, $location = 'last') {
+        global $dbg;
+        if ( ($location == 'first') ) {
+	    $dbg->addDebug('Adding MenuContent (top)', PASS);
+	    $this->_output = preg_replace('|<!--startMenuContent-->|i', "$0\n$menu<br />\n", $this->_output);
+	} else {
+	    $dbg->addDebug('Adding MenuContent (bottom)', PASS);
+            $this->_output = preg_replace('|<!--endMenuContent-->|i', "<br />\n$Menu\n$0|", $this->_output);
         }
     }
     
@@ -284,7 +299,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $this->_output = preg_replace('|(</head>)|i',"$headers\n$1", $this->_output, 1);
             
             ## CHEAT CODES
-            $ver = '$Id: crimp.php,v 1.2 2006-11-30 21:55:31 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.3 2006-12-01 08:36:00 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
             ##
         }
