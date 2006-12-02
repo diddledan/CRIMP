@@ -1,4 +1,31 @@
 <?php
+/**
+ *Debug - A debugging routine developed for use with crimp based heavily on
+ *PHP Debug (http://www.php-debug.com/)
+ *
+ *CRIMP - Content Redirection Internet Management Program
+ *Copyright (C) 2005-2006 The CRIMP Team
+ *Authors:          The CRIMP Team
+ *Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
+ *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
+ *                  HomePage:      http://crimp.sf.net/
+ *
+ *Revision info: $Id: HTML_Table.php,v 1.2 2006-12-02 00:06:06 diddledan Exp $
+ *
+ *This library is free software; you can redistribute it and/or
+ *modify it under the terms of the GNU Lesser General Public
+ *License as published by the Free Software Foundation; either
+ *version 2.1 of the License, or (at your option) any later version.
+ *
+ *This library is distributed in the hope that it will be useful,
+ *but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *Lesser General Public License for more details.
+ *
+ *You should have received a copy of the GNU Lesser General Public
+ *License along with this library; if not, write to the Free Software
+ *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+ */
 
 /**
  * Configuration class for HTML_Table
@@ -321,7 +348,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
             // 6 : User app error
             case PHP_DEBUGLINE_APPERROR:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
-                $buffer .= $this->span('/!\\ User error : '. $properties['info'] . ' /!\\', 'app-error');
+                $buffer .= $this->span('/!\\ User error : '. nl2br(htmlspecialchars($properties['info'])) . ' /!\\', 'app-error');
                 break;
                 
             // 7
@@ -386,7 +413,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
             case PHP_DEBUGLINE_PASS:
             case PHP_DEBUGLINE_WARN:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
-                $buffer .= nl2br('&nbsp;&nbsp;'.$properties['info']);
+                $buffer .= nl2br('&nbsp;&nbsp;'.htmlspecialchars($properties['info']));
                 break;
 
             default:
