@@ -2,47 +2,53 @@
 <!-- the order of plugins is important. they are executed in the same order defined here,
     starting with the plugins defined in the requested section, followed by the globals -->
 <crimp>
-    <globals>
-        <debug>
-            <switch>on</switch>
-            <mode>inline</mode><!-- 'inline' or 'javascript' -->
-        </debug>
-        <sitetitle>Powered by CRIMP</sitetitle>
-        <!--<titleorder>forward</titleorder>-->
-        <!--<titleseparator> - </titleseparator>-->
-        <vardir>./var</vardir>
-        <errordir>./errordocs</errordir>
-        <defaultlanguage>en</defaultlanguage>
-        <templatedir>./templates</templatedir>
+    <!-- root namespace declarations -->
+    <debug>
+        <switch>on</switch>
+        <mode>inline</mode><!-- 'inline' or 'javascript' -->
+    </debug>
+    <sitetitle>Powered by CRIMP</sitetitle>
+    <!--<titleorder>forward</titleorder>-->
+    <!--<titleseparator> - </titleseparator>-->
+    <vardir>./var</vardir>
+    <errordir>./errordocs</errordir>
+    <defaultlanguage>en</defaultlanguage>
+    <plugin>
+        <name>breadCrumbs</name>
+        <position>top</position><!-- either 'top', 'bottom' or 'both' -->
+    </plugin>
+    <plugin>
+        <name>perl</name>
+        <plugin>Snow</plugin>
+        <parameter>on</parameter>
+    </plugin>
+    <plugin>
+        <name>applyTemplate</name>
         <template>default-crimp.html</template>
-        <plugin>
-            <name>breadCrumbs</name>
-            <position>top</position><!-- either 'top', 'bottom' or 'both' -->
-        </plugin>
-        <plugin>
-            <name>perl</name>
-            <plugin>buttonBar</plugin>
-            <parameter>Default</parameter>
-        </plugin>
-        <plugin>
-            <name>perl</name>
-            <plugin>Snow</plugin>
-            <parameter>on</parameter>
-        </plugin>
-    </globals>
-
+        <directory>./templates</directory>
+    </plugin>
+    <plugin>
+        <name>buttonBar</name>
+        <style>Default</style>
+    </plugin>
+    <!-- end root namespace declarations -->
+    
+    <!-- below here goes the section declarations -->
     <section>
         <name>/</name>
         <plugin>
             <name>contentDirectory</name>
             <directory>./docs</directory>
         </plugin>
-        <!--<plugin>
+        <plugin>
+            <!-- fileList relies upon there being a contentDirectory plugin
+                defined for the same section, or the globals special section,
+                or in the root namespace -->
             <name>fileList</name>
             <orientation>horizontal</orientation>
-        </plugin>-->
+        </plugin>
     </section>
-
+    
     <section>
         <name>/blog</name>
         <plugin>
