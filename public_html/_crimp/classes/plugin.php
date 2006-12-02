@@ -8,7 +8,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: plugin.php,v 1.2 2006-11-30 21:55:31 diddledan Exp $
+ *Revision info: $Id: plugin.php,v 1.3 2006-12-02 00:19:19 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -25,35 +25,33 @@
  *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-interface iPlugin {
-    public function execute();
-}
-class plugin {
-    protected $config;
-    protected $userConfig;
-    protected $httpRequest;
-
-    function plugin($userconfig, $httpRequest, $config) {
-        $this->userConfig = $userconfig;
-        $this->config = $config;
-        $this->httpRequest = $httpRequest;
-    }
-}
-
 class crimpPlugins {
-    function execute($plugName, $file, $userconfig, $httpRequest, $config) {
-        global $dbg;
-        
+    protected $crmip;
+    
+    function __construct(&$crimp) {
+        $this->crimp = &$crimp;
+    }
+    
+    function execute($plugName, $file, $scope = SCOPE_ROOT, $deferred = false) {
         if ( !file_exists($file) || !is_readable($file) ) {
-            $dbg->addDebug("plugin file for $plugName inaccessible", WARN);
+            $this->crimp->debug->addDebug("plugin file for '$plugName' inaccessible", WARN);
             return;
         }
         
         require_once($file);
         
-        $dbg->addDebug("Calling '$plugName' plugin", PASS);
-        $newplugin = new $plugName($userconfig, $httpRequest, $config);
+        $this->crimp->debug->addDebug("Calling '$plugName' plugin", PASS);
+        $newplugin = new $plugName( $this->crimp,
+                                    $scope,
+                                    $deferred );
         $newplugin->execute();
     }
+}
+
+/**
+ *this interface must be supported by all would-be plugins
+ */
+interface iPlugin {
+    public function execute();
 }
 ?>
