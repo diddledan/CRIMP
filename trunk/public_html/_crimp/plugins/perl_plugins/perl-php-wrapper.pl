@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.3 2006-12-01 10:31:29 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.4 2006-12-02 00:11:00 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -101,7 +101,6 @@ sub execute {
     ## Main Routine ##
     ##################
     
-    print "global \$dbg, \$crimp, \$http;\n";
     $self->executePlugin();
 }
 
@@ -215,6 +214,13 @@ sub addPageContent {
     $PageLocation ||= 'bottom';
     
     print "\$crimp->addContent(stripslashes('$PageContent'), '$PageLocation');\n";
+}
+
+sub addMenuContent {
+    my $self = shift;
+    
+    my $menuContent = $self->AddSlashes(shift);
+    print "\$crimp->addMenu(stripslashes('$menuContent'));\n";
 }
 
 ###### END HELPER ROUTINES ######
