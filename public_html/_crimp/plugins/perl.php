@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: perl.php,v 1.4 2006-12-01 10:43:38 diddledan Exp $
+ *Revision info: $Id: perl.php,v 1.5 2006-12-02 00:21:28 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -24,14 +24,39 @@
  *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-class perl extends plugin implements iPlugin {
+class perl implements iPlugin {
+    protected $deferred;
+    protected $scope;
+    protected $crimp;
+
+    function __construct(&$crimp, $scope = SCOPE_ROOT, $deferred = false) {
+        $this->deferred = $deferred;
+        $this->scope = $scope;
+        $this->crimp = &$crimp;
+    }
+    
     public function execute() {
-        global $dbg, $crimp, $http;
+        $crimp = &$this->crimp;
+        $dbg = &$crimp->debug;
         
-        if ( !isset($this->config['plugin']) || !isset($this->config['parameter']) ) {
-            $dbg->addDebug('You need to set both "plugin" and "parameter" in the config file for this section', WARN);
+        $pluginName = 'perl';
+        
+        if ( !($config = $crimp->Config('plugin', $this->scope, $pluginName)) ) {
+            $dbg->addDebug('You need to set a "plugin" key in the config file for this plugin', WARN);
             return;
         }
+        if ( !($parameter = $crimp->Config('parameter', $this->scope, $pluginName)) ) {
+            $dbg->addDebug("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'");
+            return;
+        }
+        
+        /**
+         *Uncomment this if construct if this plugin should defer itself
+         */
+        #if ( !$this->deferred ) {
+        #    $crimp->setDeferral($pluginName, $this->scope);
+        #    return;
+        #}
         
         $descriptorspec = array(
             0 => array('pipe', 'r'), // client's stdin
@@ -48,9 +73,9 @@ class perl extends plugin implements iPlugin {
             $cookies .= ($cookies) ? "&$key=$value" : "$key=$value";
         
         $env = array(
-            'userConfig'        => $this->userConfig,
-            'plugin'            => $this->config['plugin'],
-            'parameters'        => $this->config['parameter'],
+            'userConfig'        => $crimp->userConfig(),
+            'plugin'            => $config,
+            'parameters'        => $parameter,
             'QUERY_STRING'      => $querystring,
             'COOKIES'           => $cookies,
             'VAR_DIR'           => VAR_DIR,
@@ -87,7 +112,7 @@ class perl extends plugin implements iPlugin {
         
         $level = ( $retval == 0 ) ? PASS : WARN;
         $dbg->addDebug("perl-php-wrapper.pl exited with code '$retval'", $level);
-        $dbg->addDebug('PHP code to be evaluated:<br />'.nl2br(htmlspecialchars($returned)));
+        $dbg->addDebug("PHP code to be evaluated:\n$returned");
         eval($returned);
     }
 }
