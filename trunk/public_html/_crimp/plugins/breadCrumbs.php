@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: breadCrumbs.php,v 1.2 2006-11-30 19:37:17 diddledan Exp $
+ *Revision info: $Id: breadCrumbs.php,v 1.3 2006-12-02 00:25:45 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -24,16 +24,37 @@
  *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-class breadCrumbs extends plugin implements iPlugin {
+class breadCrumbs implements iPlugin {
+    protected $deferred;
+    protected $scope;
+    protected $crimp;
+
+    function __construct(&$crimp, $scope = SCOPE_ROOT, $deferred = false) {
+        $this->deferred = $deferred;
+        $this->scope = $scope;
+        $this->crimp = &$crimp;
+    }
+    
     public function execute() {
-        global $dbg, $crimp, $http;
+        $crimp = &$this->crimp;
+        $dbg = &$crimp->debug;
         
-        if ( ! isset($this->config['position']) ) {
-            $dbg->addDebug('Please define a &lt;position /&gt; tag in the config.xml file', WARN);
+        $pluginName = 'breadCrumbs';
+        
+        if ( !($config = $crimp->Config('position', $this->scope, $pluginName)) ) {
+            $dbg->addDebug('Please define a <position /> tag in the config.xml file', WARN);
             return;
         }
         
-        $position = $this->config['position'];
+        /**
+         *Uncomment this if construct if this plugin should defer itself
+         */
+        if ( !$this->deferred ) {
+            $crimp->setDeferral($pluginName, $this->scope);
+            return;
+        }
+        
+        $position = $config;
         if ( $position != 'top' && $position != 'bottom' && $position != 'both' )
             $position = 'top';
         
@@ -42,7 +63,7 @@ class breadCrumbs extends plugin implements iPlugin {
         $BreadLink = '';
 	$BreadCrumbs = "<a href='/$BreadLink'>home</a>";
         
-        $HttpRequest = explode('/',$this->httpRequest);
+        $HttpRequest = explode('/',$crimp->HTTPRequest());
 	foreach ( $HttpRequest as $requestPart ) {
 	    if ( $requestPart && $requestPart != 'index.html' ) {
 		$BreadLink = "$BreadLink/$requestPart";
