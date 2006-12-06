@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: perl.php,v 1.5 2006-12-02 00:21:28 diddledan Exp $
+ *Revision info: $Id: perl.php,v 1.6 2006-12-06 23:42:17 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -34,13 +34,13 @@ class perl implements iPlugin {
         $this->scope = $scope;
         $this->crimp = &$crimp;
     }
-    
+
     public function execute() {
         $crimp = &$this->crimp;
         $dbg = &$crimp->debug;
-        
+
         $pluginName = 'perl';
-        
+
         if ( !($config = $crimp->Config('plugin', $this->scope, $pluginName)) ) {
             $dbg->addDebug('You need to set a "plugin" key in the config file for this plugin', WARN);
             return;
@@ -49,7 +49,7 @@ class perl implements iPlugin {
             $dbg->addDebug("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'");
             return;
         }
-        
+
         /**
          *Uncomment this if construct if this plugin should defer itself
          */
@@ -57,13 +57,13 @@ class perl implements iPlugin {
         #    $crimp->setDeferral($pluginName, $this->scope);
         #    return;
         #}
-        
+
         $descriptorspec = array(
             0 => array('pipe', 'r'), // client's stdin
             1 => array('pipe', 'w'), // client's stdout
             /*2 => array('file', '/tmp/stderr', 'a'), // client's stderr*/
         );
-        
+
         $querystring = $postquery = $cookies = '';
         foreach($_GET as $key => $value)
             $querystring .= ($querystring) ? "&$key=$value" : "$key=$value";
@@ -71,7 +71,7 @@ class perl implements iPlugin {
             $postquery .= ($postquery) ? "&$key=$value" : "$key=$value";
         foreach($_COOKIE as $key => $value)
             $cookies .= ($cookies) ? "&$key=$value" : "$key=$value";
-        
+
         $env = array(
             'userConfig'        => $crimp->userConfig(),
             'plugin'            => $config,
@@ -90,16 +90,16 @@ class perl implements iPlugin {
             'HTTP_REQUEST'      => HTTP_REQUEST,
             'CONTENT_LENGTH'    => strlen($postquery),
         );
-        
+
         $cwd = CRIMP_HOME.'/plugins/perl_plugins';
-        
+
         $proc = proc_open(CRIMP_HOME.'/plugins/perl_plugins/perl-php-wrapper.pl', $descriptorspec, $pipes, $cwd, $env);
-        
+
         if ( !is_resource($proc) ) {
             $dbg->addDebug('could not spawn perl-php-wrapper.pl', WARN);
             return;
         }
-        
+
         fwrite($pipes[0], $postquery);
         fclose($pipes[0]);
         $returned = stream_get_contents($pipes[1]);
@@ -109,10 +109,10 @@ class perl implements iPlugin {
             $dbg->addDebug('error occurred while reading from subprocess');
             return;
         }
-        
+
         $level = ( $retval == 0 ) ? PASS : WARN;
         $dbg->addDebug("perl-php-wrapper.pl exited with code '$retval'", $level);
-        $dbg->addDebug("PHP code to be evaluated:\n$returned");
+        $dbg->addDebug('PHP code to be evaluated: '.htmlspecialchars($returned));
         eval($returned);
     }
 }
