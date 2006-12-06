@@ -8,7 +8,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: plugin.komodo-template.php,v 2.3 2006-12-01 23:44:04 diddledan Exp $
+ *Revision info: $Id: plugin.komodo-template.php,v 2.4 2006-12-06 16:44:50 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -29,9 +29,22 @@ class [[%(ask0:Plugin Name)]] implements iPlugin {
     public function execute() {
         $crimp = &$this->crimp;
         $dbg = &$crimp->debug;
-        
+
         $pluginName = '[[%(ask0:Plugin Name)]]';
-        
+
+        /**
+         *should this plugin defer itself?
+         */
+        $defer = [[%(ask:Should this plugin defer itself? (true or false):false)]];
+
+        /**
+         *check that we aren't locked
+         */
+        if ( $crimp->pluginLock($pluginName) ) {
+            $dbg->addDebug('Exiting, as we are locked.');
+            return;
+        }
+
         /**
          *the value referenced by default configuration key, that you entered
          *in the komodo dialog, is stored in the variable $config
@@ -40,14 +53,19 @@ class [[%(ask0:Plugin Name)]] implements iPlugin {
             $dbg->addDebug('Please define a <position /> tag in the config.xml file', WARN);
             return;
         }
-        
+
         /**
-         *Uncomment this if construct if this plugin should defer itself
+         *the actual deferral check
          */
-        #if ( !$this->deferred ) {
-        #    $crimp->setDeferral($pluginName, $this->scope);
-        #    return;
-        #}
+        if ( $defer && !$this->deferred ) {
+            $dbg->addDebug('Deferring execution till later', PASS);
+            $crimp->setDeferral($pluginName, $this->scope);
+            return;
+        }
+
+        /**
+         *BEGIN CUSTOM PLUGIN CODE HERE
+         */
     }
 }
 
