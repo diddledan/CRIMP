@@ -13,6 +13,7 @@
     <vardir>./var</vardir>
     <errordir>./errordocs</errordir>
     <defaultlanguage>en</defaultlanguage>
+    <template>./templates/default-crimp.html</template>
     <plugin>
         <name>breadCrumbs</name>
         <position>top</position><!-- either 'top', 'bottom' or 'both' -->
@@ -23,16 +24,11 @@
         <parameter>on</parameter>
     </plugin>
     <plugin>
-        <name>applyTemplate</name>
-        <template>default-crimp.html</template>
-        <directory>./templates</directory>
-    </plugin>
-    <plugin>
         <name>buttonBar</name>
         <style>Default</style>
     </plugin>
     <!-- end root namespace declarations -->
-    
+
     <!-- below here goes the section declarations -->
     <section>
         <name>/</name>
@@ -48,7 +44,7 @@
             <orientation>horizontal</orientation>
         </plugin>
     </section>
-    
+
     <section>
         <name>/blog</name>
         <plugin>
