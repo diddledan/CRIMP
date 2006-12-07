@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: contentDirectory.php,v 1.3 2006-12-02 00:24:11 diddledan Exp $
+ *Revision info: $Id: contentDirectory.php,v 1.4 2006-12-07 20:30:31 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -29,52 +29,53 @@ class contentDirectory implements iPlugin {
     protected $scope;
     protected $crimp;
 
-    function __construct(&$crimp, $scope = SCOPE_ROOT, $deferred = false) {
+    function __construct(&$crimp, $scope = SCOPE_ROOT, $pluginNum, $deferred = false) {
         $this->deferred = $deferred;
         $this->scope = $scope;
         $this->crimp = &$crimp;
     }
-    
+
     public function execute() {
         $crimp = &$this->crimp;
         $dbg = &$crimp->debug;
-        
+
         $pluginName = 'contentDirectory';
-        
-        if ( !($config = $this->crimp->Config('directory', $this->scope, 'contentDirectory')) ) {
+
+        if ( !($config = $crimp->Config('directory', $this->scope, 'contentDirectory')) ) {
             $dbg->addDebug('Please specify a <directory /> setting in the config file', WARN);
             return;
         }
-        
+
         /**
          *Uncomment this if construct if this plugin should defer itself
          */
         #if ( !$this->deferred ) {
-        #    $crimp->setDeferral($pluginName, $this->scope);
+        #    $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
         #    return;
         #}
-        
+
         $path = $crimp->HTTPRequest();
         $userConfig = $crimp->userConfig();
         $path = preg_replace("|^$userConfig|i", '', $path);
-        $dbg->addDebug($path, PASS);
-        
+        $path = preg_replace('|\.\.|', '', $path);
+        $dbg->addDebug("Requested document: $path", PASS);
+
         if ( !$path ) $path = '/index.html';
-        
-        $requested = $crimp->Config('directory', $this->scope, $pluginName).'/'.$path;
-        
-        if ( is_dir($requested) ) $requested = $requested.'/index.html';
-        
-        $dbg->addDebug("contentDirectory\nUsing File: $requested", PASS);
-        
+
+        $requested = "$config/$path";
+
+        if ( is_dir($requested) ) $requested = "$requested/index.html";
+
+        $dbg->addDebug("Using File: $requested", PASS);
+
         if ( !is_file($requested) ) {
             $dbg->addDebug('File requested does not exist.', WARN);
-            $crimp->errorPage('contentDirectory', '404');
+            $crimp->errorPage($pluginName, '404');
             return;
         }
         if ( !is_readable($requested) ) {
-            $dbg->addDebug('File requested is not readable. (Check permissions?)', WARN);
-            $crimp->errorPage('contentDirectory', '500');
+            $dbg->addDebug('File requested exists, but is not readable. (Check permissions?)', WARN);
+            $crimp->errorPage($pluginName, '500');
             return;
         }
 

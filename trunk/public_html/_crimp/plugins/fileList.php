@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: fileList.php,v 1.3 2006-12-02 00:26:35 diddledan Exp $
+ *Revision info: $Id: fileList.php,v 1.4 2006-12-07 20:30:31 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -26,21 +26,23 @@
 
 class fileList implements iPlugin {
     protected $deferred;
+    protected $pluginNum;
     protected $scope;
     protected $crimp;
 
-    function __construct(&$crimp, $scope = SCOPE_ROOT, $deferred = false) {
+    function __construct(&$crimp, $scope = SCOPE_ROOT, $pluginNum = false, $deferred = false) {
         $this->deferred = $deferred;
+        $this->pluginNum = $pluginNum;
         $this->scope = $scope;
         $this->crimp = &$crimp;
     }
-    
+
     public function execute() {
         $crimp = &$this->crimp;
         $dbg = &$crimp->debug;
-        
+        $pluginNum = $this->pluginNum;
         $pluginName = 'fileList';
-        
+
         /**
          *this plugin relies on contentDirectory having been defined.
          */
@@ -48,15 +50,15 @@ class fileList implements iPlugin {
             $dbg->addDebug('Please make sure that the contentDirectory plugin has been enabled properly in the config.xml file', WARN);
             return;
         }
-        
+
         $DirList = '<b>Directories</b><br />&nbsp;&nbsp;&nbsp;';
 	$FileList = '<b>Documents</b><br />&nbsp;&nbsp;&nbsp;';
 	$DirCount = $FileCount = 0;
-        
+
         $DirList = '<b>Directories:</b>';
 	$FileList = '<b>Documents:</b>';
-        
-        if ( $crimp->Config('orientation', $this->scope, $pluginName) == 'vertical') { 
+
+        if ( $crimp->Config('orientation', $this->scope, $pluginName) == 'vertical') {
 	    $DirLayout = '<br />&nbsp;&nbsp;&nbsp;&nbsp;';
 	    $DirList = $DirList.'<br />&nbsp;&nbsp;&nbsp;&nbsp;';
 	    $FileList = $FileList.'<br />&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -65,36 +67,36 @@ class fileList implements iPlugin {
             $DirList = $DirList.' ';
 	    $FileList = $FileList.' ';
 	}
-        
+
         $FileDir = $config;
-        
+
         $HttpRequest = split('/',$crimp->HTTPRequest());
         $BaseUrl = '';
-        
+
         foreach ($HttpRequest as $_) {
 	    if ( is_dir("$FileDir/$_") ) {
 		$FileDir = $FileDir.'/'.$_;
 		$BaseUrl = $BaseUrl.'/'.$_;
 	    }
 	}
-        
+
         if ( !preg_match("|^{$crimp->userConfig()}|", $BaseUrl) )
             $BaseUrl = $crimp->userConfig().'/'.$BaseUrl;
-        
+
 	$BaseUrl = preg_replace('|/+|','/', $BaseUrl);
 	$dbg->addDebug("FileDir: $FileDir\nBaseUrl: $BaseUrl", PASS);
-        
+
         if ( is_dir($FileDir) ) {
 	    $DIR = opendir($FileDir);
             if ( $DIR === false ) {
                 $dbg->addDebug('Could not open the directory for reading (check permissions)', WARN);
                 return;
             }
-            
+
             while ( ($file = readdir($DIR)) !== false )
                 $DirChk[] = $file;
 	    closedir($DIR);
-            
+
 	    foreach ( $DirChk as $file ) {
 		if (($file != '.') && ($file != '..') && ($file != 'index.html') && ($file != 'CVS')) {
 		    if ( is_dir("$FileDir/$file") ) {
@@ -114,14 +116,14 @@ class fileList implements iPlugin {
                     }
 		}
 	    }
-	    
+
 	    $dbg->addDebug("Directories found: $DirCount\nDocuments found: $FileCount", PASS);
-	    
+
 	    $newhtml = '';
             if ( $DirCount > 0 ) $newhtml = $newhtml.$DirList;
 	    if ( ($DirCount > 0) && ($FileCount > 0) ) $newhtml = $newhtml.'<br />';
 	    if ( $FileCount != 0 ) $newhtml = $newhtml.$FileList;
-	    
+
 	    $crimp->addMenu($newhtml);
 	} else $dbg->addDebug('Directory does not exist, or we tried to open a file as a directory.', WARN);
     }

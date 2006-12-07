@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.5 2006-12-02 00:41:26 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.6 2006-12-07 20:30:22 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -72,6 +72,7 @@ class Crimp {
      *array containing the configuration file in an indexed form
      */
     public $_config;
+    protected $varDir;
     protected $errordir;
     protected $templatedir;
     protected $defaultLang;
@@ -122,43 +123,48 @@ class Crimp {
         HTTP_EXIT_NOT_FOUND     => array('text' => 'Not Found', 'desc' => 'The file you were trying to view cannot be found.'),
         HTTP_EXIT_SERVER_ERROR  => array('text' => 'Internal Server Error', 'desc' => 'The server encountered an error with your request. Please try again.')
     );
-    
+
     /**
      *constructor
      */
     function __construct() {
         $this->_output = $this->defaultHTML;
-        
+
         $this->debug = new Debug;
-        $config = new crimpConf($dbg);
-        
+        $config = new crimpConf;
+        if ( ! $config ) {
+            $dbg->addDebug("Configuration Parser failed to read the configuration:<br />&nbsp;&nbsp;&nbsp;&nbsp;{$this->root->getMessage()}", FAIL);
+            $dbg->render();
+            die();
+        }
+
         $this->_config = $config->get();
         unset ($config);
-        
+
         $this->remoteHost           = $_ENV['REMOTE_ADDR'];
         $this->serverName           = $_ENV['SERVER_NAME'];
         $this->serverSoftware       = $_ENV['SERVER_SOFTWARE'];
         $this->serverProtocol       = $_ENV['SERVER_PROTOCOL'];
         $this->userAgent            = $_ENV['HTTP_USER_AGENT'];
-        $this->_HTTPRequest         = $_GET['crimpq'];
-        
+        $this->_HTTPRequest         = urldecode($_GET['crimpq']);
+
         define('REMOTE_HOST',       $this->remoteHost);
         define('SERVER_NAME',       $this->serverName);
         define('SERVER_SOFTWARE',   $this->serverSoftware);
         define('PROTOCOL',          $this->serverProtocol);
         define('USER_AGENT',        $this->userAgent);
         define('HTTP_REQUEST',      $this->_HTTPRequest);
-        
+
         $this->debug->addDebug("Remote Host: {$this->remoteHost}
 Server Name: {$this->serverName}
 Server Software: {$this->serverSoftware}
 User Agent: {$this->userAgent}
 Requested Document: {$this->_HTTPRequest}", PASS);
-        
+
         $this->applyConfig();
         $this->parseUserConfig();
     }
-    
+
     /**
      *parse the configuration to set some values
      */
@@ -173,7 +179,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         define('DEFAULT_LANG', $this->defaultLang);
         $this->setTitle( ( $this->Config('sitetitle', SCOPE_GLOBALS) ) ? $this->Config('sitetitle', SCOPE_GLOBALS) : '', true );
     }
-    
+
     /**
      *figure out which <section> from the config file the requested document
      *falls under. this will find the most specific declaration, eg. if '/' and
@@ -191,13 +197,13 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             if ( isset($this->_config['section'][$tmpstr]) )
                 $userConfig = $tmpstr;
         }
-        
+
         if ( !$userConfig ) $userConfig = '/';
         $this->userConfig = $userConfig;
-        
+
         $this->debug->addDebug('UserConfig: '.$this->userConfig, PASS);
     }
-    
+
     /**
      *set the document's title for inclusion in the <title></title> tags
      */
@@ -209,20 +215,20 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         else {
             $sep = ' - ';
             if ( $conf = $this->Config('titleseparator', SCOPE_GLOBALS) ) $sep = $conf;
-            
+
             $cur = $this->pageTitle;
             $this->debug->addDebug("setTitle(): Adding '$title' to page title", PASS);
             $this->pageTitle = ( $this->Config('titleorder', SCOPE_GLOBALS) == 'forward' )
                 ? "$cur$sep$title" : "$title$sep$cur";
         }
     }
-    
+
     /**
      *add content to the html page
      */
     public function addContent($htmlcontent, $location = 'bottom') {
         $br = "\n<br />\n";
-        
+
         if ( $this->_output == $this->defaultHTML ) {
             $this->debug->addDebug('addContent(): creating initial page', PASS);
             $this->_output = $this->defaultHTML;
@@ -234,7 +240,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $location = 'top';
             $br = '';
         }
-        
+
         if ( $location == 'top' ) {
             $this->debug->addDebug('addContent(): adding to the TOP of the page', PASS);
             $this->_output = preg_replace('/(<!--startPageContent-->)/',"$1$htmlcontent$br",$this->_output);
@@ -243,7 +249,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $this->_output = preg_replace('/(<!--endPageContent-->)/',"$br$htmlcontent\n$1",$this->_output);
         }
     }
-    
+
     /**
      *add content to the menu which appears above the page content,
      *eg. for fileList plugin
@@ -257,7 +263,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $this->_output = preg_replace('|<!--endMenuContent-->|i', "<br />\n$menu\n$0", $this->_output);
         }
     }
-    
+
     /**
      *add a new header for inclusion into the final html document
      */
@@ -265,7 +271,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $this->debug->addDebug("addHeader(): adding html header:\n$header", PASS);
         $this->_headers = implode("\n", array($this->_headers, $header));
     }
-    
+
     /**
      *if we get an error, call this function and it will negotiate a language
      *with the browser and send an error document in that language if one
@@ -278,7 +284,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
      */
     public function errorPage($package, $errorCode = '500') {
         $this->debug->addDebug("errorPage(): package: $package; errorCondition: $errorCode", PASS);
-        
+
         if ( $package ) $package = "-$package";
         $languages = array();
         $errordir = $this->errorDir;
@@ -288,12 +294,12 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             }
             closedir($dir);unset($file);
         }
-        
+
         $deflang = $this->defaultLang;
         $clientLang = HTTP::negotiateLanguage($languages, $deflang);
-        
+
         if ( isset($_COOKIE['preferred_language']) ) $clientLang = $_COOKIE['preferred_language'];
-        
+
         $errorFiles = array(
             "$errorDir/$clientLang/$errorCode$package.html",
             "$errorDir/$clientLang/$errorCode.html",
@@ -303,14 +309,14 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             "$errorDir/en/$errorCode.html",
         );
         unset($errorDir, $clientLang, $deflang, $plugin);
-        
+
         $content = false;
         foreach ( $errorFiles as $file ) {
             if ( $content ) next;
             if ( file_exists($file) ) list($title, $content) = HTML::stripHeaderFooter(HTML::pageRead($file));
         }
         unset($errorFiles, $file);
-        
+
         if ( ! $content ) {
             global $http;
             $title = "Error '$errorCode'";
@@ -321,14 +327,14 @@ Requested Document: {$this->_HTTPRequest}", PASS);
 <p>Additionally, a 404: Not Found error was encountered while trying to use a 'friendly' error document for this request.</p>
 ";
         }
-        
+
         $this->addContent($content, true);
         $this->setTitle($title, true);
         $this->_exitCode = $errorCode;
         $this->sendDocument();
         die();
     }
-    
+
     /**
      *this is the meat of the application. a simple routine that calls all the
      *defined plugins in the order listed in the config file. it starts with
@@ -338,14 +344,14 @@ Requested Document: {$this->_HTTPRequest}", PASS);
      */
     public function executePlugins() {
         $pluginSystem = new crimpPlugins($this);
-        
+
         if ( !isset($this->_config['section'][$this->userConfig]['plugin'])
             && !isset($this->_config['globals']['plugin'])
             && !isset($this->_config['plugin']) ) {
             $this->debug->addDebug('You forgot to add at least one <plugin> section for this url.', FAIL);
             return;
         }
-        
+
         /**
          *config scope - this is so that a plugin can determine where it's
          *config root is.
@@ -357,21 +363,24 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          *for successively higher levels works out nicely.
          */
         $scope = 0;
-        
+
         foreach ( array($this->_config['section'][$this->userConfig],
                         $this->_config['globals'],
                         $this->_config) as $plugins ) {
             $scope++;
             if ( isset($plugins['plugin']) ) {
+                $i = 0;
                 foreach( $plugins['plugin'] as $plugin ) {
                     if ( isset($plugin['name']) ) {
                         if ( !$this->pluginLock($plugin['name']) ) {
-                            $pluginSystem->execute( $plugin['name'],
-                                                    CRIMP_HOME."/plugins/{$plugin['name']}.php",
-                                                    $scope,
-                                                    false );
+                            $pluginSystem->execute($plugin['name'],
+                                                   $i,
+                                                   CRIMP_HOME."/plugins/{$plugin['name']}.php",
+                                                   $scope,
+                                                   false);
                         }
                     } else $this->debug->addDebug('the plugin declaration has no "name" element', WARN);
+                    $i++;
                 }
             }
         }
@@ -381,24 +390,27 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          */
         if ( is_array($this->deferredPlugins) )
             foreach ( $this->deferredPlugins as $plugin )
-                $pluginSystem->execute( $plugin['name'],
-                                        CRIMP_HOME."/plugins/{$plugin['name']}.php",
-                                        $plugin['scope'],
-                                        true );
+                $pluginSystem->execute($plugin['name'],
+                                       $plugin['num'],
+                                       CRIMP_HOME."/plugins/{$plugin['name']}.php",
+                                       $plugin['scope'],
+                                       true);
     }
-    
+
     /**
      *complete the document and send to the browser
      */
     public function sendDocument() {
         $this->debug->addDebug('Tidying up and exiting cleanly', PASS);
-        
+
         $exitCode = $this->_exitCode;
         if ( $this->_output && $exitCode == '204' ) $exitCode = '200';
         if ( !$this->_contentType ) $this->_contentType = 'text/html';
-        
+
         if ( $this->_contentType == 'text/html' ) {
-            ## add headers
+            /**
+             *add headers
+             */
             if ( $this->debugMode == 'javascript' )
                 $this->addHeader('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-hidden.css" />');
             $this->addHeader('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
@@ -406,33 +418,96 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/moo/moo.fx.js"></script>');
             $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/moo/moo.fx.pack.js"></script>');
             $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/debug.js"></script>');
-            
+
+            /**
+             *apply the template
+             */
+            $this->applyTemplate();
+
+            /**
+             *set the title tags
+             */
+            $title = $this->pageTitle;
+            $this->_output = preg_replace('/(<title>)/i',"$1$title", $this->_output, 1);
+
+            /**
+             *add headers to the actual output
+             */
+            $headers = $this->_headers;
+            $this->_output = preg_replace('|(</head>)|i',"$headers\n$1", $this->_output, 1);
+
+            /**
+             *apply the debug output
+             */
             $this->debug->addDebug("HTTP Exit Code: $exitCode",PASS);
             $debugString = $this->stripHeaderFooter($this->debug->getDisplay());
             unset ($junk);
             $this->_output = preg_replace('|(</body>)|i', "{$debugString[1]}$1", $this->_output, 1);
-            
-            $menuString = $this->_menu;
-            $this->_output = preg_replace('/(<body>)/i',"$1$menuString", $this->_output, 1);
-            $title = $this->pageTitle;
-            $this->_output = preg_replace('/(<title>)/i',"$1$title", $this->_output, 1);
-            
-            $headers = $this->_headers;
-            $this->_output = preg_replace('|(</head>)|i',"$headers\n$1", $this->_output, 1);
-            
-            ## CHEAT CODES
-            $ver = '$Id: crimp.php,v 1.5 2006-12-02 00:41:26 diddledan Exp $';
+
+            /**
+             *CHEAT CODES
+             */
+            $ver = '$Id: crimp.php,v 1.6 2006-12-07 20:30:22 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
-            ##
         }
-        
+
+        /**
+         *send the http headers
+         */
         $this->head($this->_contentType, $exitCode);
-        
+
+        /**
+         *send the content to the browser
+         */
         echo $this->_output;
     }
-    
+
+    protected function applyTemplate() {
+        if ( !($templ = $this->Config('template', SCOPE_SECTION)) ) {
+            $this->debug->addDebug('Please define a <template></template> tag in the config.xml file', WARN);
+            return;
+        }
+
+        /**
+         *if the user has explicitly turned off the template
+         */
+        if ( $templ == 'none' || $templ == 'off' ) {
+            $this->debug->addDebug("$pluginName turned off. Not applying a template", PASS);
+            return;
+        }
+
+        /**
+         *check the content-type: we don't want to mess up an image stream,
+         *for instance.
+         */
+        $ct = $this->contentType();
+        if ( ($ct != 'text/html') && ($ct != 'text/xhtml+xml') ) {
+	    $this->debug->addDebug("Skipped applying template for ContentType: $ct");
+	    return;
+	}
+
+        /**
+         *check that the template file is readable
+         */
+        if ( !is_file($templ) || ! is_readable($templ) ) {
+            $this->debug->addDebug("$templ is not readable by this program", WARN);
+            return;
+        }
+
+        /**
+         *get the template content
+         */
+        if ( !($template = file_get_contents($templ)) ) {
+            $this->debug->addDebug('template file is empty', WARN);
+            return;
+        }
+
+        list($null,$content) = $this->stripHeaderFooter($this->_output);
+	$this->_output = preg_replace('/<!--PAGE_CONTENT-->/i', $content, $template);
+    }
+
     ##### HELPER FUNCTIONS #####
-    
+
     /**
      *set/get the exitCode of the application. If a value is defined, it will
      *override any previous values, and will become the code used in the final
@@ -458,7 +533,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             if ( isset($this->_pluginLock[$plugName]) ) return true;
             return false;
         }
-        
+
         $this->_pluginLock[$plugName] = true;
         return true;
     }
@@ -466,25 +541,39 @@ Requested Document: {$this->_HTTPRequest}", PASS);
      *sets a plugin as 'deferred', ie. will halt execution now and restart
      *later, after all the other plugins have been executed.
      */
-    public function setDeferral($plugName, $scope) {
+    public function setDeferral($plugName, $pluginNum, $scope) {
         $this->debug->addDebug("adding deferral for '$plugName' in scope '$scope'", PASS);
-        $this->deferredPlugins[] = array('name' => $plugName, 'scope' => $scope);
+        $this->deferredPlugins[] = array('name' => $plugName,
+                                         'num' => $pluginNum,
+                                         'scope' => $scope);
     }
-    
+
     /**
      *cycle through the config array looking for a specific plugin, and return
      *the value of the hash element who's name is stored in $key
      */
-    protected function getPlugConf($pluginName, $key, $config) {
+    /**
+     *TODO: fix this for multiple invocations of the same plugin within the same
+     *scope. eg. two 'perl' plugins calling different modules
+     */
+    protected function getPlugConf($pluginName, $key, $config, $pluginNum = false) {
+        if ( $pluginNum &&
+            isset($config[$pluginNum]) &&
+            isset($config[$pluginNum]['name']) &&
+            $config[$pluginNum]['name'] == $pluginName &&
+            isset($config[$pluginNum][$key]) )
+                return $config[$pluginNum][$key];
         foreach ($config as $plugin)
-            if ( isset($plugin['name']) && $plugin['name'] == $pluginName && isset($plugin[$key]) )
-                return $plugin[$key];
+            if ( isset($plugin['name']) &&
+                $plugin['name'] == $pluginName &&
+                isset($plugin[$key]) )
+                    return $plugin[$key];
         return false;
     }
     /**
      *get a configuration value - subcalls the protected getPlugConf() above
      */
-    public function Config($key, $scope = SCOPE_SECTION, $plugin = false) {
+    public function Config($key, $scope = SCOPE_SECTION, $plugin = false, $pluginNum = false) {
         /**
          *if the plugin name has been given:
          */
@@ -498,15 +587,15 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             switch ($scope) {
                 case SCOPE_SECTION:
                     if ( isset($this->_config['section'][$this->userConfig]['plugin']) )
-                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['section'][$this->userConfig]['plugin']) )
+                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['section'][$this->userConfig]['plugin'], $pluginNum) )
                             return $conf;
                 case SCOPE_GLOBALS:
                     if ( isset($this->_config['globals']['plugin']) )
-                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['globals']['plugin']) )
+                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['globals']['plugin'], $pluginNum) )
                             return $conf;
                 case SCOPE_ROOT:
                     if ( isset($this->_config['plugin']) )
-                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['plugin']) )
+                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['plugin'], $pluginNum) )
                             return $conf;
             }
         } else {
@@ -517,7 +606,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             switch ($scope) {
                 case SCOPE_SECTION:
                     if ( isset($this->_config['section'][$this->userConfig][$key]) )
-                        return $conf;
+                        return $this->_config['section'][$this->userConfig][$key];
                 case SCOPE_GLOBALS:
                     if ( isset($this->_config['globals'][$key]) )
                         return $this->_config['globals'][$key];
@@ -526,14 +615,14 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                         return $this->_config[$key];
             }
         }
-        
+
         /**
          *we've searched for it, now return false to indicate that the config
          *value was not found
          */
         return false;
     }
-    
+
     /**
      *returns the calculated section name of the request
      *(may not be complete URL path)
@@ -547,7 +636,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
     public function HTTPRequest() {
         return $this->_HTTPRequest;
     }
-    
+
     /**
      *get the short and long description of an HTTP exit code
      */
@@ -556,7 +645,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             return array($this->HTTP_EXIT_CODES['-1']['text'], $this->HTTP_EXIT_CODES['-1']['desc']);
         return array($this->HTTP_EXIT_CODES[$code]['text'], $this->HTTP_EXIT_CODES[$code]['desc']);
     }
-    
+
     /**
      *send the appropriate headers to the browser for the content-type and
      *http exit status code
@@ -566,14 +655,14 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          *check that the headers have not been sent already
          */
         if ( headers_sent() ) return false;
-        
+
         $err = ( isset($this->HTTP_EXIT_CODES[$exitCode]) ) ? $this->HTTP_EXIT_CODES[$exitCode]['text'] : 'Unknown';
         header("HTTP/1.1 $exitCode $err");
         header("Content-type: $contentType");
-        
+
         return true;
     }
-    
+
     /**
      *strips out everything before and after (inclusive of) the <body></body>
      *tags in the supplied html code. returns an array containing the content of
@@ -598,32 +687,32 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          */
         return array($title[1], $html);
     }
-    
+
     /**
      *read the contents of a file or returns an error document explaining that
      *the file was unavailable.
      */
     public function pageRead($file) {
         $this->debug->addDebug("pageRead(): File: $file", PASS);
-        
+
         if ( is_file($file) && is_readable($file) )
             return file_get_contents($file);
         else $this->debug->addDebug('File is either non-existant or unreadable (permissions?)', WARN);
-        
+
         $file = ERRORDIR.'/404.html';
         $crimp->exitCode('404');
-        
+
         if ( is_file($file) && is_readable($file) )
             return file_get_contents($file);
         else $this->debug->addDebug("Error page file is either non-existant or unreadable (permissions?)\nFilename: $file", WARN);
-        
+
         $newhtml = <<<EOF
 <h1>404 - Page Not Found</h1>
 <p>The document you are looking for has not been found.
 Additionally a 404 Not Found error was encountered while trying to
 use an error document for this request</p>
 EOF;
-        
+
         $FileRead = $crimp->defaultHTML;
         $FileRead = preg_replace('/(<body>)/i', "$1$newhtml", $FileRead);
         $FileRead = preg_replace('/(<title>)/i', '${1}404 - Page Not Found', $FileRead);

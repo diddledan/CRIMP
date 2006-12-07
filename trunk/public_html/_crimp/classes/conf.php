@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: conf.php,v 1.1 2006-12-02 00:15:08 diddledan Exp $
+ *Revision info: $Id: conf.php,v 1.2 2006-12-07 20:30:22 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -34,21 +34,19 @@ class crimpConf {
     private $conf;
     private $root;
     protected $configArray;
-    
-    public function __construct(&$dbg) {
+
+    public function __construct() {
         $this->conf = new Config;
         $this->root =& $this->conf->parseConfig('config.xml','XML');
-        
+
         if ( PEAR::isError($this->root) ) {
-            $dbg->addDebug("Configuration Parser failed to read the configuration:<br />&nbsp;&nbsp;&nbsp;&nbsp;{$this->root->getMessage()}", FAIL);
-            $dbg->render();
-            die();
+            return false;
         }
-        
+
         $this->configArray = $this->root->toArray();
         $this->configArray = $this->configArray['root']['crimp'];
     }
-    
+
     public function get() {
         /**
          *reorganise the ['section'] hash/array. first force it to be an array,
@@ -60,12 +58,12 @@ class crimpConf {
             && (!is_array($this->configArray['section'])
             || !isset($this->configArray['section'][0])) )
             $this->configArray['section'] = array($this->configArray['section']);
-        
+
         for ($i = 0; $i < count($this->configArray['section']); $i++) {
             $this->configArray['section'][$this->configArray['section'][$i]['name']] = $this->configArray['section'][$i];
             unset($this->configArray['section'][$i]);
         }
-        
+
         /**
          *force plugins to be listed in an array format for each section
          */
@@ -74,7 +72,7 @@ class crimpConf {
                 && (!is_array($section['plugin'])
                 || !isset($section['plugin'][0])) )
                 $this->configArray['section'][$key]['plugin'] = array($section['plugin']);
-        
+
         /**
          *force plugins to be listed in an array format for the globals section.
          *first make sure the globals key exists.
@@ -85,7 +83,7 @@ class crimpConf {
                 && (!is_array($this->configArray['globals']['plugin'])
                 || !isset($this->configArray['plugin'][0])) )
             $this->configArray['globals']['plugin'] = array($this->configArray['globals']['plugin']);
-        
+
         /**
          *force the root namespace's plugin declaration(s) to be in array form
          */
@@ -93,7 +91,7 @@ class crimpConf {
             && (!is_array($this->configArray['plugin'])
             || !isset($this->configArray['plugin'][0])) )
             $this->configArray['plugin'] = array($this->configArray['plugin']);
-        
+
         /**
          *return the configuration array
          */
