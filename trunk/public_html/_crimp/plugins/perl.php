@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: perl.php,v 1.6 2006-12-06 23:42:17 diddledan Exp $
+ *Revision info: $Id: perl.php,v 1.7 2006-12-07 20:27:50 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -26,11 +26,13 @@
 
 class perl implements iPlugin {
     protected $deferred;
+    protected $pluginNum;
     protected $scope;
     protected $crimp;
 
-    function __construct(&$crimp, $scope = SCOPE_ROOT, $deferred = false) {
+    function __construct(&$crimp, $scope = SCOPE_ROOT, $pluginNum = false, $deferred = false) {
         $this->deferred = $deferred;
+        $this->pluginNum = $pluginNum;
         $this->scope = $scope;
         $this->crimp = &$crimp;
     }
@@ -38,15 +40,15 @@ class perl implements iPlugin {
     public function execute() {
         $crimp = &$this->crimp;
         $dbg = &$crimp->debug;
-
+        $pluginNum = $this->pluginNum;
         $pluginName = 'perl';
 
-        if ( !($config = $crimp->Config('plugin', $this->scope, $pluginName)) ) {
+        if ( !($config = $crimp->Config('plugin', $this->scope, $pluginName, $pluginNum)) ) {
             $dbg->addDebug('You need to set a "plugin" key in the config file for this plugin', WARN);
             return;
         }
-        if ( !($parameter = $crimp->Config('parameter', $this->scope, $pluginName)) ) {
-            $dbg->addDebug("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'");
+        if ( !($parameter = $crimp->Config('parameter', $this->scope, $pluginName, $pluginNum)) ) {
+            $dbg->addDebug("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'", WARN);
             return;
         }
 
@@ -54,7 +56,7 @@ class perl implements iPlugin {
          *Uncomment this if construct if this plugin should defer itself
          */
         #if ( !$this->deferred ) {
-        #    $crimp->setDeferral($pluginName, $this->scope);
+        #    $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
         #    return;
         #}
 
@@ -73,14 +75,11 @@ class perl implements iPlugin {
             $cookies .= ($cookies) ? "&$key=$value" : "$key=$value";
 
         $env = array(
-            'userConfig'        => $crimp->userConfig(),
-            'plugin'            => $config,
-            'parameters'        => $parameter,
+            'USERCONFIG'        => $crimp->userConfig(),
+            'PLUGIN'            => $config,
+            'PARAMETER'         => $parameter,
             'QUERY_STRING'      => $querystring,
             'COOKIES'           => $cookies,
-            'VAR_DIR'           => VAR_DIR,
-            'TEMPLATE_DIR'      => TEMPLATE_DIR,
-            'ERROR_DIR'         => ERROR_DIR,
             'CONTENT_TYPE'      => $crimp->contentType(),
             'REMOTE_HOST'       => REMOTE_HOST,
             'SERVER_NAME'       => SERVER_NAME,
@@ -89,7 +88,33 @@ class perl implements iPlugin {
             'USER_AGENT'        => USER_AGENT,
             'HTTP_REQUEST'      => HTTP_REQUEST,
             'CONTENT_LENGTH'    => strlen($postquery),
+            'DOCUMENT_ROOT'     => $_SERVER['DOCUMENT_ROOT'],
         );
+
+        /**
+         *the following three 'if' constructs check if the path given is
+         *relative or not.
+         *if it begins with './', we add '../.' to the
+         *beginning forcing it to read '../../' so that we come up two dirs
+         *from the perl_plugins dir (which means the _crimp dir).
+         *if it begins with '../', we add another pair of '../'s so that the
+         *relative path becomes relative to the perl_plugins dir, just like
+         *what we did above.
+         *if neither of these matches, then the path must be fully defined.
+         */
+        if (strpos(VAR_DIR, './') === 0) $env['VAR_DIR'] = '../.'.VAR_DIR;
+        elseif (strpos(VAR_DIR, '../') === 0) $env['VAR_DIR'] = '../../'.VAR_DIR;
+        else $env['VAR_DIR'] = VAR_DIR;
+        if (strpos(TEMPLATE_DIR, './') === 0) $env['TEMPLATE_DIR'] = '../.'.TEMPLATE_DIR;
+        elseif (strpos(TEMPLATE_DIR, '../') === 0) $env['TEMPLATE_DIR'] = '../../'.TEMPLATE_DIR;
+        else $env['TEMPLATE_DIR'] = TEMPLATE_DIR;
+        if (strpos(ERROR_DIR, './') === 0) $env['ERROR_DIR'] = '../.'.ERROR_DIR;
+        elseif (strpos(ERROR_DIR, '../') === 0) $env['ERROR_DIR'] = '../../'.ERROR_DIR;
+        else $env['ERROR_DIR'] = ERROR_DIR;
+
+        $dbg->addDebug("VAR_DIR = {$env['VAR_DIR']}
+                       TEMPLATE_DIR = {$env['TEMPLATE_DIR']}
+                       ERROR_DIR = {$env['ERROR_DIR']}");
 
         $cwd = CRIMP_HOME.'/plugins/perl_plugins';
 
@@ -112,7 +137,7 @@ class perl implements iPlugin {
 
         $level = ( $retval == 0 ) ? PASS : WARN;
         $dbg->addDebug("perl-php-wrapper.pl exited with code '$retval'", $level);
-        $dbg->addDebug('PHP code to be evaluated: '.htmlspecialchars($returned));
+        $dbg->addDebug('PHP code to be evaluated: '.htmlspecialchars(stripslashes($returned)));
         eval($returned);
     }
 }

@@ -17,18 +17,18 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.4 2006-12-02 00:11:00 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.5 2006-12-07 20:27:45 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -71,13 +71,14 @@ sub new {
               _rawCookies       => $ENV{'COOKIES'},
               _VarDirectory     => $ENV{'VAR_DIR'},
               _ErrorDirectory   => $ENV{'ERROR_DIR'},
+              _HtmlDirectory    => $ENV{'DOCUMENT_ROOT'},
               _ContentType      => $ENV{'CONTENT_TYPE'},
               _RemoteHost       => $ENV{'REMOTE_HOST'},
               _ServerName       => $ENV{'SERVER_NAME'},
               _ServerSoftware   => $ENV{'SERVER_SOFTWARE'},
               _ServerProtocol   => $ENV{'PROTOCOL'},
               _UserAgent        => $ENV{'USER_AGENT'},
-              _UserConfig       => $ENV{'userConfig'},
+              _UserConfig       => $ENV{'USERCONFIG'},
              };
   bless $self, $class;
 
@@ -96,11 +97,11 @@ sub new {
 
 sub execute {
     my $self = shift;
-    
+
     ##################
     ## Main Routine ##
     ##################
-    
+
     $self->executePlugin();
 }
 
@@ -118,7 +119,7 @@ EOF
 sub stripHtmlHeaderFooter {
     my $self = shift;
     my $html = shift;
-    
+
     #parse headers storing the title of the page
     $html =~ m|<title>(.*?)</title>|si;
     my $title = $1;
@@ -184,10 +185,14 @@ sub VarDirectory {
     my $self = shift;
     return $self->{_VarDirectory};
 }
+sub HtmlDirectory {
+    my $self = shift;
+    return $self->{_HtmlDirectory};
+}
 sub queryParam {
     #return the query parameter requested, favouring POST
     my ($self, $parameter) = @_;
-      
+
     return $self->{_PostData}->{$parameter} if $self->{_PostData}->{$parameter};
     return $self->{_GetData}->{$parameter} if $self->{_GetData}->{$parameter};
     return undef;
@@ -196,7 +201,7 @@ sub queryParam {
 sub Config {
 	#return the configuration for the specified key from the crimp.ini file
 	my ($self, $plugin, $key) = @_;
-	return $ENV{'parameter'} if $key eq 'value' && $plugin eq $ENV{'plugin'};
+	return $ENV{'PARAMETER'} if $key eq 'value' && $plugin eq $ENV{'PLUGIN'};
 	return undef;
 }
 
@@ -208,17 +213,17 @@ sub addHeaderContent {
 
 sub addPageContent {
     my $self = shift;
-    
+
     my $PageContent = $self->AddSlashes(shift);
     my $PageLocation = shift; #(top / bottom / null = bottom)
     $PageLocation ||= 'bottom';
-    
+
     print "\$crimp->addContent(stripslashes('$PageContent'), '$PageLocation');\n";
 }
 
 sub addMenuContent {
     my $self = shift;
-    
+
     my $menuContent = $self->AddSlashes(shift);
     print "\$crimp->addMenu(stripslashes('$menuContent'));\n";
 }
@@ -238,7 +243,7 @@ sub parseCookies {
 	$value = uri_unescape($value);
         $cookies{$name} = $value;
     }
-    
+
     %{$self->{rceivedCookies}} = %cookies;
 }
 
@@ -255,13 +260,13 @@ sub parseGETed {
         $value = uri_unescape($value);
         $GetQuery{$name} = $value;
     }
-    
+
     %{$self->{_GetData}} = %GetQuery;
 }
 
 sub parsePOSTed {
     my $self = shift;
-    
+
     read(STDIN, my $PostQueryString, $ENV{'CONTENT_LENGTH'});
     my @TempArray = split /&/, $PostQueryString;
     my %PostQuery;
@@ -273,7 +278,7 @@ sub parsePOSTed {
         $value = uri_unescape($value);
         $PostQuery{$name} = $value;
     }
-    
+
     %{$self->{_PostData}} = %PostQuery;
     $self->{PostQuery} = $PostQueryString;
 }
@@ -281,13 +286,13 @@ sub parsePOSTed {
 ####################################################################
 sub executePlugin {
     my $self = shift;
-    
-    my $plugin = $ENV{'plugin'};    
+
+    my $plugin = $ENV{'PLUGIN'};
     $self->printdebug('Executing Plugin','',"<b>($plugin)</b>");
-    $self->{$plugin} = $ENV{'parameter'};
-    
+    $self->{$plugin} = $ENV{'PARAMETER'};
+
     my $handle;
-    
+
     eval "use Crimp::$plugin; \$handle = new Crimp::$plugin(\$self);";
     $self->printdebug('', 'warn', 'Plugin failed to execute:', "&nbsp;&nbsp;$@") if ($@);
     eval { $handle->execute() };
@@ -300,16 +305,16 @@ sub printdebug {
     my $package = shift;
     my $status = shift;
     my $message = '';
-    
+
     while (my $extra = shift) {
 	if ($message eq '') { $message = $extra; }
 	else { $message = "$message<br />$extra"; }
     }
-    
+
     $message = "<b>$package</b><br />$message" if $package ne '';
-    
+
     $message = $self->AddSlashes($message);
-    
+
     if ($status eq 'pass') { print "\$dbg->addDebug(stripslashes('$message'), PASS);\n" }
     elsif ($status eq 'warn') { print "\$dbg->addDebug(stripslashes('$message'), WARN);\n" }
     elsif ($status eq 'fail') { print "\$dbg->addDebug(stripslashes('$message'), FAIL);\n\$crimp->errorPage('$package', '500');\n"; exit }
@@ -325,7 +330,7 @@ sub PageRead {
     sysopen (FILE,$filename,O_RDONLY) || $self->printdebug('', 'fail', 'Couldnt open file for reading', "file: $filename", "error: $!");
     my @FileRead=<FILE>;
     close(FILE);
-    $self->printdebug('(PageRead - perl-php-wrapper.pl BuiltIn Module)','pass',"Returning content from $filename"); 
+    $self->printdebug('(PageRead - perl-php-wrapper.pl BuiltIn Module)','pass',"Returning content from $filename");
     return "@FileRead";
   }
 
@@ -351,9 +356,9 @@ EOF
 sub lockFileGC {
     my $self = shift;
     my $lockfile = shift;
-    
+
     my $timeout = 60; #seconds
-    
+
     my $FileDate = (stat($lockfile))[9];
     if ($FileDate > 0) {
 	my $now = time();
@@ -368,17 +373,17 @@ sub FileRead {
     my $filename=shift;
     my $entry=shift;
     my $string=shift;
-    my $fileopen = join '/',$self->VarDirectory,$filename;
-    
+    my $fileopen = join '/',$self->VarDirectory(),$filename;
+
     if ( -f $fileopen ) {
 	sysopen (FILE,$fileopen,O_RDONLY) || $self->printdebug('(FileRead - perl-php-wrapper.pl built-in)', 'fail', 'Couldnt open file for reading', "file: $fileopen", "error: $!");
 	my @FileRead=<FILE>;
 	close(FILE);
-	
+
 	if (@FileRead) {
 	    foreach (@FileRead) {
 		chop($_) if $_ =~ /\n$/;
-		my ($FileEntry,$FileString) = split(/\|\|/,$_);				
+		my ($FileEntry,$FileString) = split(/\|\|/,$_);
 		return($FileString) if ($FileEntry eq $entry);
 	    }
 	}
@@ -393,23 +398,23 @@ sub FileWrite {
     my $entry=shift;
     my $string=shift;
     my $try = shift;
-    my $filelock = join '/',$self->VarDirectory,'lock',$filename;
+    my $filelock = join '/',$self->VarDirectory(),'lock',$filename;
     $self->lockFileGC($filelock);
-    my $fileopen = join '/',$self->VarDirectory,$filename;
-    
+    my $fileopen = join '/',$self->VarDirectory(),$filename;
+
     sysopen(LOCKED,$filelock, O_WRONLY | O_EXCL | O_CREAT) or return $self->RetryWait($filename,$entry,$string,$try||0);
-    $self->printdebug('(FileWrite - perl-php-wrapper.pl built-in)','',"FileWrite: [$filename] $entry");#Keep on one line
+    $self->printdebug('','',"FileWrite: [$filename] $entry");#Keep on one line
     if ( -f $fileopen ) {
-        sysopen (FILE,$fileopen,O_RDONLY) || $self->printdebug('(FileWrite - perl-php-wrapper.pl built-in)', 'fail', 'Couldn\'t open file for reading', "file: $fileopen", "error: $!");
+        sysopen (FILE,$fileopen,O_RDONLY) || $self->printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $fileopen", "error: $!");
         my @FileRead=<FILE>;
         close(FILE);
-        
+
         if (@FileRead) {
             my $flag=0;
             foreach my $line (@FileRead) {
             chop($line) if $line =~ /\n$/;
             my ($FileEntry,$FileString) = split(/\|\|/,$line);
-            
+
             if ($FileEntry eq $entry) {
                 print LOCKED "$entry||$string\n";
                 $flag=1;
@@ -417,20 +422,20 @@ sub FileWrite {
                 print LOCKED "$FileEntry||$FileString\n";
             }
         }
-        
+
         print LOCKED "$entry||$string\n" if($flag == 0);
         }
     } else {
         print LOCKED "$entry||$string\n";
     }
-    
+
     close(LOCKED);
-    
+
     if (!rename($filelock, $fileopen)) {
         $self->printdebug('(FileWrite - perl-php-wrapper.pl built-in)','fail','Can\'t rename: '.$!);
         return undef;
     }
-    
+
     return($string);
 }
 
@@ -441,13 +446,13 @@ sub RetryWait {
     my $entry=shift;
     my $string=shift;
     my $tries = shift;
-    
+
     if ($tries > 5) {
         $self->ExitCode('500');
         $self->printdebug('(RetryWait - perl-php-wrapper.pl built-in)','warn',"File lock in place on $filename. Write aborted.");
         return 0;
     }
-    
+
     if ($tries != 0) { sleep 1; }
     $tries++;
     return $self->FileWrite($filename,$entry,$string,$tries);
