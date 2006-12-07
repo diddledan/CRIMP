@@ -8,7 +8,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: plugin.php,v 1.3 2006-12-02 00:19:19 diddledan Exp $
+ *Revision info: $Id: plugin.php,v 1.4 2006-12-07 20:30:22 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -27,22 +27,23 @@
 
 class crimpPlugins {
     protected $crmip;
-    
+
     function __construct(&$crimp) {
         $this->crimp = &$crimp;
     }
-    
-    function execute($plugName, $file, $scope = SCOPE_ROOT, $deferred = false) {
+
+    function execute($plugName, $pluginNum, $file, $scope = SCOPE_ROOT, $deferred = false) {
         if ( !file_exists($file) || !is_readable($file) ) {
             $this->crimp->debug->addDebug("plugin file for '$plugName' inaccessible", WARN);
             return;
         }
-        
+
         require_once($file);
-        
+
         $this->crimp->debug->addDebug("Calling '$plugName' plugin", PASS);
         $newplugin = new $plugName( $this->crimp,
                                     $scope,
+                                    $pluginNum,
                                     $deferred );
         $newplugin->execute();
     }
