@@ -24,6 +24,11 @@
         <parameter>on</parameter>
     </plugin>
     <plugin>
+        <name>perl</name>
+        <plugin>PageVote</plugin>
+        <parameter>Default</parameter>
+    </plugin>
+    <plugin>
         <name>buttonBar</name>
         <style>Default</style>
     </plugin>

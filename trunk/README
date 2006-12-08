@@ -5,26 +5,50 @@ perl version of CRIMP, but we are upgrading to PHP, so the configuration
 goes in public_html/_crimp/config.xml.
 Configuration examples are in *.example files
 
+---------
+TEMPLATES
+---------
+A template file is essentially a standard html file (the kind of file that
+you view with your internet browser) with a special 'tag' that is replaced
+with the output from the CRIMP engine. This enables you to create a
+customised look and feel for your entire website with just one file. All
+you need to do, is create your desired layout in a webpage editor, then
+find the spot where you want CRIMP's content to appear, and select "insert
+html" or "insert custom tag" (something like that) from the menu. When
+prompted, enter "<!--PAGE_CONTENT-->" without the quotes, save the file
+and upload to your webspace.
 
--------
-MODULES
--------
+The <template></template> tag looks for the file you specify in the _crimp
+directory, so if you put your template in _crimp/templates, you would
+specify in your crimp.xml file:
+    ...
+    <template>./templates/yourtemplate.html</template>
+    ...
 
-BreadCrumbs
+
+-----------------
+PHP MODULES (new)
+-----------------
+
+breadCrumbs
 Designed to add a backwards navigation system so that users know where
 they are in relation to the homepage, this module can be configured to
 output breadcrumbs at either the top or bottom (or both) of the page.
-See the examples below for usage.
 
-ContentDirectory
+contentDirectory
 This module is configured with the path to the directory which contains
 the content that you want to be visible within the section. The default
-is ./docs. Paths must either be absolute or relative to the cgi-bin
+is ./docs. Paths must either be absolute or relative to the _crimp
 dir. The module will automatically use a file by the name of index.html
 for any directories (eg. request for / will result in the page at
 location ../content/index.html, and a request for /wibble will use
 ../content/wibble/index.html if wibble is a directory, or just the file
-by the name wibble if not.).
+by the name wibble.html if not.).
+
+
+------------------
+PERL MODULES (old)
+------------------
 
 ContentDatabase
 This module must be configured with a database on an accessible server.
@@ -42,36 +66,6 @@ or /db/root. The 'content' field must ocntain either pure (x)html or
 pure perl code with "#PERL" on the first line with no spaces beforehand.
 you cannot mix and match (x)html and perl within the same section. You
 CAN, however, use (x)html on one page, and perl code on another.
-
-
---------
-EXAMPLES
---------
-
-Example Global Configuration:
-  DebugMode = on #can be either 'on', 'off' or 'page'
-  # path to the template which should be used for any paths that do
-  # not explicitly specify a template file.
-  DocumentTemplate = ../template/index.html
-  # set a default BreadCrumbs setting - not necessary, but this makes
-  # sure that BreadCrumbs will be executed for every page..
-  BreadCrumbs = both
-
-Example configuration for ContentDirectory module:
-  [/]
-  ContentDirectory = ../content
-
-Example configuration settings for ContentDatabase module:
-  [/db]
-  # override the default BreadCrumbs setting
-  BreadCrumbs = top
-  ContentDatabase = on
-  DBType = mysql
-  DBName = test
-  DBTable = test
-  DBHost = localhost
-  DBUserName = test
-  DBUserPass = test
 
 
 ---

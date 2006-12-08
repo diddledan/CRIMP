@@ -8,7 +8,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: plugin.komodo-template.php,v 2.4 2006-12-06 16:44:50 diddledan Exp $
+ *Revision info: $Id: plugin.komodo-template.php,v 2.5 2006-12-08 00:12:52 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -26,10 +26,22 @@
  */
 
 class [[%(ask0:Plugin Name)]] implements iPlugin {
+    protected $deferred;
+    protected $pluginNum;
+    protected $scope;
+    protected $crimp;
+
+    function __construct(&$crimp, $scope = SCOPE_ROOT, $pluginNum = false, $deferred = false) {
+        $this->deferred = $deferred;
+        $this->pluginNum = $pluginNum;
+        $this->scope = $scope;
+        $this->crimp = &$crimp;
+    }
+
     public function execute() {
         $crimp = &$this->crimp;
         $dbg = &$crimp->debug;
-
+        $pluginNum = $this->pluginNum;
         $pluginName = '[[%(ask0:Plugin Name)]]';
 
         /**
@@ -49,8 +61,8 @@ class [[%(ask0:Plugin Name)]] implements iPlugin {
          *the value referenced by default configuration key, that you entered
          *in the komodo dialog, is stored in the variable $config
          */
-        if ( !($config = $crimp->Config('[[%(ask1:Default Configuration Key)]]', $this->scope, $pluginName)) ) {
-            $dbg->addDebug('Please define a <position /> tag in the config.xml file', WARN);
+        if ( !($config = $crimp->Config('[[%(ask1:Default Configuration Key)]]', $this->scope, $pluginName, $pluginNum)) ) {
+            $dbg->addDebug('Please define a <[[%(ask1:Default Configuration Key)]]></[[%(ask1:Default Configuration Key)]]> tag in the config.xml file', WARN);
             return;
         }
 
@@ -59,7 +71,7 @@ class [[%(ask0:Plugin Name)]] implements iPlugin {
          */
         if ( $defer && !$this->deferred ) {
             $dbg->addDebug('Deferring execution till later', PASS);
-            $crimp->setDeferral($pluginName, $this->scope);
+            $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
             return;
         }
 
