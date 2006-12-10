@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.6 2006-12-07 20:30:22 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.7 2006-12-10 00:58:20 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -320,7 +320,13 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         if ( ! $content ) {
             global $http;
             $title = "Error '$errorCode'";
-            list($errorName, $errorDescription) = $http->errorCode($errorCode);
+            if (isset($this->HTTP_EXIT_CODES[$errorCode])) {
+                $errorName = $this->HTTP_EXIT_CODES[$errorCode]['text'];
+                $errorDescription = $this->HTTP_EXIT_CODES[$errorCode]['desc'];
+            } else {
+                $errorName = 'Unknown';
+                $errorDescription = 'An unknown error status has been encountered.';
+            }
             $content = "
 <h1>Error '$errorCode': $errorName</h1>
 <p>$errorDescription</p>
@@ -447,7 +453,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.6 2006-12-07 20:30:22 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.7 2006-12-10 00:58:20 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
