@@ -29,8 +29,10 @@
         <parameter>Default</parameter>
     </plugin>
     <plugin>
-        <name>buttonBar</name>
-        <style>Default</style>
+        <name>perl</name>
+        <plugin>ButtonBar</plugin>
+        <parameter>Default</parameter>
+        <defer>yes</defer>
     </plugin>
     <!-- end root namespace declarations -->
 
