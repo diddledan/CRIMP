@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.8 2006-12-15 17:17:24 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.9 2006-12-15 18:04:28 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -63,7 +63,7 @@ sub new {
 </html>',
               _DefaultLang      => 'en',
               _HttpRequest      => $ENV{'HTTP_REQUEST'},
-              _HttpQuery        => $ENV{'QUERY_STRING'},
+              _HttpQuery        => $ENV{'QUERY_STRING'} || '',
               _PostQuery        => undef,
               _GetData          => undef,
               _PostData         => undef,
@@ -111,7 +111,6 @@ sub redirectTo {
     return if not defined $url;
     print <<EOF;
 header('Location: $url');
-exit;
 EOF
     exit;
 }
