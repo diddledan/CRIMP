@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: ButtonBar.pm,v 1.3 2006-12-15 09:52:31 diddledan Exp $
+# Revision info: $Id: ButtonBar.pm,v 1.4 2006-12-15 12:29:06 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@ package Crimp::ButtonBar;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: ButtonBar.pm,v 1.3 2006-12-15 09:52:31 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: ButtonBar.pm,v 1.4 2006-12-15 12:29:06 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 }
 
@@ -47,7 +47,8 @@ sub execute {
 	my $view = "#";
 	my $edit = "#";
 	my $querystring = $crimp->{_HttpQuery};
-	$querystring =~ s|debug=.*?(&)?||i;
+	$querystring ||= '?';
+	$querystring =~ s|([\?&;])debug=.*?[&;]?|$1|i;
 	$querystring = join('', '?', $querystring) if not $querystring =~ m|^\?|;
 	$querystring = join('', $querystring, '&') if $querystring =~ m|^\?.+|;
 	my $debug = join '', $crimp->HttpRequest, $querystring, 'debug=on#crimpDebug';
