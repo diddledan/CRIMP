@@ -7,7 +7,11 @@
         <switch>on</switch>
         <mode>inline</mode><!-- 'inline' or 'javascript' -->
     </debug>
-    <sitetitle>Powered by CRIMP</sitetitle>
+    <!-- this ADDs to the title set in the template you choose, so best to
+    either use this, and leave the template with an empty <title></title> or
+    set the title in the <title> tags inside your template and leave this blank
+    -->
+    <sitetitle></sitetitle>
     <!--<titleorder>forward</titleorder>-->
     <!--<titleseparator> - </titleseparator>-->
     <vardir>./var</vardir>
@@ -22,11 +26,13 @@
         <name>perl</name>
         <plugin>Snow</plugin>
         <parameter>on</parameter>
+        <defer>no</defer>
     </plugin>
     <plugin>
         <name>perl</name>
         <plugin>PageVote</plugin>
         <parameter>Default</parameter>
+        <defer>no</defer>
     </plugin>
     <plugin>
         <name>perl</name>
@@ -36,7 +42,11 @@
     </plugin>
     <!-- end root namespace declarations -->
 
-    <!-- below here goes the section declarations -->
+    <!-- GLOBALS super section -->
+    <globals>
+    </globals>
+
+    <!-- below here goes the individual section declarations -->
     <section>
         <name>/</name>
         <plugin>
@@ -57,7 +67,8 @@
         <plugin>
             <name>perl</name>
             <plugin>FlatBlog</plugin>
-            <parameter>flatblog.html</parameter>
+            <parameter>flatblog.example.html</parameter>
+            <defer>no</defer>
         </plugin>
     </section>
 </crimp>
