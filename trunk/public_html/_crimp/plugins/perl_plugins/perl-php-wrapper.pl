@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.9 2006-12-15 18:04:28 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.10 2006-12-15 20:59:37 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -150,7 +150,7 @@ sub errorPage {
 
 sub HttpRequest {
   my $self = shift;
-  return $self->{_HttpRequest};
+  return $self->{_HttpRequest} || '/';
 }
 
 sub ContentType {
@@ -173,12 +173,12 @@ sub ExitCode {
 
 sub getCookie {
     my ($self, $cookiename) = @_;
-    return $self->{_receivedCookies}->{$cookiename};
+    return $self->{_receivedCookies}->{$cookiename} || '';
 }
 
 sub userConfig {
   my $self = shift;
-  return $self->{_UserConfig};
+  return $self->{_UserConfig} || '/';
 }
 sub VarDirectory {
     my $self = shift;
