@@ -5,18 +5,18 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: PageVote.pm,v 1.2 2006-11-30 19:57:11 diddledan Exp $
+# Revision info: $Id: PageVote.pm,v 1.3 2006-12-15 12:26:10 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -26,7 +26,7 @@ package Crimp::PageVote;
 sub new {
 	my ($class, $crimp) = @_;
         my $self = {
-        	id => q$Id: PageVote.pm,v 1.2 2006-11-30 19:57:11 diddledan Exp $,
+        	id => q$Id: PageVote.pm,v 1.3 2006-12-15 12:26:10 diddledan Exp $,
                 crimp => $crimp,
                 YesVoteRating => 0,
 		NoVoteRating => 0,
@@ -51,7 +51,7 @@ sub execute {
         $self->{crimp}->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
-			"Version: $ID",
+			"Version: $self->{id}",
 			'http://crimp.sourceforge.net/'
 			);
 
