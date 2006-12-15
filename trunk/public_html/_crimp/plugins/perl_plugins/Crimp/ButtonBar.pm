@@ -5,18 +5,18 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: ButtonBar.pm,v 1.2 2006-11-30 19:57:11 diddledan Exp $
+# Revision info: $Id: ButtonBar.pm,v 1.3 2006-12-15 09:52:31 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -26,23 +26,23 @@ package Crimp::ButtonBar;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: ButtonBar.pm,v 1.2 2006-11-30 19:57:11 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: ButtonBar.pm,v 1.3 2006-12-15 09:52:31 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 }
 
 sub execute {
 	my $self = shift;
 	my $crimp = $self->{crimp};
-	
+
 	$crimp->printdebug('',
 			'',
 			'Authors: The CRIMP Team',
 			'Version: '.$self->{id},
 			'http://crimp.sourceforge.net/'
 			);
-	
+
 	$crimp->printdebug('','',"Started With: $crimp->{ButtonBar}");
-	
+
 	my $help ="#";
 	my $view = "#";
 	my $edit = "#";
@@ -51,8 +51,8 @@ sub execute {
 	$querystring = join('', '?', $querystring) if not $querystring =~ m|^\?|;
 	$querystring = join('', $querystring, '&') if $querystring =~ m|^\?.+|;
 	my $debug = join '', $crimp->HttpRequest, $querystring, 'debug=on#crimpDebug';
-	
-	@ButtonBar = <<ENDEOF;
+
+	$ButtonBar = <<ENDEOF;
 <a href="<!--help-->"><img
  src="/crimp_assets/ButtonBar/$crimp->{ButtonBar}/pics/help.gif" alt="Help"
  style="border: 0px solid ; width: 26px; height: 25px;"/></a><a href="<!--view-->"><img
@@ -63,7 +63,7 @@ sub execute {
  src="/crimp_assets/ButtonBar/$crimp->{ButtonBar}/pics/debug.gif" alt="Debug"
  style="border: 0px solid ; width: 26px; height: 25px;" onClick="showDebug(); return false;"/></a>
 ENDEOF
-	
+
 	if ($crimp->{ButtonBar} eq 'Default') {
 		$crimp->printdebug('','pass','Using Default ButtonBar');
 	} else {
@@ -72,20 +72,21 @@ ENDEOF
 		if ( -f $requested ) {
 			sysopen (FILE,$requested,O_RDONLY) || $crimp->printdebug('', 'fail', 'Couldn\'t open file for reading', "file: $requested", "error: $!");
 			$crimp->printdebug('','pass',"Using $crimp->{ButtonBar} ButtonBar");
-			@ButtonBar=<FILE>;
+			my @temp=<FILE>;
 			close(FILE);
+			$ButtonBar = "@temp";
 		} else {
-			$crimp->printdebug('','warn',"$crimp->{ButtonBar} ButtonBar does not exist",'Using Default ButtonBar');	
+			$crimp->printdebug('','warn',"$crimp->{ButtonBar} ButtonBar does not exist",'Using Default ButtonBar');
 		}
 	}
-	
+
 	# Put it all together
-	
-	$crimp->{DisplayHtml} =~ s/<!--BUTTONBAR-->/@ButtonBar/gi;
-	$crimp->{DisplayHtml} =~ s/<!--help-->/$help/gi;
-	$crimp->{DisplayHtml} =~ s/<!--view-->/$view/gi;
-	$crimp->{DisplayHtml} =~ s/<!--edit-->/$edit/gi;
-	$crimp->{DisplayHtml} =~ s/<!--debug-->/$debug/gi;
+
+	$ButtonBar =~ s/<!--help-->/$help/gi;
+	$ButtonBar =~ s/<!--view-->/$view/gi;
+	$ButtonBar =~ s/<!--edit-->/$edit/gi;
+	$ButtonBar =~ s/<!--debug-->/$debug/gi;
+	$crimp->addReplacement('<!--BUTTONBAR-->',$ButtonBar,'i');
 }
 
-1,
+1;
