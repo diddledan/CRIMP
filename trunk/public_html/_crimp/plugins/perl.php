@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: perl.php,v 1.8 2006-12-15 09:56:46 diddledan Exp $
+ *Revision info: $Id: perl.php,v 1.9 2006-12-15 12:18:15 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -51,13 +51,12 @@ class perl implements iPlugin {
             $dbg->addDebug("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'", WARN);
             return;
         }
-        $defer = $crimp->Config('defer', $this->scope, $pluginName, $pluginNum);
-        if ( $defer == 'no' ) $defer = false;
 
         /**
-         *Uncomment this if construct if this plugin should defer itself
+         *deferral check
          */
-        if ( $defer &&  !$this->deferred ) {
+        $defer = $crimp->Config('defer', $this->scope, $pluginName, $pluginNum);
+        if ( $defer == 'yes' &&  !$this->deferred ) {
             $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
             return;
         }
@@ -114,10 +113,6 @@ class perl implements iPlugin {
         elseif (strpos(ERROR_DIR, '../') === 0) $env['ERROR_DIR'] = '../../'.ERROR_DIR;
         else $env['ERROR_DIR'] = ERROR_DIR;
 
-        $dbg->addDebug("VAR_DIR = {$env['VAR_DIR']}
-                       TEMPLATE_DIR = {$env['TEMPLATE_DIR']}
-                       ERROR_DIR = {$env['ERROR_DIR']}");
-
         $cwd = CRIMP_HOME.'/plugins/perl_plugins';
 
         $proc = proc_open(CRIMP_HOME.'/plugins/perl_plugins/perl-php-wrapper.pl', $descriptorspec, $pipes, $cwd, $env);
@@ -139,7 +134,6 @@ class perl implements iPlugin {
 
         $level = ( $retval == 0 ) ? PASS : WARN;
         $dbg->addDebug("perl-php-wrapper.pl exited with code '$retval'", $level);
-        $dbg->addDebug('PHP code to be evaluated: '.htmlspecialchars(stripslashes($returned)));
         eval($returned);
     }
 }
