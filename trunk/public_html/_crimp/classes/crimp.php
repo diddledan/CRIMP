@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.9 2006-12-15 12:22:06 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.10 2006-12-15 18:28:25 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -201,9 +201,9 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         }
 
         if ( !$userConfig ) $userConfig = '/';
-        $this->userConfig = $userConfig;
+        $this->_userConfig = $userConfig;
 
-        $this->debug->addDebug('UserConfig: '.$this->userConfig, PASS);
+        $this->debug->addDebug('UserConfig: '.$this->_userConfig, PASS);
     }
 
     /**
@@ -303,14 +303,14 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         if ( isset($_COOKIE['preferred_language']) ) $clientLang = $_COOKIE['preferred_language'];
 
         $errorFiles = array(
-            "$errorDir/$clientLang/$errorCode$package.html",
-            "$errorDir/$clientLang/$errorCode.html",
-            "$errorDir/$deflang/$errorCode$package.html",
-            "$errorDir/$deflang/$errorCode.html",
-            "$errorDir/en/$errorCode$package.html",
-            "$errorDir/en/$errorCode.html",
+            "$errordir/$clientLang/$errorCode$package.html",
+            "$errordir/$clientLang/$errorCode.html",
+            "$errordir/$deflang/$errorCode$package.html",
+            "$errordir/$deflang/$errorCode.html",
+            "$errordir/en/$errorCode$package.html",
+            "$errordir/en/$errorCode.html",
         );
-        unset($errorDir, $clientLang, $deflang, $plugin);
+        unset($errordir, $clientLang, $deflang, $plugin);
 
         $content = false;
         foreach ( $errorFiles as $file ) {
@@ -339,7 +339,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $this->addContent($content, true);
         $this->setTitle($title, true);
         $this->_exitCode = $errorCode;
-        $this->sendDocument();
+        $this->sendDocument(false);
         die();
     }
 
@@ -373,7 +373,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         /**
          *check if a <plugin> declaration has been made for this section
          */
-        if ( !isset($this->_config['section'][$this->userConfig]['plugin'])
+        if ( !isset($this->_config['section'][$this->userConfig()]['plugin'])
             && !isset($this->_config['globals']['plugin'])
             && !isset($this->_config['plugin']) ) {
             $this->debug->addDebug('You forgot to add at least one <plugin> section for this url.', FAIL);
@@ -392,7 +392,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          */
         $scope = 0;
 
-        foreach ( array($this->_config['section'][$this->userConfig],
+        foreach ( array($this->_config['section'][$this->userConfig()],
                         $this->_config['globals'],
                         $this->_config) as $plugins ) {
             $scope++;
@@ -417,7 +417,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
     /**
      *complete the document and send to the browser
      */
-    public function sendDocument() {
+    public function sendDocument($doDeferred = true) {
         $this->debug->addDebug('Tidying up and exiting cleanly', PASS);
 
         $exitCode = $this->_exitCode;
@@ -444,7 +444,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *do the deferred plugin thing now that the template has been applied
              */
-            if (is_array($this->deferredPlugins)) $this->executeDeferredPlugins();
+            if ($doDeferred && is_array($this->deferredPlugins)) $this->executeDeferredPlugins();
 
             /**
              *set the title tags
@@ -469,7 +469,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.9 2006-12-15 12:22:06 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.10 2006-12-15 18:28:25 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
@@ -610,8 +610,8 @@ Requested Document: {$this->_HTTPRequest}", PASS);
              */
             switch ($scope) {
                 case SCOPE_SECTION:
-                    if ( isset($this->_config['section'][$this->userConfig]['plugin']) )
-                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['section'][$this->userConfig]['plugin'], $pluginNum) )
+                    if ( isset($this->_config['section'][$this->userConfig()]['plugin']) )
+                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['section'][$this->userConfig()]['plugin'], $pluginNum) )
                             return $conf;
                 case SCOPE_GLOBALS:
                     if ( isset($this->_config['globals']['plugin']) )
@@ -629,8 +629,8 @@ Requested Document: {$this->_HTTPRequest}", PASS);
              */
             switch ($scope) {
                 case SCOPE_SECTION:
-                    if ( isset($this->_config['section'][$this->userConfig][$key]) )
-                        return $this->_config['section'][$this->userConfig][$key];
+                    if ( isset($this->_config['section'][$this->userConfig()][$key]) )
+                        return $this->_config['section'][$this->userConfig()][$key];
                 case SCOPE_GLOBALS:
                     if ( isset($this->_config['globals'][$key]) )
                         return $this->_config['globals'][$key];
