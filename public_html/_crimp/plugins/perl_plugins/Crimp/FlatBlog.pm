@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: FlatBlog.pm,v 1.6 2006-12-15 22:56:06 diddledan Exp $
+# Revision info: $Id: FlatBlog.pm,v 1.7 2006-12-15 23:02:39 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@ use Fcntl;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: FlatBlog.pm,v 1.6 2006-12-15 22:56:06 diddledan Exp $, crimp => $crimp, MenuList => [] };
+	my $self = { id => q$Id: FlatBlog.pm,v 1.7 2006-12-15 23:02:39 diddledan Exp $, crimp => $crimp, MenuList => [] };
 	bless $self, $class;
 }
 
@@ -212,9 +212,10 @@ sub do_blog_list {
 		while (($offset_counter++ < $offset) && ($self->{new_content} =~ s|(<h$heading_level>).*?<h$heading_level>|$1|si)) {};
 	}
 	my $title = my $text = '';
+	my %seen;
 	for (my $counter = 0; $counter < $limit; $counter++) {
 		$self->{new_content} =~ s|<h$heading_level>(.*?)</h$heading_level>(.*?)(<h$heading_level>)|$3|si;
-		if ($1 && $2 && $title ne $1 && $text ne $2) {
+		if ($1 && !$seen{$1}++) {
 			($title, $text) = ($1, $2);
 			my $newurl = join '/', $crimp->userConfig, uri_escape($title);
 			$newurl =~ s|/{2,}|/|g;
