@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.10 2006-12-15 18:28:25 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.11 2006-12-15 22:44:14 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -146,7 +146,8 @@ class Crimp {
         $this->serverSoftware       = $_ENV['SERVER_SOFTWARE'];
         $this->serverProtocol       = $_ENV['SERVER_PROTOCOL'];
         $this->userAgent            = $_ENV['HTTP_USER_AGENT'];
-        $this->_HTTPRequest         = urldecode($_GET['crimpq']);
+        $this->_HTTPRequest         = preg_replace('|/+|', '/', '/'.urldecode($_GET['crimpq']));
+
         unset ($_GET['crimpq']);
 
         define('REMOTE_HOST',       $this->remoteHost);
@@ -469,7 +470,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.10 2006-12-15 18:28:25 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.11 2006-12-15 22:44:14 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
