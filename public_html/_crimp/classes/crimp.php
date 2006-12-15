@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.8 2006-12-15 10:01:42 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.9 2006-12-15 12:22:06 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -147,6 +147,7 @@ class Crimp {
         $this->serverProtocol       = $_ENV['SERVER_PROTOCOL'];
         $this->userAgent            = $_ENV['HTTP_USER_AGENT'];
         $this->_HTTPRequest         = urldecode($_GET['crimpq']);
+        unset ($_GET['crimpq']);
 
         define('REMOTE_HOST',       $this->remoteHost);
         define('SERVER_NAME',       $this->serverName);
@@ -443,7 +444,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *do the deferred plugin thing now that the template has been applied
              */
-            if (is_array($this->deferredPlugins)) $this->executeDeferredPlugins;
+            if (is_array($this->deferredPlugins)) $this->executeDeferredPlugins();
 
             /**
              *set the title tags
@@ -468,7 +469,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.8 2006-12-15 10:01:42 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.9 2006-12-15 12:22:06 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
@@ -578,17 +579,19 @@ Requested Document: {$this->_HTTPRequest}", PASS);
      *scope. eg. two 'perl' plugins calling different modules
      */
     protected function getPlugConf($pluginName, $key, $config, $pluginNum = false) {
-        if ( $pluginNum &&
-            isset($config[$pluginNum]) &&
-            isset($config[$pluginNum]['name']) &&
-            $config[$pluginNum]['name'] == $pluginName &&
-            isset($config[$pluginNum][$key]) )
+        if ( $pluginNum ) {
+            if ( isset($config[$pluginNum]) &&
+                 isset($config[$pluginNum]['name']) &&
+                 $config[$pluginNum]['name'] == $pluginName &&
+                 isset($config[$pluginNum][$key]) )
                 return $config[$pluginNum][$key];
-        foreach ($config as $plugin)
-            if ( isset($plugin['name']) &&
-                $plugin['name'] == $pluginName &&
-                isset($plugin[$key]) )
+        } else {
+            foreach ($config as $plugin)
+                if ( isset($plugin['name']) &&
+                     $plugin['name'] == $pluginName &&
+                     isset($plugin[$key]) )
                     return $plugin[$key];
+        }
         return false;
     }
     /**
