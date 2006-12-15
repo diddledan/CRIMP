@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.7 2006-12-15 12:24:22 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.8 2006-12-15 17:17:24 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -368,6 +368,8 @@ EOF
 sub lockFileGC {
     my $self = shift;
     my $lockfile = shift;
+
+    return if not -f $lockfile;
 
     my $timeout = 60; #seconds
 
