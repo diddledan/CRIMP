@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.7 2006-12-10 00:58:20 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.8 2006-12-15 10:01:42 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -38,7 +38,7 @@ class Crimp {
      *this is for all the content that will be sent to the user's browser
      *upon completion of execution of all plugins.
      */
-    protected $_output;
+    public $_output;
     /**
      *html headers like <meta /> tags, <script></script> tags and etc.
      */
@@ -163,6 +163,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
 
         $this->applyConfig();
         $this->parseUserConfig();
+        $this->pluginSystem = new crimpPlugins($this);
     }
 
     /**
@@ -342,6 +343,25 @@ Requested Document: {$this->_HTTPRequest}", PASS);
     }
 
     /**
+     *this one speaks for itself - iterates through the deferredPlugins array
+     *executing the plugins that have manually set themselves to 'deferred'
+     *status. No check to determine if the deferredPlugins var is an array!!
+     */
+    public function executeDeferredPlugins() {
+        /**
+         *no test here for a pluginLock, as a plugin that sets a deferred
+         *status should not be locking itself as well
+         */
+        foreach ( $this->deferredPlugins as $plugin ) {
+            $this->pluginSystem->execute($plugin['name'],
+                                         $plugin['num'],
+                                         CRIMP_HOME."/plugins/{$plugin['name']}.php",
+                                         $plugin['scope'],
+                                         true);
+        }
+    }
+
+    /**
      *this is the meat of the application. a simple routine that calls all the
      *defined plugins in the order listed in the config file. it starts with
      *the plugins defined for the section requested (userConfig), then continues
@@ -349,8 +369,9 @@ Requested Document: {$this->_HTTPRequest}", PASS);
      *finally those that are not in a sub-branch of the config file.
      */
     public function executePlugins() {
-        $pluginSystem = new crimpPlugins($this);
-
+        /**
+         *check if a <plugin> declaration has been made for this section
+         */
         if ( !isset($this->_config['section'][$this->userConfig]['plugin'])
             && !isset($this->_config['globals']['plugin'])
             && !isset($this->_config['plugin']) ) {
@@ -379,28 +400,17 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                 foreach( $plugins['plugin'] as $plugin ) {
                     if ( isset($plugin['name']) ) {
                         if ( !$this->pluginLock($plugin['name']) ) {
-                            $pluginSystem->execute($plugin['name'],
-                                                   $i,
-                                                   CRIMP_HOME."/plugins/{$plugin['name']}.php",
-                                                   $scope,
-                                                   false);
+                            $this->pluginSystem->execute($plugin['name'],
+                                                         $i,
+                                                         CRIMP_HOME."/plugins/{$plugin['name']}.php",
+                                                         $scope,
+                                                         false);
                         }
                     } else $this->debug->addDebug('the plugin declaration has no "name" element', WARN);
                     $i++;
                 }
             }
         }
-        /**
-         *no test here for a pluginLock, as a plugin that sets a deferred
-         *status should not be locking itself as well
-         */
-        if ( is_array($this->deferredPlugins) )
-            foreach ( $this->deferredPlugins as $plugin )
-                $pluginSystem->execute($plugin['name'],
-                                       $plugin['num'],
-                                       CRIMP_HOME."/plugins/{$plugin['name']}.php",
-                                       $plugin['scope'],
-                                       true);
     }
 
     /**
@@ -431,6 +441,11 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $this->applyTemplate();
 
             /**
+             *do the deferred plugin thing now that the template has been applied
+             */
+            if (is_array($this->deferredPlugins)) $this->executeDeferredPlugins;
+
+            /**
              *set the title tags
              */
             $title = $this->pageTitle;
@@ -453,7 +468,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.7 2006-12-10 00:58:20 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.8 2006-12-15 10:01:42 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
