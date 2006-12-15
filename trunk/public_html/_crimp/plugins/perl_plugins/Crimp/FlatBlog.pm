@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: FlatBlog.pm,v 1.3 2006-12-15 17:58:33 diddledan Exp $
+# Revision info: $Id: FlatBlog.pm,v 1.4 2006-12-15 18:22:50 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@ use Fcntl;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: FlatBlog.pm,v 1.3 2006-12-15 17:58:33 diddledan Exp $, crimp => $crimp, MenuList => [] };
+	my $self = { id => q$Id: FlatBlog.pm,v 1.4 2006-12-15 18:22:50 diddledan Exp $, crimp => $crimp, MenuList => [] };
 	bless $self, $class;
 }
 
@@ -181,26 +181,25 @@ sub execute {
 
 		$crimp->PageTitle($EntryTitle);
 		my $newurl = join '/', $crimp->userConfig, uri_escape($EntryTitle);
-		$crimp->addPageContent("<h$heading_level>$EntryTitle<br/></h$heading_level>\n$EntryContent");
+		$crimp->addPageContent("<h$heading_level>$EntryTitle</h$heading_level>\n$EntryContent");
 
 		#show menu entries
-		push @{$self->{MenuList}}, '<b>Entries:</b>';
-		$offset = int($crimp->queryParam('show'));
+		$self->{MenuList} = '<b>Entries:</b>';
+		$offset = ($param) ? int($param) : 0;
 		my $newoffset = $offset - $limit || 0;
 		if ($offset > 0) {
-			push @{$self->{MenuList}}, "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Prev]</b></a>";
+			$self->{MenuList} .= "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Prev]</b></a>";
 		}
 		$self->do_blog_list($offset,$limit);
 		if ($self->{new_content} =~ m|</h$heading_level>|i) {
 			$newoffset = $offset + $limit;
-			push @{$self->{MenuList}}, "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Next]</b></a>";
+			$self->{MenuList} .= "<br />&nbsp;&nbsp;<a href='$crimp->{HttpRequest}?show=$newoffset'><b>[Next]</b></a>";
 		}
 
-		$menu = "@{$self->{MenuList}}";
-		$crimp->addMenuContent($menu);
+		$crimp->addMenuContent($self->{MenuList});
 		$crimp->printdebug('','',
 			"BaseContent: $BaseContent",
-			"HttpQuery: $crimp->{HttpQuery}"
+			"HttpQuery: $crimp->{_HttpQuery}"
 		);
 	}
 }
@@ -210,15 +209,16 @@ sub do_blog_list {
 	my $crimp = $self->{crimp};
 	if ($offset > 0) {
 		my $offset_counter = 0;
-		while (($offset_counter++ < $offset) && ($self->{new_content} =~ s|<h$heading_level>.*?<h$heading_level>|<h$heading_level>|si)) {};
+		while (($offset_counter++ < $offset) && ($self->{new_content} =~ s|(<h$heading_level>).*?<h$heading_level>|$1|si)) {};
 	}
+	my $title = my $text = '';
 	for (my $counter = 0; $counter < $limit; $counter++) {
-		$self->{new_content} =~ s|<h$heading_level>(.*?)</h$heading_level>(.*?)<h$heading_level>|<h$heading_level>|si;
-		if ($1 && $2) {
-			my ($title, $text) = ($1, $2);
-			my $newurl = join '/', $crimp->userConfig, uri_escape($1);
+		$self->{new_content} =~ s|<h$heading_level>(.*?)</h$heading_level>(.*?)(<h$heading_level>)|$3|si;
+		if ($1 && $2 && $title ne $1 && $text ne $2) {
+			($title, $text) = ($1, $2);
+			my $newurl = join '/', $crimp->userConfig, uri_escape($title);
 			$newurl =~ s|/{2,}|/|g;
-			push @{$self->{MenuList}}, "<br />&nbsp;&nbsp;&nbsp;&nbsp;<a href='$newurl?show=$offset'>$title</a>";
+			$self->{MenuList} .= "<br />&nbsp;&nbsp;&nbsp;&nbsp;<a href='$newurl?show=$offset'>$title</a>\n";
 		}
 	}
 }
