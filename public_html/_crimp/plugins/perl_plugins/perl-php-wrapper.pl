@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.5 2006-12-07 20:27:45 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.6 2006-12-15 09:52:35 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -226,6 +226,18 @@ sub addMenuContent {
 
     my $menuContent = $self->AddSlashes(shift);
     print "\$crimp->addMenu(stripslashes('$menuContent'));\n";
+}
+
+sub addReplacement {
+    my $self = shift;
+    my ($regex, $replace, $opts) = @_;
+    return if (!defined $regex || !defined $replace);
+    $opts = '' if not defined $opts;
+    $replace = $self->AddSlashes($replace);
+    $regex = $self->AddSlashes($regex);
+    $opts = $self->AddSlashes($opts);
+
+    print "\$crimp->_output = preg_replace('/$regex/$opts', \$crimp->_output, $replace);\n";
 }
 
 ###### END HELPER ROUTINES ######
