@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: perl.php,v 1.7 2006-12-07 20:27:50 diddledan Exp $
+ *Revision info: $Id: perl.php,v 1.8 2006-12-15 09:56:46 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -51,14 +51,16 @@ class perl implements iPlugin {
             $dbg->addDebug("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'", WARN);
             return;
         }
+        $defer = $crimp->Config('defer', $this->scope, $pluginName, $pluginNum);
+        if ( $defer == 'no' ) $defer = false;
 
         /**
          *Uncomment this if construct if this plugin should defer itself
          */
-        #if ( !$this->deferred ) {
-        #    $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
-        #    return;
-        #}
+        if ( $defer &&  !$this->deferred ) {
+            $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
+            return;
+        }
 
         $descriptorspec = array(
             0 => array('pipe', 'r'), // client's stdin
