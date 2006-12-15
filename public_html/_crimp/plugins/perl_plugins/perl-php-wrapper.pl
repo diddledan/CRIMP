@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.10 2006-12-15 20:59:37 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.11 2006-12-15 22:35:02 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -111,6 +111,7 @@ sub redirectTo {
     return if not defined $url;
     print <<EOF;
 header('Location: $url');
+exit;
 EOF
     exit;
 }
