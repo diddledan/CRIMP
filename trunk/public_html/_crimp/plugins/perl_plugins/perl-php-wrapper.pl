@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.6 2006-12-15 09:52:35 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.7 2006-12-15 12:24:22 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -237,7 +237,7 @@ sub addReplacement {
     $regex = $self->AddSlashes($regex);
     $opts = $self->AddSlashes($opts);
 
-    print "\$crimp->_output = preg_replace('/$regex/$opts', \$crimp->_output, $replace);\n";
+    print "\$crimp->_output = preg_replace(stripslashes('/$regex/$opts'), stripslashes('$replace'), \$crimp->_output);\n";
 }
 
 ###### END HELPER ROUTINES ######
