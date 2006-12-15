@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: FlatBlog.pm,v 1.5 2006-12-15 22:34:57 diddledan Exp $
+# Revision info: $Id: FlatBlog.pm,v 1.6 2006-12-15 22:56:06 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@ use Fcntl;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: FlatBlog.pm,v 1.5 2006-12-15 22:34:57 diddledan Exp $, crimp => $crimp, MenuList => [] };
+	my $self = { id => q$Id: FlatBlog.pm,v 1.6 2006-12-15 22:56:06 diddledan Exp $, crimp => $crimp, MenuList => [] };
 	bless $self, $class;
 }
 
@@ -150,7 +150,7 @@ sub execute {
 		#Decide what to show
 		my $BaseContent = $crimp->HttpRequest;
 		my $uc = $crimp->userConfig;
-		$BaseContent =~ s/^$uc//;
+		$BaseContent =~ s/^$uc\/*//;
 		$BaseContent = uri_unescape($BaseContent);
 
 		#show the single entry
@@ -162,14 +162,22 @@ sub execute {
 		if (!$EntryTitle && !$EntryContent) {
 			# redirect the user to the correct URL
 			$self->{new_content} =~ m|<h$heading_level>(.*?)</h$heading_level>|si;
-			$EntryTitle = $1;
-			if (!$EntryTitle) {
+			$EntryTitle = uri_escape($1);
+			my $redirectUrl = $crimp->userConfig;
+			$redirectUrl ||= '/';
+			if ($EntryTitle) {
+				$redirectUrl = "$redirectUrl/$EntryTitle?show=0";
+				$redirectUrl =~ s|/{2,}|/|g;
+				$crimp->redirectTo($redirectUrl);
+			} else {
 				$crimp->errorPage('FlatBlog','404');
-				return;
 			}
-			$self->{new_content} =~ m|<h$heading_level>$EntryTitle</h$heading_level>(.*?)<h$heading_level>|si;
-			$EntryContent = $1;
+			return;
 		}
+		#I amended the above to use the title specified
+		# in the blog file, not the one parsed from the
+		# query string. This ensures the title is displayed
+		# as the author intended. (Fremen)
 
 		$crimp->PageTitle($EntryTitle);
 		my $newurl = join '/', $crimp->userConfig, uri_escape($EntryTitle);
