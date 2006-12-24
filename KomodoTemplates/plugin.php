@@ -8,7 +8,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: plugin.komodo-template.php,v 2.5 2006-12-08 00:12:52 diddledan Exp $
+ *Revision info: $Id: plugin.php,v 1.1 2006-12-24 14:56:31 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
