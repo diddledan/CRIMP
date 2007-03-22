@@ -10,7 +10,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: HTML_Table_Config.php,v 1.2 2006-12-02 00:06:06 diddledan Exp $
+ *Revision info: $Id: HTML_Table_Config.php,v 1.3 2007-03-22 17:03:09 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public

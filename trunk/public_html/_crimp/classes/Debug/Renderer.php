@@ -10,7 +10,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: Renderer.php,v 1.2 2006-12-02 00:06:06 diddledan Exp $
+ *Revision info: $Id: Renderer.php,v 1.3 2007-03-22 17:03:09 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -26,9 +26,7 @@
  *License along with this library; if not, write to the Free Software
  *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-
 require_once 'Debug/Renderer/Common.php';
-
 /**
  * A loader class for the renderers.
  *
@@ -40,10 +38,8 @@ require_once 'Debug/Renderer/Common.php';
  * @package PHP_Debug
  * @filesource
  */
-
 class Debug_Renderer
 {
-
     /**
      * Attempt to return a concrete Debug_Renderer instance.
      *
@@ -54,10 +50,8 @@ class Debug_Renderer
     static function factory($debugObject, $options)
     {
         //Debug::dumpVar($options, "Debug_Renderer::options");
-
         $className = 'Debug_Renderer_' . $options['DEBUG_render_mode'];
         include_once 'Debug/Renderer/'. $options['DEBUG_render_mode']. '.php';
-
         if (class_exists($className)) {
             $obj = new $className($debugObject, $options);
         } else {
@@ -69,5 +63,4 @@ class Debug_Renderer
         return $obj;
     }
 }
-
 ?>
