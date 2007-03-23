@@ -1,11 +1,11 @@
 # CRIMP - Content Redirection Internet Management Program
-# Copyright (C) 2005-2006 The CRIMP Team
+# Copyright (C) 2005-2007 The CRIMP Team
 # Authors:       The CRIMP Team
 # Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: RandomContent.pm,v 1.3 2006-12-16 23:36:19 diddledan Exp $
+# Revision info: $Id: RandomContent.pm,v 1.4 2007-03-23 14:11:15 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@ package Crimp::RandomContent;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: RandomContent.pm,v 1.3 2006-12-16 23:36:19 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: RandomContent.pm,v 1.4 2007-03-23 14:11:15 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 

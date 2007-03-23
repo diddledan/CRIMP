@@ -4,13 +4,13 @@
  *PHP Debug (http://www.php-debug.com/)
  *
  *CRIMP - Content Redirection Internet Management Program
- *Copyright (C) 2005-2006 The CRIMP Team
+ *Copyright (C) 2005-2007 The CRIMP Team
  *Authors:          The CRIMP Team
  *Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: Log.php,v 1.3 2007-03-22 17:03:09 diddledan Exp $
+ *Revision info: $Id: Log.php,v 1.4 2007-03-23 14:11:12 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
