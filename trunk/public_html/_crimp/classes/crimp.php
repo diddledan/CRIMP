@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.11 2006-12-15 22:44:14 diddledan Exp $
+ *Revision info: $Id: crimp.php,v 1.12 2007-03-23 14:02:49 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -131,11 +131,11 @@ class Crimp {
         $this->_output = $this->defaultHTML;
 
         $this->debug = new Debug;
-        $config = new crimpConf;
-        if ( ! $config ) {
-            $dbg->addDebug("Configuration Parser failed to read the configuration:<br />&nbsp;&nbsp;&nbsp;&nbsp;{$this->root->getMessage()}", FAIL);
-            $dbg->render();
-            die();
+        $config = crimpConf();
+        if ( PEAR::isError($config) ) {
+            $this->debug->addDebug("Configuration Parser failed to read the configuration. This could mean the file either does not exist or has the wrong permissions:\n    {$config->getMessage()}", FAIL);
+            $this->_config = array();
+            $this->errorPage('crimp', HTTP_EXIT_SERVER_ERROR);
         }
 
         $this->_config = $config->get();
@@ -172,15 +172,15 @@ Requested Document: {$this->_HTTPRequest}", PASS);
      *parse the configuration to set some values
      */
     private function applyConfig() {
-        $this->errorDir     = ( $this->Config('errordir', SCOPE_GLOBALS) ) ? $this->Config('errordir', SCOPE_GLOBALS) : CRIMP_HOME.'/errordocs';
+        $this->errorDir     = ( $cfg = $this->Config('errordir', SCOPE_GLOBALS) ) ? $cfg : CRIMP_HOME.'/errordocs';
         define('ERROR_DIR', $this->errorDir);
-        $this->templateDir  = ( $this->Config('templatedir', SCOPE_GLOBALS) ) ? $this->Config('templatedir', SCOPE_GLOBALS) : CRIMP_HOME.'/templates';
+        $this->templateDir  = ( $cfg = $this->Config('templatedir', SCOPE_GLOBALS) ) ? $cfg : CRIMP_HOME.'/templates';
         define('TEMPLATE_DIR', $this->templateDir);
-        $this->varDir       = ( $this->Config('vardir', SCOPE_GLOBALS) ) ? $this->Config('vardir', SCOPE_GLOBALS) : CRIMP_HOME.'/var';
+        $this->varDir       = ( $cfg = $this->Config('vardir', SCOPE_GLOBALS) ) ? $cfg : CRIMP_HOME.'/var';
         define('VAR_DIR', $this->varDir);
-        $this->defaultLang  = ( $this->Config('defaultlanguage', SCOPE_GLOBALS) ) ? $this->Config('defaultlanguage', SCOPE_GLOBALS) : 'en';
+        $this->defaultLang  = ( $cfg = $this->Config('defaultlanguage', SCOPE_GLOBALS) ) ? $cfg : 'en';
         define('DEFAULT_LANG', $this->defaultLang);
-        $this->setTitle( ( $this->Config('sitetitle', SCOPE_GLOBALS) ) ? $this->Config('sitetitle', SCOPE_GLOBALS) : '', true );
+        $this->setTitle( ( $cfg = $this->Config('sitetitle', SCOPE_GLOBALS) ) ? $cfg : '', true );
     }
 
     /**
@@ -232,7 +232,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
     public function addContent($htmlcontent, $location = 'bottom') {
         $br = "\n<br />\n";
 
-        if ( $this->_output == $this->defaultHTML ) {
+        if ( !$this->_output || $this->_output == $this->defaultHTML ) {
             $this->debug->addDebug('addContent(): creating initial page', PASS);
             $this->_output = $this->defaultHTML;
             $location = 'top';
@@ -249,7 +249,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $this->_output = preg_replace('/(<!--startPageContent-->)/',"$1$htmlcontent$br",$this->_output);
         } else {
             $this->debug->addDebug('addContent(): adding to the BOTTOM of the page', PASS);
-            $this->_output = preg_replace('/(<!--endPageContent-->)/',"$br$htmlcontent\n$1",$this->_output);
+            $this->_output = preg_replace('/(<!--endPageContent-->)/',"$br$htmlcontent$1",$this->_output);
         }
     }
 
@@ -316,7 +316,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $content = false;
         foreach ( $errorFiles as $file ) {
             if ( $content ) next;
-            if ( file_exists($file) ) list($title, $content) = HTML::stripHeaderFooter(HTML::pageRead($file));
+            if ( file_exists($file) ) list($title, $content) = $this->stripHeaderFooter($this->pageRead($file));
         }
         unset($errorFiles, $file);
 
@@ -341,7 +341,6 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $this->setTitle($title, true);
         $this->_exitCode = $errorCode;
         $this->sendDocument(false);
-        die();
     }
 
     /**
@@ -422,7 +421,8 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $this->debug->addDebug('Tidying up and exiting cleanly', PASS);
 
         $exitCode = $this->_exitCode;
-        if ( $this->_output && $exitCode == '204' ) $exitCode = '200';
+
+        if ( $this->_output && $exitCode == HTTP_EXIT_NO_CONTENT ) $exitCode = HTTP_EXIT_OK;
         if ( !$this->_contentType ) $this->_contentType = 'text/html';
 
         if ( $this->_contentType == 'text/html' ) {
@@ -436,6 +436,11 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/moo/moo.fx.js"></script>');
             $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/moo/moo.fx.pack.js"></script>');
             $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/debug.js"></script>');
+            
+            /**
+             *make sure the _output var is filled
+             */
+            if ( ! $this->_output ) { $this->_output = $this->defaultHTML; }
 
             /**
              *apply the template
@@ -462,15 +467,17 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *apply the debug output
              */
-            $this->debug->addDebug("HTTP Exit Code: $exitCode",PASS);
+            $cruft = '';
+            if (399 < $exitCode || $exitCode < 200) $cruft = 'This exit code is outside the range 200-399, which indicates something amiss. Check the rest of this debug statement for information on what may have gone wrong.';
+            $this->debug->addDebug("HTTP Exit Code: $exitCode. $cruft",PASS);
+            unset($cruft);
             $debugString = $this->stripHeaderFooter($this->debug->getDisplay());
-            unset ($junk);
             $this->_output = preg_replace('|(</body>)|i', "{$debugString[1]}$1", $this->_output, 1);
 
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.11 2006-12-15 22:44:14 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.12 2007-03-23 14:02:49 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
@@ -483,10 +490,12 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          *send the content to the browser
          */
         echo $this->_output;
+        exit;
     }
 
     protected function applyTemplate() {
-        if ( !($templ = $this->Config('template', SCOPE_SECTION)) ) {
+        if ( !$this->_config ) { $templ = 'none'; }
+        elseif ( !($templ = $this->Config('template', SCOPE_SECTION)) ) {
             $this->debug->addDebug('Please define a <template></template> tag in the config.xml file', WARN);
             return;
         }
@@ -512,7 +521,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         /**
          *check that the template file is readable
          */
-        if ( !is_file($templ) || ! is_readable($templ) ) {
+        if ( !is_file($templ) || !is_readable($templ) ) {
             $this->debug->addDebug("$templ is not readable by this program", WARN);
             return;
         }
@@ -675,7 +684,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
      *send the appropriate headers to the browser for the content-type and
      *http exit status code
      */
-    function head($contentType, $exitCode = '200') {
+    function head($contentType, $exitCode = HTTP_EXIT_OK) {
         /**
          *check that the headers have not been sent already
          */
@@ -723,25 +732,28 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         if ( is_file($file) && is_readable($file) )
             return file_get_contents($file);
         else $this->debug->addDebug('File is either non-existant or unreadable (permissions?)', WARN);
+        
+        $ecode = HTTP_EXIT_NOT_FOUND;
+        $desc = $this->HTTP_EXIT_CODES[$ecode];
 
-        $file = ERRORDIR.'/404.html';
-        $crimp->exitCode('404');
+        $file = ERRORDIR."/$ecode.html";
+        $crimp->exitCode($ecode);
 
         if ( is_file($file) && is_readable($file) )
             return file_get_contents($file);
         else $this->debug->addDebug("Error page file is either non-existant or unreadable (permissions?)\nFilename: $file", WARN);
 
         $newhtml = <<<EOF
-<h1>404 - Page Not Found</h1>
+<h1>$ecode - $desc</h1>
 <p>The document you are looking for has not been found.
 Additionally a 404 Not Found error was encountered while trying to
 use an error document for this request</p>
 EOF;
 
-        $FileRead = $crimp->defaultHTML;
-        $FileRead = preg_replace('/(<body>)/i', "$1$newhtml", $FileRead);
-        $FileRead = preg_replace('/(<title>)/i', '${1}404 - Page Not Found', $FileRead);
-        return $FileRead;
+        $PageContent = $crimp->defaultHTML;
+        $PageContent = preg_replace('/(<body>)/i', "$1$newhtml", $PageContent);
+        $PageContent = preg_replace('/(<title>)/i', "$1$ecode - $desc", $PageContent);
+        return $PageContent;
     }
 }
 

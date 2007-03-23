@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: conf.php,v 1.2 2006-12-07 20:30:22 diddledan Exp $
+ *Revision info: $Id: conf.php,v 1.3 2007-03-23 14:02:48 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -30,72 +30,66 @@ define('SCOPE_ROOT',     3);
 
 require_once('Config.php');
 
-class crimpConf {
-    private $conf;
-    private $root;
-    protected $configArray;
+function crimpConf() {
+    $conf = new Config;
+    $root =& $conf->parseConfig('config.xml','XML');
+    unset($conf);
 
-    public function __construct() {
-        $this->conf = new Config;
-        $this->root =& $this->conf->parseConfig('config.xml','XML');
-
-        if ( PEAR::isError($this->root) ) {
-            return false;
-        }
-
-        $this->configArray = $this->root->toArray();
-        $this->configArray = $this->configArray['root']['crimp'];
+    if ( PEAR::isError($root) ) {
+        return $root;
     }
 
-    public function get() {
-        /**
-         *reorganise the ['section'] hash/array. first force it to be an array,
-         *then create a hash key for each section with the contents being the
-         *contents of the <section /> tag (this means that the section name
-         *is both in ['sections'][$sectname] and =['sections'][$sectname]['name']
-         */
-        if ( isset($this->configArray['section'])
-            && (!is_array($this->configArray['section'])
-            || !isset($this->configArray['section'][0])) )
-            $this->configArray['section'] = array($this->configArray['section']);
+    $configArray = $root->toArray();
+    unset($root);
+    $configArray = $configArray['root']['crimp'];
 
-        for ($i = 0; $i < count($this->configArray['section']); $i++) {
-            $this->configArray['section'][$this->configArray['section'][$i]['name']] = $this->configArray['section'][$i];
-            unset($this->configArray['section'][$i]);
-        }
+    /**
+     *reorganise the ['section'] hash/array. first force it to be an array,
+     *then create a hash key for each section with the contents being the
+     *contents of the <section /> tag (this means that the section name
+     *is both in ['sections'][$sectname] and =['sections'][$sectname]['name']
+     */
+    if ( isset($configArray['section'])
+        && (!is_array($configArray['section'])
+            || !isset($configArray['section'][0])) )
+        $configArray['section'] = array($configArray['section']);
 
-        /**
-         *force plugins to be listed in an array format for each section
-         */
-        foreach ($this->configArray['section'] as $key => $section)
-            if ( isset($section['plugin'])
-                && (!is_array($section['plugin'])
+    for ($i = 0; $i < count($configArray['section']); $i++) {
+        $configArray['section'][$configArray['section'][$i]['name']] = $configArray['section'][$i];
+        unset($configArray['section'][$i]);
+    }
+
+    /**
+     *force plugins to be listed in an array format for each section
+     */
+    foreach ($configArray['section'] as $key => $section)
+        if ( isset($section['plugin'])
+            && (!is_array($section['plugin'])
                 || !isset($section['plugin'][0])) )
-                $this->configArray['section'][$key]['plugin'] = array($section['plugin']);
+            $configArray['section'][$key]['plugin'] = array($section['plugin']);
 
-        /**
-         *force plugins to be listed in an array format for the globals section.
-         *first make sure the globals key exists.
-         */
-        if ( ! isset($this->configArray['globals']) )
-            $this->configArray['globals'] = array();
-        elseif ( isset($this->configArray['globals']['plugin'])
-                && (!is_array($this->configArray['globals']['plugin'])
-                || !isset($this->configArray['plugin'][0])) )
-            $this->configArray['globals']['plugin'] = array($this->configArray['globals']['plugin']);
+    /**
+     *force plugins to be listed in an array format for the globals section.
+     *first make sure the globals key exists.
+     */
+    if ( ! isset($configArray['globals']) )
+        $configArray['globals'] = array();
+    elseif ( isset($configArray['globals']['plugin'])
+            && (!is_array($configArray['globals']['plugin'])
+                || !isset($configArray['plugin'][0])) )
+        $configArray['globals']['plugin'] = array($configArray['globals']['plugin']);
 
-        /**
-         *force the root namespace's plugin declaration(s) to be in array form
-         */
-        if ( isset($this->configArray['plugin'])
-            && (!is_array($this->configArray['plugin'])
-            || !isset($this->configArray['plugin'][0])) )
-            $this->configArray['plugin'] = array($this->configArray['plugin']);
+    /**
+     *force the root namespace's plugin declaration(s) to be in array form
+     */
+    if ( isset($configArray['plugin'])
+        && (!is_array($configArray['plugin'])
+            || !isset($configArray['plugin'][0])) )
+        $configArray['plugin'] = array($configArray['plugin']);
 
-        /**
-         *return the configuration array
-         */
-        return $this->configArray;
-    }
+    /**
+     *return the configuration array
+     */
+    return $configArray;
 }
 ?>
