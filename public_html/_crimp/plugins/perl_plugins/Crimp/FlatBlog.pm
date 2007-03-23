@@ -1,11 +1,11 @@
 # CRIMP - Content Redirection Internet Management Program
-# Copyright (C) 2005-2006 The CRIMP Team
+# Copyright (C) 2005-2007 The CRIMP Team
 # Authors:       The CRIMP Team
 # Project Leads: Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: FlatBlog.pm,v 1.7 2006-12-15 23:02:39 diddledan Exp $
+# Revision info: $Id: FlatBlog.pm,v 1.8 2007-03-23 14:11:15 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@ use Fcntl;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: FlatBlog.pm,v 1.7 2006-12-15 23:02:39 diddledan Exp $, crimp => $crimp, MenuList => [] };
+	my $self = { id => q$Id: FlatBlog.pm,v 1.8 2007-03-23 14:11:15 diddledan Exp $, crimp => $crimp, MenuList => [] };
 	bless $self, $class;
 }
 
