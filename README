@@ -5,6 +5,15 @@ perl version of CRIMP, but we are upgrading to PHP, so the configuration
 goes in public_html/_crimp/config.xml.
 Configuration examples are in *.example files
 
+--------------
+PRE-REQUISITES
+--------------
+You need a php enabled host with the following PEAR modules installed:
+   - HTTP
+   - Config
+   - XML_Parser
+   - XML_Util
+
 ---------
 TEMPLATES
 ---------

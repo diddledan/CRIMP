@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: index.php,v 1.3 2006-12-02 00:14:27 diddledan Exp $
+ *Revision info: $Id: index.php,v 1.4 2007-03-23 14:02:49 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -56,7 +56,7 @@ require_once('HTTP.php');
  *Main class - this is where the bulk of the app resides
  */
 require_once('crimp.php');
-$crimp = new Crimp($dbg, $config);
+$crimp = new Crimp;
 
 /**
  *do the plugin thing
