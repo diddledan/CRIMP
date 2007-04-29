@@ -7,32 +7,40 @@
 
 <body>
 <h1>CRIMP Requirements </h1>
-To run CRIMP, please check that you can meet the following requirements. <br />
+<p>To run CRIMP, please check that you can meet the following requirements:</p>
 <ul>
-  <li>An account on one of the following webservers:</li>
-</ul>
-<table width="100%" border="0" cellspacing="10" cellpadding="10">
-  <tr>
-    <td bgcolor="#EEEEEE"><pre>Apache (linux)</pre></td>
-  </tr>
-</table>
-<ul>
-  <li>Webserver settings</li>
-</ul>
-<table width="100%" border="0" cellspacing="10" cellpadding="10">
-  <tr>
-    <td bgcolor="#EEEEEE"><pre>Use of &quot;.htaccess&quot; files<br />Options FollowSymLinks<br />AllowOverride FileInfo (or preferably set to All if your host allows it)</pre></td>
-  </tr>
-</table>
-<ul>
-  <li>A perl cgi-bin with the following perl modules:<br />
-    (please note that some CRIMP plugin modules may require additional perl modules in order to work) <br />
+  <li>
+    A webhosting account based on the Apache webserver, or Apache installed on a
+    machine you control. Other webservers may work, but are untested. The best
+    way to get access to an Apache webserver is to sign up for Linux/UNIX
+    WebHosting.
+  </li>
+  <li>
+    Webserver settings
+    <ul>
+        <li>Use of &quot;.htaccess&quot; files</li>
+        <li>Options FollowSymLinks OR Options SymLinksIfOwnerMatch</li>
+        <li>AllowOverride FileInfo (or preferably set to All if your host allows it)</li>
+    </ul>
+  </li>
+  <li>PHP5 enabled on your selected webserver</li>
+  <li>
+    For use of the CRIMP:PHP/Perl bridge, you require access to the perl binary
+    on your system (usually in /usr/bin/perl on Linux hosts), along with the
+    following Perl modules:
+    <ul>
+        <li>Fcntl</li>
+        <li>URI::Escape</li>
+        <li>Some CRIMPerl plugin modules may require additional perl modules in order to work.</li>
+    </ul>
   </li>
 </ul>
-<table width="100%" border="0" cellspacing="10" cellpadding="10">
-  <tr>
-    <td bgcolor="#EEEEEE"><pre>CGI<br />CGI::Cookie<br />Fcntl<br />URI::Escape</pre></td>
-  </tr>
-</table>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">
+<img alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png" />
+</a>
+<br />This 
+<span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/Text" rel="dc:type">work</span> is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England & Wales License</a>.
 </body>
 </html>

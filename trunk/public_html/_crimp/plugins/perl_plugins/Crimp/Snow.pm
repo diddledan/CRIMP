@@ -5,21 +5,9 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: Snow.pm,v 1.3 2007-03-23 14:11:15 diddledan Exp $
+# Revision info: $Id: Snow.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $
 #
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-# 
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+# This file is Licensed under the LGPL.
 
 #This is an example of using CRIMP's addHeaderContent function to add
 #a javascript call, which in this case displays some pretty snow
@@ -39,7 +27,7 @@ sub new {
   # this variable will also hold our crimp object, so that any crimp subs or variables can be called
   # with $varname->{crimp}->sub(); or $varname->{crimp}->{variable};. we call this $self for
   # decriptiveness sake as it referrs to this module.
-  my $self = { id => q$Id: Snow.pm,v 1.3 2007-03-23 14:11:15 diddledan Exp $, crimp => $crimp, };
+  my $self = { id => q$Id: Snow.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $, crimp => $crimp, };
   bless $self, $class;
   #the bless command makes the variable part of the namespace.
 }
