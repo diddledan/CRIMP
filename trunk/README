@@ -1,4 +1,4 @@
-Welcome to CRIMP
+Welcome to CRIMP, the Content Redirection Internet Management Programme
 
 Configuration is all done in the cgi-bin/crimp.ini file when using the
 perl version of CRIMP, but we are upgrading to PHP, so the configuration
@@ -8,11 +8,8 @@ Configuration examples are in *.example files
 --------------
 PRE-REQUISITES
 --------------
-You need a php enabled host with the following PEAR modules installed:
-   - HTTP
-   - Config
-   - XML_Parser
-   - XML_Util
+You need a php enabled host. We try to include everything you need in the
+distribution, so there's no reason to worry about whether it will work.
 
 ---------
 TEMPLATES
@@ -22,17 +19,25 @@ you view with your internet browser) with a special 'tag' that is replaced
 with the output from the CRIMP engine. This enables you to create a
 customised look and feel for your entire website with just one file. All
 you need to do, is create your desired layout in a webpage editor, then
-find the spot where you want CRIMP's content to appear, and select "insert
-html" or "insert custom tag" (something like that) from the menu. When
-prompted, enter "<!--PAGE_CONTENT-->" without the quotes, save the file
-and upload to your webspace.
+find the spot where you want CRIMP's content to appear, and type in
+the text "@@PAGE_CONTENT@@" without the quotes. Then save the file and
+upload to your webspace.
 
-The <template></template> tag looks for the file you specify in the _crimp
-directory, so if you put your template in _crimp/templates, you would
-specify in your crimp.xml file:
+The <template></template> tag looks for the file you specify relative to the
+'./public_html/_crimp' directory, so if you put your template in
+'_crimp/templates', you would specify in your crimp.xml file:
     ...
     <template>./templates/yourtemplate.html</template>
     ...
+and if you put it at './templates':
+    ...
+    <template>../../templates/yourtemplate.html</template>
+    ...
+(WARNING: This behavious is subject to change: check this document for
+updates as to where CRIMP will look for your template, and what it looks
+for inside the template - one thought I have already had is replacing the
+<!--PAGE_CONTENT--> tag with something easier for people with no knowledge
+of HTML.)
 
 
 -----------------
@@ -42,7 +47,7 @@ PHP MODULES (new)
 breadCrumbs
 Designed to add a backwards navigation system so that users know where
 they are in relation to the homepage, this module can be configured to
-output breadcrumbs at either the top or bottom (or both) of the page.
+output breadcrumbs at either the top or bottom of the page, or both.
 
 contentDirectory
 This module is configured with the path to the directory which contains
@@ -52,7 +57,7 @@ dir. The module will automatically use a file by the name of index.html
 for any directories (eg. request for / will result in the page at
 location ../content/index.html, and a request for /wibble will use
 ../content/wibble/index.html if wibble is a directory, or just the file
-by the name wibble.html if not.).
+by the name wibble.html if not, and a 404 error if neither applies.).
 
 
 ------------------
@@ -85,5 +90,5 @@ Q. the perl code in my database is printed out as is, instead of being
 interpreted by CRIMP's perl-based ContentDatabase plugin.
 
 A. make sure that the first line of your page(s) reads "#PERL" with nothing
-before it (and nothing else on the same line as it will be interpreted as
+before it (and nothing else on the same line, as it will be interpreted as
 a perl comment).
