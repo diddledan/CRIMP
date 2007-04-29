@@ -1,30 +1,35 @@
 <?php
 /**
- *Debug - A debugging routine developed for use with crimp based heavily on
- *PHP Debug (http://www.php-debug.com/)
+ * This is a debugging routine developed for use with crimp based heavily on
+ * PHP Debug (http://www.php-debug.com/)
+ * 
+ *---
+ * 
+ * PHP_Debug : A simple and fast way to debug your PHP code
+ * 
+ * The basic purpose of PHP_Debug is to provide assistance in debugging PHP
+ * code, by "debug" i don't mean "step by step debug" but program trace,
+ * variables display, process time, included files, queries executed, watch
+ * variables... These informations are gathered through the script execution and
+ * therefore are displayed at the end of the script (in a nice floating div or a
+ * html table) so that it can be read and used at any moment. (especially
+ * usefull during the development phase of a project or in production with a
+ * secure key/ip)
  *
- *CRIMP - Content Redirection Internet Management Program
- *Copyright (C) 2005-2007 The CRIMP Team
- *Authors:          The CRIMP Team
- *Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
- *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
- *                  HomePage:      http://crimp.sf.net/
+ * PHP version 5 only
+ * 
+ *---
+ * 
+ * CRIMP - Content Redirection Internet Management Program
+ * Copyright (C) 2005-2007 The CRIMP Team
+ * Authors:          The CRIMP Team
+ * Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
+ *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
+ * HomePage:         http://crimp.sf.net/
  *
- *Revision info: $Id: HTML_Table.php,v 1.4 2007-03-23 14:11:12 diddledan Exp $
+ * Revision info: $Id: HTML_Table.php,v 1.5 2007-04-29 20:37:32 diddledan Exp $
  *
- *This library is free software; you can redistribute it and/or
- *modify it under the terms of the GNU Lesser General Public
- *License as published by the Free Software Foundation; either
- *version 2.1 of the License, or (at your option) any later version.
- *
- *This library is distributed in the hope that it will be useful,
- *but WITHOUT ANY WARRANTY; without even the implied warranty of
- *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *Lesser General Public License for more details.
- *
- *You should have received a copy of the GNU Lesser General Public
- *License along with this library; if not, write to the Free Software
- *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+ * This file is released under the LGPL License under kind permission from Vernet Loïc.
  */
 
 /**
@@ -47,7 +52,7 @@ require_once 'Debug/Renderer/HTML_Table_Config.php';
  * @filesource
  */
 
-class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
+class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
 {    
     /**
      * Debug_Renderer_HTML_Table class constructor
@@ -57,11 +62,9 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
     function __construct($DebugObject, $options)
     {
         $this->DebugObject = $DebugObject;
-        $this->defaultOptions = Debug_Renderer_HTML_Table_Config::singleton()->getConfig();
+        $this->defaultOptions = PHP_Debug_Renderer_HTML_Table_Config::singleton()->getConfig();
         $this->setOptions($options);
         
-        //Debug::dumpVar($this->options, "Debug_Renderer_HTML_Table::options");
-
         // Now add in first the predefined debugline depending on the configuration
         if ($this->options['HTML_TABLE_enable_search'] == true)
             $this->DebugObject->addDebugFirst(STR_N, PHP_DEBUGLINE_SEARCH);
@@ -87,7 +90,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
      * This is the function to display the debug information
      *
      * @since V2.0.0 - 07 Apr 2006
-     * @see Debug::Render()
+     * @see PHP_Debug::Render()
      */
     public function display()
     {
@@ -300,7 +303,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
         $buffer = $this->options['HTML_TABLE_interrow_time'];
         
         if (!empty($properties['endTime'])) {
-            $buffer .=  $this->span(Debug::getElapsedTime($properties['startTime'], $properties['endTime']), 'time');
+            $buffer .=  $this->span(PHP_Debug::getElapsedTime($properties['startTime'], $properties['endTime']), 'time');
         } else {
             $buffer .= '&nbsp;';
         }
@@ -324,7 +327,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
             // 1 : Standard
             case PHP_DEBUGLINE_STD:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
-                $buffer .= $this->span($properties['info'], 'std');
+                $buffer .= $this->span(nl2br(htmlspecialchars($properties['info'])), 'std');
                 break;
             
             // 2 : Query
@@ -348,7 +351,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
             // 6 : User app error
             case PHP_DEBUGLINE_APPERROR:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
-                $buffer .= $this->span('/!\\ User error : '. nl2br(htmlspecialchars($properties['info'])) . ' /!\\', 'app-error');
+                $buffer .= $this->span('/!\\<br />&nbsp;&nbsp;&nbsp;' . nl2br(htmlspecialchars($properties['info'])), 'app-error');
                 break;
                 
             // 7
@@ -371,7 +374,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
 
             // 10
             case PHP_DEBUGLINE_PROCESSPERF:
-                $buffer = $this->options['HTML_TABLE_interrow_file'];
+                $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->showProcessTime();
                 break;
 
@@ -383,7 +386,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
 
             // 12 : Main Page Action
             case PHP_DEBUGLINE_PAGEACTION;
-                $buffer = $this->options['HTML_TABLE_interrow_file'];
+                $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $txtPageAction = 'Page Action';
                 $buffer .= $this->span("[ $txtPageAction : ". $properties['info']. ' ]', 'pageaction');
                 break;
@@ -413,7 +416,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
             case PHP_DEBUGLINE_PASS:
             case PHP_DEBUGLINE_WARN:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
-                $buffer .= nl2br('&nbsp;&nbsp;'.htmlspecialchars($properties['info']));
+                $buffer .= nl2br(htmlspecialchars($properties['info']));
                 break;
 
             default:
@@ -450,7 +453,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
     private function processType($properties)
     {   
         $buffer = $this->options['HTML_TABLE_interrow_type'];
-        $buffer .= Debug_Line::$debugLineLabels[$properties['type']];
+        $buffer .= PHP_Debug_Line::$debugLineLabels[$properties['type']];
         return $buffer;
     }
 
@@ -628,7 +631,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
 
         switch ($properties['type'])
         {
-            case PHP_DEBUGLINE_STD:
+        	case PHP_DEBUGLINE_STD:
             case PHP_DEBUGLINE_QUERY:
             case PHP_DEBUGLINE_QUERYREL:
             case PHP_DEBUGLINE_APPERROR:             
@@ -646,7 +649,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
                     if (!empty($this->options['HTML_TABLE_view_source_script_path']) and !empty($this->options['HTML_TABLE_view_source_script_name'])) {
                         $buffer .= '<a href="'. $this->options['HTML_TABLE_view_source_script_path']
                                 . '/'. $this->options['HTML_TABLE_view_source_script_name']  
-                                .'?file='. $properties['file'];
+                                .'?file='. urlencode($properties['file']);
 
                         $buffer .= '">'. basename($properties['file']). '</a>'; 
 
@@ -719,9 +722,9 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
         
         if ($preDisplay == true){
             $buffer .= '<pre>';                   
-            $buffer .= Debug::dumpVar($properties['info'][1], '', PHP_DEBUG_DUMP_STR);
+            $buffer .= PHP_Debug::dumpVar($properties['info'][1], '', false, PHP_DEBUG_DUMP_STR);
         } else {
-            $buffer .= $this->span(Debug::dumpVar($properties['info'][1], '', PHP_DEBUG_DUMP_STR), 'dump-val');
+            $buffer .= $this->span(PHP_Debug::dumpVar($properties['info'][1], '', false, PHP_DEBUG_DUMP_STR), 'dump-val');
         }
 
         if ($preDisplay == true){
@@ -768,7 +771,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
           <td class="pd-search">:</td>
           <td class="pd-search">
             <select class="pd-search" name="PHPDEBUG_SEARCH_TYPE">';
-                    foreach (Debug_Line::$debugLineLabels as $lkey => $lvalue) {
+                    foreach (PHP_Debug_Line::$debugLineLabels as $lkey => $lvalue) {
                         $debugSearchTypeVal = (!empty($_REQUEST["PHPDEBUG_SEARCH_TYPE"]) && $lkey == $_REQUEST["PHPDEBUG_SEARCH_TYPE"]) ? ' selected="selected"' : '';
                         $buffer .= "              <option value=\"$lkey\"$debugSearchTypeVal>&raquo; $lvalue</option>". CR;
                     }                                   
@@ -813,7 +816,7 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
 	            $buffer .= $this->span($lvalue, 'files');
 	            $buffer .= ' <a href="'. $this->options['HTML_TABLE_view_source_script_path']
 	                         . '/'. $this->options['HTML_TABLE_view_source_script_name']  
-	                         .'?file='. $lvalue. '">View source</a> ';
+	                         .'?file='. urlencode($lvalue). '">View source</a> ';
 	                
 	            // Mark main file    
 	            if ($idx == 1) {
@@ -893,14 +896,14 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
         $SuperArray    = null;
         $buffer        = '';
 
-        $ArrayTitle = Debug::$globalEnvConstantsCorresp[$SuperArrayType];
+        $ArrayTitle = PHP_Debug::$globalEnvConstantsCorresp[$SuperArrayType];
         $SuperArray = $GLOBALS["$ArrayTitle"];
         $Title = "$ArrayTitle $txtVariable";
         $SectionBasetitle = "<b>$Title (". count($SuperArray). ') :';
 
         if (count($SuperArray)) {
             $buffer .= $SectionBasetitle. '</b>';
-            $buffer .= '<pre>'. Debug::dumpVar($SuperArray, $ArrayTitle, PHP_DEBUG_DUMP_STR). '</pre>';
+            $buffer .= '<pre>'. PHP_Debug::dumpVar($SuperArray, $ArrayTitle, false, PHP_DEBUG_DUMP_STR). '</pre>';
         }
         else {
             $buffer .= $SectionBasetitle. "$NoVariable</b>";
@@ -975,12 +978,12 @@ class Debug_Renderer_HTML_Table extends Debug_Renderer_Common
         $buffer .= '</td><td class="pd-perf" align="center">100%';
         $buffer .= '</td><td class="pd-perf" align="center">&nbsp;</td></tr>';
 
-        $buffer .= '<td class="pd-perf" align="center">'. $txtPHP;
+        $buffer .= '<tr><td class="pd-perf" align="center">'. $txtPHP;
         $buffer .= '</td><td class="pd-perf" align="center">'. $phpTime . $txtSECOND;
         $buffer .= '</td><td class="pd-perf" align="center">'. $phpPercent .'%';
         $buffer .= '</td><td class="pd-perf" align="center">&nbsp;</td></tr>';
         
-        $buffer .= '<td class="pd-perf" align="center">'. $txtSQL;
+        $buffer .= '<tr><td class="pd-perf" align="center">'. $txtSQL;
         $buffer .= '</td><td class="pd-perf" align="center">'. $sqlTime. $txtSECOND;
         $buffer .= '</td><td class="pd-perf" align="center">'. $sqlPercent . '%';
         $buffer .= '</td><td class="pd-perf" align="center">'. $queryCount. $txtQuery. '</td></tr>';

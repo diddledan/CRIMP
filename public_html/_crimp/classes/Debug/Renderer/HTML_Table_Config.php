@@ -1,30 +1,35 @@
 <?php
 /**
- *Debug - A debugging routine developed for use with crimp based heavily on
- *PHP Debug (http://www.php-debug.com/)
+ * This is a debugging routine developed for use with crimp based heavily on
+ * PHP Debug (http://www.php-debug.com/)
+ * 
+ *---
+ * 
+ * PHP_Debug : A simple and fast way to debug your PHP code
+ * 
+ * The basic purpose of PHP_Debug is to provide assistance in debugging PHP
+ * code, by "debug" i don't mean "step by step debug" but program trace,
+ * variables display, process time, included files, queries executed, watch
+ * variables... These informations are gathered through the script execution and
+ * therefore are displayed at the end of the script (in a nice floating div or a
+ * html table) so that it can be read and used at any moment. (especially
+ * usefull during the development phase of a project or in production with a
+ * secure key/ip)
  *
- *CRIMP - Content Redirection Internet Management Program
- *Copyright (C) 2005-2007 The CRIMP Team
- *Authors:          The CRIMP Team
- *Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
- *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
- *                  HomePage:      http://crimp.sf.net/
+ * PHP version 5 only
+ * 
+ *---
+ * 
+ * CRIMP - Content Redirection Internet Management Program
+ * Copyright (C) 2005-2007 The CRIMP Team
+ * Authors:          The CRIMP Team
+ * Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
+ *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
+ * HomePage:         http://crimp.sf.net/
  *
- *Revision info: $Id: HTML_Table_Config.php,v 1.4 2007-03-23 14:11:12 diddledan Exp $
+ * Revision info: $Id: HTML_Table_Config.php,v 1.5 2007-04-29 20:37:32 diddledan Exp $
  *
- *This library is free software; you can redistribute it and/or
- *modify it under the terms of the GNU Lesser General Public
- *License as published by the Free Software Foundation; either
- *version 2.1 of the License, or (at your option) any later version.
- *
- *This library is distributed in the hope that it will be useful,
- *but WITHOUT ANY WARRANTY; without even the implied warranty of
- *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *Lesser General Public License for more details.
- *
- *You should have received a copy of the GNU Lesser General Public
- *License along with this library; if not, write to the Free Software
- *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+ * This file is released under the LGPL License under kind permission from Vernet Loïc.
  */
 
 /**
@@ -39,7 +44,7 @@
  * @filesource
  */
 
-class Debug_Renderer_HTML_Table_Config
+class PHP_Debug_Renderer_HTML_Table_Config
 {    
     /**
      * Config container for Debug_Renderer_HTML_Table
@@ -72,7 +77,7 @@ class Debug_Renderer_HTML_Table_Config
         /**
          * Enable or disable included and required files
          */ 
-        self::$options['HTML_TABLE_show_templates'] = false;
+        self::$options['HTML_TABLE_show_templates'] = true;
         
         /**
          * Enable or disable pattern removing in included files
@@ -114,7 +119,12 @@ class Debug_Renderer_HTML_Table_Config
         /** 
          * View source script file name
          */     
-        self::$options['HTML_TABLE_view_source_script_name'] = /*'source.php'*/''; 
+        self::$options['HTML_TABLE_view_source_script_name'] = /*'PHP_Debug_show_source.php'*/''; 
+
+        /** 
+         * css path
+         */     
+        self::$options['HTML_TABLE_css_path'] = '/crimp_assets/debug-css'; 
 
         /** 
          * Tabsize for view source script
@@ -162,8 +172,8 @@ class Debug_Renderer_HTML_Table_Config
     <td class="pd-table-header" align="center">File</td>
     <td class="pd-table-header" align="center">Line</td>
     <td class="pd-table-header" align="center">Inside/From function</td>
-    <td class="pd-table-header" align="center">Inside/From Class</td>
-    <td class="pd-table-header" align="center" valign="bottom">Type</td>
+    <td class="pd-table-header" align="center">Inside/From Class</td>  
+    <td class="pd-table-header" align="center">Type</td>  
     <td class="pd-table-header" align="center">Debug information</td>
     <td class="pd-table-header" align="center">Execution time (sec)</td>
   </tr>
@@ -173,210 +183,10 @@ class Debug_Renderer_HTML_Table_Config
          * HTML code for footer 
          */         
          self::$options['HTML_TABLE_credits'] = '
-        PHP_Debug ['. PHP_DEBUG_RELEASE .'] | By COil (2006) | 
-        <a href="mailto:qrf_coil@yahoo.fr">qrf_coil@yahoo.fr</a> | 
-        <a href="http://phpdebug.sourceforge.net/">PHP_Debug Project Home</a> |
-        Adapted for CRIMP by The CRIMP Team (crimp.sf.net)
+        PHP_Debug ['. PHP_DEBUG_RELEASE .'] | By COil (2007) &amp; The CRIMP Team (2007) | 
+        <a href="http://www.coilblog.com">http://www.coilblog.com</a> | 
+        <a href="http://phpdebug.sourceforge.net/">PHP_Debug Project Home</a> 
         ';
-
-         /**
-         * PHP_Debug style sheet
-         */         
-         self::$options['HTML_TABLE_stylesheet'] = '
-    <style type="text/css">
-    /* Main table */
-    .pd-table {
-      border: solid 1px Navy;
-      border-bottom: 0px;
-      border-right: 0px;
-    }
-    /* Table header */
-    .pd-table-header {
-      font-family: tahoma, arial, sans-serif;
-      font-size: 0.8em;
-      font-weight: bold;
-      color: white;
-      background-color: Navy;
-      border-bottom: solid 1px Navy;
-    }
-    /* 1- Generic TD cell */
-    .pd-td {
-      font-family: tahoma, arial, sans-serif;
-      font-size: 0.8em;
-      color: black;
-      background-color: white;
-      padding: 2px;
-      border-bottom: solid 1px Navy;
-      border-right: solid 1px Navy;
-    }
-    /* 2, 3 - Query cell */
-    .pd-query {
-      font-weight: bold;
-      color: orange;
-    }
-    /* 5 - Application error */
-    .pd-app-error {
-      background-color: orange;
-      color: white;
-      font-weight: bold;
-    }
-    /* 6 - Credits */
-    .pd-credits { 
-      font-family: tahoma, arial, sans-serif;
-      font-size: 0.9em;
-      color: navy;
-      font-weight: bold;
-    }
-    /* 7 - Search cell */
-    .pd-search {
-      font-family: tahoma, arial, sans-serif;
-      font-size: 0.8em;
-      font-weight: bold;
-    }
-    /* Highligthed search keyword */
-    .pd-search-hl {
-      background-color: yellow;
-      color: blue;
-    }
-    /* 8 - Dump */
-    .pd-dump-title {
-      color: blue;
-    }
-    .pd-dump-val {
-      color: black;
-      border: solid 1px blue;
-    }
-    /* 9 - Perf summary */
-    .pd-perf {
-      font-size: 0.8em;
-      color: white;
-      font-weight: bold;
-      background-color: blue;
-    }
-    .pd-perf-table {
-      border: solid 1px blue;
-    }
-    .pd-time {
-      color: navy;
-      font-weight: bold;
-    }
-    /* 10 - Templates */
-    .pd-files {
-      color: blue;
-    }
-    .pd-main-file {
-      background-color: LightSteelBlue;
-      color: white;
-      font-weight: bold;
-    }
-    /* 11 - Page action */
-    .pd-pageaction {
-      background-color: LightSteelBlue;
-      color: white;
-      font-weight: bold;
-    }
-    /* 13 - Watch cell */
-    .pd-watch {
-      font-style: oblique; 
-      font-weight: bold;
-    }
-    .pd-watch-val {
-      font-weight: bold;
-      border: solid 1px Navy;
-    }
-    /* 14 - Php errors */
-    .pd-php-warning {
-      background-color: red;
-      color: white;
-      font-weight: bold;
-    }
-    .pd-php-notice {
-      background-color: yellow;
-      color: navy;
-      font-weight: bold;
-    }
-    .pd-php-user-error {
-      background-color: orange;
-      color: white;
-      font-weight: bold;
-    }
-    </style>
-';
-
-         /**
-         * View source style sheet
-         */         
-         self::$options['HTML_TABLE_view_source_stylesheet'] = '
-    <style type="text/css">
-    .hl-default {
-      color: Black;
-    }
-    .hl-code {
-      color: Gray;
-    }
-    .hl-brackets {
-      color: Olive;
-    }
-    .hl-comment {
-      color: Orange;
-    }
-    .hl-quotes {
-      color: Darkred;
-    }
-    .hl-string {
-      color: Red;
-    }
-    .hl-identifier {
-      color: Blue;
-    }
-    .hl-builtin {
-      color: Teal;
-    }
-    .hl-reserved {
-      color: Green;
-    }
-    .hl-inlinedoc {
-      color: Blue;
-    }
-    .hl-var {
-      color: Darkblue;
-    }
-    .hl-url {
-      color: Blue;
-    }
-    .hl-special {
-      color: Navy;
-    }
-    .hl-number {
-      color: Maroon;
-    }
-    .hl-inlinetags {
-      color: Blue;
-    }
-    .hl-main { 
-      background-color: #F5F5F5;
-    }
-    .hl-gutter {
-      background-color: #999999;
-      color: White
-    }
-    .hl-table {
-      font-family: courier;
-      font-size: 14px;
-      border: solid 1px Lightgrey;
-    }
-    .hl-title {    
-      font-family: Tahoma;
-      font-size: 22px;
-      border: solid 1px Lightgrey;
-      background-color: #F0F0F0;
-      margin-left: 15px;
-      padding-left: 5px;
-      padding-right: 5px;
-    }
-    </style>
-';
-
 
         /**
          * HTML code for a basic header 
@@ -481,7 +291,7 @@ class Debug_Renderer_HTML_Table_Config
      */
     function __tostring()
     {
-        return '<pre>'. Debug::dumpVar($this->singleton()->getConfig(), __CLASS__, PHP_DEBUG_DUMP_ARR_STR). '</pre>';
+        return '<pre>'. PHP_Debug::dumpVar($this->singleton()->getConfig(), __CLASS__, PHP_DEBUG_DUMP_ARR_STR). '</pre>';
     }   
 }
 

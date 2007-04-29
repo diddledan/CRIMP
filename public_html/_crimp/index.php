@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: index.php,v 1.5 2007-03-23 14:11:13 diddledan Exp $
+ *Revision info: $Id: index.php,v 1.6 2007-04-29 20:37:33 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -40,18 +40,10 @@ set_include_path('./classes'.PATH_SEPARATOR.get_include_path());
 require_once('Debug.php');
 
 /**
- *our own config interface to the 'Config' pear module
- */
-require_once('conf.php');
-
-/**
  *plugin architecture
  */
 require_once('plugin.php');
-/**
- *the HTTP pear module
- */
-require_once('HTTP.php');
+
 /**
  *Main class - this is where the bulk of the app resides
  */

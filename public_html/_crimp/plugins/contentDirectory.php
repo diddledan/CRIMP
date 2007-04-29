@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: contentDirectory.php,v 1.5 2007-03-23 14:11:14 diddledan Exp $
+ *Revision info: $Id: contentDirectory.php,v 1.6 2007-04-29 20:37:33 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ class contentDirectory implements iPlugin {
     protected $scope;
     protected $crimp;
 
-    function __construct(&$crimp, $scope = SCOPE_ROOT, $pluginNum, $deferred = false) {
+    function __construct(&$crimp, $scope = SCOPE_CRIMP, $pluginNum, $deferred = false) {
         $this->deferred = $deferred;
         $this->scope = $scope;
         $this->crimp = &$crimp;

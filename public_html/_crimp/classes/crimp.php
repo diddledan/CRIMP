@@ -1,34 +1,38 @@
 <?php
 /**
- *CRIMP - Content Redirection Internet Management Program
- *Copyright (C) 2005-2007 The CRIMP Team
- *Authors:          The CRIMP Team
- *Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
- *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
- *                  HomePage:      http://crimp.sf.net/
+ * CRIMP - Content Redirection Internet Management Program
+ * Copyright (C) 2005-2007 The CRIMP Team
+ * Authors:          The CRIMP Team
+ * Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
+ *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
+ * HomePage:         http://crimp.sf.net/
  *
- *Revision info: $Id: crimp.php,v 1.13 2007-03-23 14:11:11 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.14 2007-04-29 20:37:32 diddledan Exp $
  *
- *This library is free software; you can redistribute it and/or
- *modify it under the terms of the GNU Lesser General Public
- *License as published by the Free Software Foundation; either
- *version 2.1 of the License, or (at your option) any later version.
- *
- *This library is distributed in the hope that it will be useful,
- *but WITHOUT ANY WARRANTY; without even the implied warranty of
- *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *Lesser General Public License for more details.
- *
- *You should have received a copy of the GNU Lesser General Public
- *License along with this library; if not, write to the Free Software
- *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+ * This file is released under the LGPL License.
  */
 
-define('HTTP_EXIT_OK',          '200');
-define('HTTP_EXIT_NO_CONTENT',  '204');
-define('HTTP_EXIT_FORBIDDEN',   '403');
-define('HTTP_EXIT_NOT_FOUND',   '404');
-define('HTTP_EXIT_SERVER_ERROR','500');
+define('HTTP_EXIT_UNKNOWN',     -1);
+define('HTTP_EXIT_OK',          200);
+define('HTTP_EXIT_NO_CONTENT',  204);
+define('HTTP_EXIT_FORBIDDEN',   403);
+define('HTTP_EXIT_NOT_FOUND',   404);
+define('HTTP_EXIT_SERVER_ERROR',500);
+
+/**
+ *the plugin configuration scopes
+ */
+define('SCOPE_SECTION',         1);
+define('SCOPE_CRIMP',           0);
+define('MAX_SCOPE_VALUE',       1);
+
+/**
+ *crimp specific debug constants
+ */
+define('INFO',                      PHP_DEBUGLINE_STD);
+define('PASS',                      PHP_DEBUGLINE_PASS);
+define('WARN',                      PHP_DEBUGLINE_WARN);
+define('FAIL',                      PHP_DEBUGLINE_FAIL);
 
 /**
  *CRIMP's main class
@@ -68,9 +72,7 @@ class Crimp {
     protected $userAgent;
     protected $debugMode = 'inline';
     protected $debugSwitch = false;
-    /**
-     *array containing the configuration file in an indexed form
-     */
+
     public $_config;
     protected $varDir;
     protected $errordir;
@@ -98,6 +100,13 @@ class Crimp {
      */
     protected $deferredPlugins;
     /**
+     *the list of executed plugins and how many times they've been executed
+     *(array of arrays: the first key is the scope, and the second key is the
+     *plugin name, the value of which is the number of times the plugin has been
+     *executed in this scope.)
+     */
+    protected $executedPlugins;
+    /**
      *debug object
      */
     public $debug;
@@ -117,6 +126,7 @@ class Crimp {
      *HTTP status indicator codes and their names/descriptions
      */
     protected $HTTP_EXIT_CODES = array(
+        HTTP_EXIT_UNKNOWN       => array('text' => 'Unknown', 'desc' => 'Unknown HTTP Error Code'),
         HTTP_EXIT_OK            => array('text' => 'OK', 'desc' => null),
         HTTP_EXIT_NO_CONTENT    => array('text' => 'No Content', 'desc' => null),
         HTTP_EXIT_FORBIDDEN     => array('text' => 'Forbidden', 'desc' => 'You do not have permission to view this resource.'),
@@ -128,19 +138,10 @@ class Crimp {
      *constructor
      */
     function __construct() {
-        $this->_output = $this->defaultHTML;
+        $this->debug = new PHP_Debug;
+        $this->parseConf();
 
-        $this->debug = new Debug;
-        $config = crimpConf();
-        if ( PEAR::isError($config) ) {
-            $this->debug->addDebug("Configuration Parser failed to read the configuration. This could mean the file either does not exist or has the wrong permissions:\n    {$config->getMessage()}", FAIL);
-            $this->_config = array();
-            $this->errorPage('crimp', HTTP_EXIT_SERVER_ERROR);
-        }
-
-        $this->_config = $config->get();
-        unset ($config);
-
+        $this->_output              = $this->defaultHTML;
         $this->remoteHost           = $_ENV['REMOTE_ADDR'];
         $this->serverName           = $_ENV['SERVER_NAME'];
         $this->serverSoftware       = $_ENV['SERVER_SOFTWARE'];
@@ -165,6 +166,10 @@ Requested Document: {$this->_HTTPRequest}", PASS);
 
         $this->applyConfig();
         $this->parseUserConfig();
+        /**
+         *initialise the executedPlugins array of arrays
+         */
+        for($i = 0; $i <= MAX_SCOPE_VALUE; $i++) $this->executedPlugins[$i] = array();
         $this->pluginSystem = new crimpPlugins($this);
     }
 
@@ -172,15 +177,15 @@ Requested Document: {$this->_HTTPRequest}", PASS);
      *parse the configuration to set some values
      */
     private function applyConfig() {
-        $this->errorDir     = ( $cfg = $this->Config('errordir', SCOPE_GLOBALS) ) ? $cfg : CRIMP_HOME.'/errordocs';
+        $this->errorDir     = ( $cfg = $this->Config('errordir', SCOPE_CRIMP) ) ? $cfg : CRIMP_HOME.'/errordocs';
         define('ERROR_DIR', $this->errorDir);
-        $this->templateDir  = ( $cfg = $this->Config('templatedir', SCOPE_GLOBALS) ) ? $cfg : CRIMP_HOME.'/templates';
+        $this->templateDir  = ( $cfg = $this->Config('templatedir', SCOPE_CRIMP) ) ? $cfg : CRIMP_HOME.'/templates';
         define('TEMPLATE_DIR', $this->templateDir);
-        $this->varDir       = ( $cfg = $this->Config('vardir', SCOPE_GLOBALS) ) ? $cfg : CRIMP_HOME.'/var';
+        $this->varDir       = ( $cfg = $this->Config('vardir', SCOPE_CRIMP) ) ? $cfg : CRIMP_HOME.'/var';
         define('VAR_DIR', $this->varDir);
-        $this->defaultLang  = ( $cfg = $this->Config('defaultlanguage', SCOPE_GLOBALS) ) ? $cfg : 'en';
+        $this->defaultLang  = ( $cfg = $this->Config('defaultlanguage', SCOPE_CRIMP) ) ? $cfg : 'en';
         define('DEFAULT_LANG', $this->defaultLang);
-        $this->setTitle( ( $cfg = $this->Config('sitetitle', SCOPE_GLOBALS) ) ? $cfg : '', true );
+        $this->setTitle( ( $cfg = $this->Config('sitetitle', SCOPE_CRIMP) ) ? $cfg : '', true );
     }
 
     /**
@@ -197,7 +202,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         $req = explode('/', $this->_HTTPRequest);
         foreach( $req as $_ ) {
             if ( $_ ) $tmpstr = "$tmpstr/$_";
-            if ( isset($this->_config['section'][$tmpstr]) )
+            //if ( [$tmpstr]) )
                 $userConfig = $tmpstr;
         }
 
@@ -217,11 +222,11 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         }
         else {
             $sep = ' - ';
-            if ( $conf = $this->Config('titleseparator', SCOPE_GLOBALS) ) $sep = $conf;
+            if ( $conf = $this->Config('titleseparator', SCOPE_CRIMP) ) $sep = $conf;
 
             $cur = $this->pageTitle;
             $this->debug->addDebug("setTitle(): Adding '$title' to page title", PASS);
-            $this->pageTitle = ( $this->Config('titleorder', SCOPE_GLOBALS) == 'forward' )
+            $this->pageTitle = ( $this->Config('titleorder', SCOPE_CRIMP) == 'forward' )
                 ? "$cur$sep$title" : "$title$sep$cur";
         }
     }
@@ -354,11 +359,9 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          *status should not be locking itself as well
          */
         foreach ( $this->deferredPlugins as $plugin ) {
-            $this->pluginSystem->execute($plugin['name'],
-                                         $plugin['num'],
+            $this->pluginSystem->execute($plugin['name'], $plugin['num'],
                                          CRIMP_HOME."/plugins/{$plugin['name']}.php",
-                                         $plugin['scope'],
-                                         true);
+                                         $plugin['scope'], true);
         }
     }
 
@@ -373,44 +376,41 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         /**
          *check if a <plugin> declaration has been made for this section
          */
-        if ( !isset($this->_config['section'][$this->userConfig()]['plugin'])
-            && !isset($this->_config['globals']['plugin'])
-            && !isset($this->_config['plugin']) ) {
+        if (   !$this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']")
+            || !$this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']/plugin")
+            || !$this->_config->xpath('/crimp/plugin') ) {
             $this->debug->addDebug('You forgot to add at least one <plugin> section for this url.', FAIL);
             return;
         }
-
-        /**
-         *config scope - this is so that a plugin can determine where it's
-         *config root is.
-         *from conf.php:
-         *  define('SCOPE_SECTION',  1);
-         *  define('SCOPE_GLOBALS',  2);
-         *  define('SCOPE_ROOT',     3);
-         *hopefully we won't have to change these values, as incrementation
-         *for successively higher levels works out nicely.
-         */
-        $scope = 0;
-
-        foreach ( array($this->_config['section'][$this->userConfig()],
-                        $this->_config['globals'],
-                        $this->_config) as $plugins ) {
-            $scope++;
-            if ( isset($plugins['plugin']) ) {
-                $i = 0;
-                foreach( $plugins['plugin'] as $plugin ) {
-                    if ( isset($plugin['name']) ) {
-                        if ( !$this->pluginLock($plugin['name']) ) {
-                            $this->pluginSystem->execute($plugin['name'],
-                                                         $i,
-                                                         CRIMP_HOME."/plugins/{$plugin['name']}.php",
-                                                         $scope,
-                                                         false);
-                        }
-                    } else $this->debug->addDebug('the plugin declaration has no "name" element', WARN);
-                    $i++;
-                }
-            }
+        
+        if ( $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']")
+            && $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']/plugin") )
+            $this->doPluginsFromXpath("/crimp/section[@name='{$this->userConfig()}']/plugin", SCOPE_SECTION);
+        
+        if ( $this->_config->xpath('/crimp/plugin') )
+            $this->doPluginsFromXpath('/crimp/plugin', SCOPE_CRIMP);
+    }
+    
+    private function doPluginsFromXpath($xpath, $scope) {
+        foreach ( $this->_config->xpath($xpath) as $plugin ) {
+            if ( $plugin['name'] ) {
+                $plugName = (string) $plugin['name'];
+                
+                if (!isset($this->executedPlugins[$scope][$plugName]))
+                    $this->executedPlugins[$scope][$plugName] = 0;
+                
+                /**
+                 *sanity check for instances where a plugin name may break out
+                 *of the plugin directory.
+                 */
+                if ( !preg_match('/^[\/]*\.\.[\/]+.*$/', $plugName) ) {
+                    if ( !$this->pluginLock( $plugName ) ) {
+                        $this->pluginSystem->execute($plugName, $this->executedPlugins[$scope][$plugName]++,
+                                                     CRIMP_HOME."/plugins/$plugName.php",
+                                                     $scope, false);
+                    }
+                } else $this->debug->addDebug("'$plugName' is a malformed plugin name", WARN);
+            } else $this->debug->addDebug('the plugin declaration has no "name" attribute', WARN);
         }
     }
 
@@ -477,7 +477,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.13 2007-03-23 14:11:11 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.14 2007-04-29 20:37:32 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
@@ -535,7 +535,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
         }
 
         list($null,$content) = $this->stripHeaderFooter($this->_output);
-	$this->_output = preg_replace('/<!--PAGE_CONTENT-->/i', $content, $template);
+	$this->_output = preg_replace('/@@PAGE_CONTENT@@/', $content, $template);
     }
 
     ##### HELPER FUNCTIONS #####
@@ -579,35 +579,35 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                                          'num' => $pluginNum,
                                          'scope' => $scope);
     }
+    
+    /**
+     *parse the configuration file
+     */
+    function parseConf() {
+        try {
+            $xml = file_get_contents('config.xml');
+        } catch (Exception $e) {
+            $this->debug->add($e, FAIL);
+            $this->errorPage('crimp');
+        }
+        $SimpleXML = new SimpleXMLElement($xml);
+        $this->_config = $SimpleXML;
+    }
 
     /**
-     *cycle through the config array looking for a specific plugin, and return
-     *the value of the hash element who's name is stored in $key
-     */
-    /**
-     *TODO: fix this for multiple invocations of the same plugin within the same
-     *scope. eg. two 'perl' plugins calling different modules
-     */
-    protected function getPlugConf($pluginName, $key, $config, $pluginNum = false) {
-        if ( $pluginNum ) {
-            if ( isset($config[$pluginNum]) &&
-                 isset($config[$pluginNum]['name']) &&
-                 $config[$pluginNum]['name'] == $pluginName &&
-                 isset($config[$pluginNum][$key]) )
-                return $config[$pluginNum][$key];
-        } else {
-            foreach ($config as $plugin)
-                if ( isset($plugin['name']) &&
-                     $plugin['name'] == $pluginName &&
-                     isset($plugin[$key]) )
-                    return $plugin[$key];
-        }
-        return false;
-    }
-    /**
-     *get a configuration value - subcalls the protected getPlugConf() above
+     *get a configuration value
      */
     public function Config($key, $scope = SCOPE_SECTION, $plugin = false, $pluginNum = false) {
+        $cfg = $this->Config2($key, $scope, $plugin, $pluginNum);
+        if (!$cfg) {
+            $this->debug->add("nothing configured for\nkey:$key,\nscope:$scope,\nplugin:$plugin,\npluginNum:$pluginNum", INFO);
+            return;
+        } else {
+            $this->debug->add("configuration found for\nkey:$key,\nscope:$scope,\nplugin:$plugin,\npluginNum:$pluginNum", INFO);
+            return $cfg;
+        }
+    }
+    protected function Config2($key, $scope = SCOPE_SECTION, $plugin = false, $pluginNum = false) {
         /**
          *if the plugin name has been given:
          */
@@ -620,33 +620,44 @@ Requested Document: {$this->_HTTPRequest}", PASS);
              */
             switch ($scope) {
                 case SCOPE_SECTION:
-                    if ( isset($this->_config['section'][$this->userConfig()]['plugin']) )
-                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['section'][$this->userConfig()]['plugin'], $pluginNum) )
-                            return $conf;
-                case SCOPE_GLOBALS:
-                    if ( isset($this->_config['globals']['plugin']) )
-                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['globals']['plugin'], $pluginNum) )
-                            return $conf;
-                case SCOPE_ROOT:
-                    if ( isset($this->_config['plugin']) )
-                        if ( $conf = $this->getPlugConf($plugin, $key, $this->_config['plugin'], $pluginNum) )
-                            return $conf;
+                    if ( $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']") ) {
+                        if ($this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']/plugin[@name='$plugin']")) {
+                            $plugcfg = $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']/plugin[@name='$plugin']");
+                            if ( $pluginNum && isset($plugcfg[$pluginNum]) && $plugcfg[$pluginNum]->$key )
+                                return $plugcfg[$pluginNum]->$key;
+                            else if ($plugcfg[0]->$key) return (string) $plugcfg[0]->$key;
+                        }
+                    }
+                    break;
+                case SCOPE_CRIMP:
+                    if ( $this->_config->xpath("/crimp/plugin[@name='$plugin']") ) {
+                        $plugcfg = $this->_config->xpath("/crimp/plugin[@name='$plugin']");
+                        if ( isset($plugcfg[$pluginNum]) && $plugcfg[$pluginNum]->$key )
+                            return $plugcfg[$pluginNum]->$key;
+                        else if ($plugcfg[0]->$key) return (string) $plugcfg[0]->$key;
+                    }
+                    break;
             }
         } else {
             /**
-             *if the plugin name wasn't defined we search for just the key name
-             *in the same manner as above.
+             *if the plugin name wasn't defined we search for just the key name.
+             *the difference between this and the above, is that this allows
+             *fallthrough, so that if the key isn't found in the 'section' scope
+             *it'll fallthrough to check the 'crimp' scope.
              */
             switch ($scope) {
                 case SCOPE_SECTION:
-                    if ( isset($this->_config['section'][$this->userConfig()][$key]) )
-                        return $this->_config['section'][$this->userConfig()][$key];
-                case SCOPE_GLOBALS:
-                    if ( isset($this->_config['globals'][$key]) )
-                        return $this->_config['globals'][$key];
-                case SCOPE_ROOT:
-                    if ( isset($this->_config[$key]) )
-                        return $this->_config[$key];
+                    if ( $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']") ) {
+                        $sectcfg = $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']");
+                        if ( isset($sectcfg[0]) && $sectcfg[0]->$key )
+                            return (string) $sectcfg[0]->$key;
+                    }
+                case SCOPE_CRIMP:
+                default:
+                    if ( $this->_config->xpath("/crimp/$key") ) {
+                        $cfg = $this->_config->xpath("/crimp/$key");
+                        return $cfg[0];
+                    }
             }
         }
 
@@ -690,8 +701,8 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          */
         if ( headers_sent() ) return false;
 
-        $err = ( isset($this->HTTP_EXIT_CODES[$exitCode]) ) ? $this->HTTP_EXIT_CODES[$exitCode]['text'] : 'Unknown';
-        header("HTTP/1.1 $exitCode $err");
+        $status = ( isset($this->HTTP_EXIT_CODES[$exitCode]) ) ? $this->HTTP_EXIT_CODES[$exitCode]['text'] : 'Unknown';
+        header("HTTP/1.1 $exitCode $status");
         header("Content-type: $contentType");
 
         return true;

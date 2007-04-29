@@ -8,7 +8,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: plugin.php,v 1.2 2007-03-23 14:11:11 diddledan Exp $
+ *Revision info: $Id: plugin.php,v 1.3 2007-04-29 20:37:31 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,7 @@ class [[%(ask0:Plugin Name)]] implements iPlugin {
     protected $scope;
     protected $crimp;
 
-    function __construct(&$crimp, $scope = SCOPE_ROOT, $pluginNum = false, $deferred = false) {
+    function __construct(&$crimp, $scope = SCOPE_CRIMP, $pluginNum = false, $deferred = false) {
         $this->deferred = $deferred;
         $this->pluginNum = $pluginNum;
         $this->scope = $scope;

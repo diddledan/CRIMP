@@ -2,7 +2,7 @@
 <!-- the order of plugins is important. they are executed in the same order defined here,
     starting with the plugins defined in the requested section, followed by the globals -->
 <crimp>
-    <!-- root namespace declarations -->
+    <!-- root namespace declarations - these are GLOBAL to ALL of CRIMP -->
     <debug>
         <switch>on</switch>
         <mode>inline</mode><!-- 'inline' or 'javascript' -->
@@ -18,54 +18,40 @@
     <errordir>./errordocs</errordir>
     <defaultlanguage>en</defaultlanguage>
     <template>./templates/default-crimp.html</template>
-    <plugin>
-        <name>breadCrumbs</name>
+    <plugin name="breadCrumbs">
         <position>top</position><!-- either 'top', 'bottom' or 'both' -->
     </plugin>
-    <plugin>
-        <name>perl</name>
+    <plugin name="perl">
         <plugin>Snow</plugin>
         <parameter>on</parameter>
         <defer>no</defer>
     </plugin>
-    <plugin>
-        <name>perl</name>
+    <plugin name="perl">
         <plugin>PageVote</plugin>
         <parameter>Default</parameter>
         <defer>no</defer>
     </plugin>
-    <plugin>
-        <name>perl</name>
+    <plugin name="perl">
         <plugin>ButtonBar</plugin>
         <parameter>Default</parameter>
         <defer>yes</defer>
     </plugin>
     <!-- end root namespace declarations -->
 
-    <!-- GLOBALS super section -->
-    <globals>
-    </globals>
-
     <!-- below here goes the individual section declarations -->
-    <section>
-        <name>/</name>
-        <plugin>
-            <name>contentDirectory</name>
+    <section name="/">
+        <plugin name="contentDirectory">
             <directory>./docs</directory>
         </plugin>
-        <plugin>
+        <plugin name="fileList">
             <!-- fileList relies upon there being a contentDirectory plugin
-                defined for the same section, or the globals special section,
-                or in the root namespace -->
-            <name>fileList</name>
+                defined for the same section or in the root namespace -->
             <orientation>horizontal</orientation>
         </plugin>
     </section>
 
-    <section>
-        <name>/blog</name>
-        <plugin>
-            <name>perl</name>
+    <section name="/blog">
+        <plugin name="perl">
             <plugin>FlatBlog</plugin>
             <parameter>flatblog.example.html</parameter>
             <defer>no</defer>

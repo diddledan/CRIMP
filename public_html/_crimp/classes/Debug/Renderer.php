@@ -10,7 +10,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: Renderer.php,v 1.4 2007-03-23 14:11:12 diddledan Exp $
+ *Revision info: $Id: Renderer.php,v 1.5 2007-04-29 20:37:32 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,7 @@
  *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 require_once 'Debug/Renderer/Common.php';
+
 /**
  * A loader class for the renderers.
  *
@@ -38,8 +39,10 @@ require_once 'Debug/Renderer/Common.php';
  * @package PHP_Debug
  * @filesource
  */
-class Debug_Renderer
+
+class PHP_Debug_Renderer
 {
+
     /**
      * Attempt to return a concrete Debug_Renderer instance.
      *
@@ -49,18 +52,20 @@ class Debug_Renderer
      */
     static function factory($debugObject, $options)
     {
-        //Debug::dumpVar($options, "Debug_Renderer::options");
-        $className = 'Debug_Renderer_' . $options['DEBUG_render_mode'];
-        include_once 'Debug/Renderer/'. $options['DEBUG_render_mode']. '.php';
+        $className = 'PHP_Debug_Renderer_' . $options['DEBUG_render_mode'];
+        $classPath = 'Debug/Renderer/'. $options['DEBUG_render_mode']. '.php';
+        include_once $classPath;
+
         if (class_exists($className)) {
             $obj = new $className($debugObject, $options);
         } else {
             include_once 'PEAR.php';
-            PEAR::raiseError('Debug: renderer "' . $options['DEBUG_render_mode'] . '" not found', TRUE);
+            PEAR::raiseError('PHP_Debug: renderer "' . $options['DEBUG_render_mode'] . '" not found', TRUE);
             return NULL;
         }
         
         return $obj;
     }
 }
+
 ?>

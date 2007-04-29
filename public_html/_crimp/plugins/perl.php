@@ -7,7 +7,7 @@
  *                  Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                  HomePage:      http://crimp.sf.net/
  *
- *Revision info: $Id: perl.php,v 1.10 2007-03-23 14:11:14 diddledan Exp $
+ *Revision info: $Id: perl.php,v 1.11 2007-04-29 20:37:33 diddledan Exp $
  *
  *This library is free software; you can redistribute it and/or
  *modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ class perl implements iPlugin {
     protected $scope;
     protected $crimp;
 
-    function __construct(&$crimp, $scope = SCOPE_ROOT, $pluginNum = false, $deferred = false) {
+    function __construct(&$crimp, $scope = SCOPE_CRIMP, $pluginNum = false, $deferred = false) {
         $this->deferred = $deferred;
         $this->pluginNum = $pluginNum;
         $this->scope = $scope;
@@ -89,7 +89,7 @@ class perl implements iPlugin {
             'USER_AGENT'        => USER_AGENT,
             'HTTP_REQUEST'      => HTTP_REQUEST,
             'CONTENT_LENGTH'    => strlen($postquery),
-            'DOCUMENT_ROOT'     => $_SERVER['DOCUMENT_ROOT'],
+            'DOCUMENT_ROOT'     => (($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : CRIMP_HOME),
         );
 
         /**
