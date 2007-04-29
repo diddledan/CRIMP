@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.14 2007-04-29 20:37:32 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.15 2007-04-29 23:22:27 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -431,11 +431,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
              */
             if ( $this->debugMode == 'javascript' )
                 $this->addHeader('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-hidden.css" />');
-            $this->addHeader('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug.css" />');
-            $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/prototype/prototype.js"></script>');
-            $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/moo/moo.fx.js"></script>');
-            $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/moo/moo.fx.pack.js"></script>');
-            $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/debug.js"></script>');
+            $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/mootools.js" />');
             
             /**
              *make sure the _output var is filled
@@ -477,7 +473,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.14 2007-04-29 20:37:32 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.15 2007-04-29 23:22:27 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 

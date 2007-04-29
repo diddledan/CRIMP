@@ -7,10 +7,10 @@
 
 <body>
 <h1>SSH Install</h1>
-If you have SSH access to your webserver, then installing CRIMP over
+<p>If you have SSH access to your webserver, then installing CRIMP over
 SSH is the prefered method. Windows
 users can use a SSH client (Example: <a
- href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/download.html">Putty</a> which includes pscp.exe) and linux users can use their console.<br />
+ href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/download.html">Putty</a> which includes pscp.exe) and linux users can use their console.</p>
 <h2>Upload CRIMP and MD5 sum</h2>
 <h3>Windows</h3>
 <p>If you have downloaded CRIMP and its MD5 sum onto your local windows
@@ -18,64 +18,56 @@ users can use a SSH client (Example: <a
   files.<br />
   (Start - Run : then type 'cmd' for Windows XP and NT or type 'command'
   for Windows 98/98se/ME)<br />
-  Change to your Putty install directory by typing:</p>
-<table width="100%" border="0" cellspacing="10" cellpadding="10">
-  <tr>
-    <td bgcolor="#EEEEEE"><pre>cd [path\to\putty]
-pscp [path\to\Crimp-version.tar.bz2] [username]@[server-host.com]:[webserver root]
-pscp [path\to\Crimp-version.tar.bz2.sum] [username]@[server-host.com]:[webserver root]</pre>
-    </td>
-  </tr>
-</table>
-<p>Then open your SSH client and connect to your server host.</p>
+  Change to your Putty install directory by typing:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+cd [path\to\putty]
+pscp [path\to\Crimp-version.tar.bz2] [username]@[server-host.com]:[/path/to/webroot]
+pscp [path\to\Crimp-version.tar.bz2.sum] [username]@[server-host.com]:[/path/to/webroot]
+</pre>
+Now open your SSH client and connect to your server host.</p>
 <h3>Linux </h3>
 <p>If you have downloaded CRIMP and its MD5 sum onto your local linux
   machine, you can use scp in your console to upload the
   files.</p>
-<table width="100%" border="0" cellspacing="10" cellpadding="10">
-  <tr>
-    <td bgcolor="#EEEEEE"><pre><span class="input">scp [server-host]:~/ ~/[Crimp-version.tar.bz2]
-</span><span class="input">scp [server-host]:~/ ~/[</span>Crimp-version.tar.bz2.sum<span
- class="input">]
-</span><span class="input">ssh [username]@[server-host]</span></pre>
-    </td>
-  </tr>
-</table>
-<h2>SSH Client<span style="font-family: monospace;"></span></h2>
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+scp [server-host]:[/path/to/webroot] [/path/to/Crimp-version.tar.bz2]
+scp [server-host]:[/path/to/webroot] [/path/to/Crimp-version.tar.bz2.sum]
+ssh [username]@[server-host]
+</pre>
+
+<h2>SSH Client</h2>
 <p>Once logged into your server host over SSH, you can run the following
-  commands to install CRIMP:</p>
-<table width="100%" border="0" cellspacing="10" cellpadding="10">
-  <tr>
-    <td bgcolor="#EEEEEE"><pre>cd ~/
+  commands to install CRIMP:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+cd [/path/to/webroot]
 # MD5 check the module for consistancy
 md5sum -c [Crimp-version].tar.bz2.sum
 # If the check returns OK then unpack the tarball
 tar -xjpvf [Crimp-version].tar.bz2
 # Create the crimp.ini file
-mv cgi-bin/crimp.ini.example cgi-bin/crimp.ini</pre>
-    </td>
-  </tr>
-</table>
+cp cgi-bin/crimp.ini.example cgi-bin/crimp.ini
+</pre>
+
 <h2>Initial setup</h2>
-<p>Point your browser to <span style="text-decoration: underline;">http://your-web-server/cgi-bin/index.pl</span><br />
-    <br />
-  If this fails, then make sure the first line in 'cgi-bin/index.pl' is
-pointing to your perl executable.</p>
-<table width="100%" border="0" cellspacing="10" cellpadding="10">
-  <tr>
-    <td bgcolor="#EEEEEE"><pre>#!/usr/bin/perl
-# or replace to point to the correct perl location </pre>
-    </td>
-  </tr>
-</table>
-<p>Or create a symbolic link instead:</p>
-<table width="100%" border="0" cellspacing="10" cellpadding="10">
-  <tr>
-    <td bgcolor="#EEEEEE"><pre>cd ~ 
+<p>Point your browser to <span style="color: #00f; text-decoration: underline;">http://your-web-server/cgi-bin/index.pl</span></p>
+<p>If this fails, then make sure the first line in 'cgi-bin/index.pl' is
+pointing to your perl executable:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+#!/usr/bin/perl
+# or replace to point to the correct perl location
+</pre>
+Or create a symbolic link instead:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+cd [/path/to/webroot]
 ln -s /usr/bin/perl cgi-bin/perl</pre>
-    </td>
-  </tr>
-</table>
+</p>
 <p>CRIMP is now installed and ready for <a href="../configuration/index.html">configuration</a>.</p>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">
+<img alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png" />
+</a>
+<br />This 
+<span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/Text" rel="dc:type">work</span> is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England & Wales License</a>.
 </body>
 </html>
