@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.17 2007-04-30 00:03:57 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.18 2007-04-30 00:09:36 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -39,7 +39,7 @@ define('FAIL',                      PHP_DEBUGLINE_FAIL);
  */
 class Crimp {
     protected $htmlheaders = array(
-        '<script type="text/javascript" src="/crimp_assets/javascript/mootools.js" />',
+        '<script type="text/javascript" src="/crimp_assets/js/mootools.js" />',
         '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-css/html_div.css" />',
         '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-css/html_table.css" />',
     );
@@ -479,7 +479,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.17 2007-04-30 00:03:57 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.18 2007-04-30 00:09:36 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
