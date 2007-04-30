@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.15 2007-04-29 23:22:27 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.16 2007-04-30 00:01:57 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -38,6 +38,12 @@ define('FAIL',                      PHP_DEBUGLINE_FAIL);
  *CRIMP's main class
  */
 class Crimp {
+    protected $htmlheaders = array(
+        '<script type="text/javascript" src="/crimp_assets/javascript/mootools.js" />',
+        '<link rel="stylesheet" type"=text/css" href="/crimp_assets/debug-css/html_div.css" />',
+        '<link rel="stylesheet" type"=text/css" href="/crimp_assets/debug-css/html_table.css" />',
+    );
+    
     /**
      *this is for all the content that will be sent to the user's browser
      *upon completion of execution of all plugins.
@@ -431,7 +437,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
              */
             if ( $this->debugMode == 'javascript' )
                 $this->addHeader('<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-hidden.css" />');
-            $this->addHeader('<script type="text/javascript" src="/crimp_assets/javascript/mootools.js" />');
+            foreach ($this->htmlheaders as $header) $this->addHeader($header);
             
             /**
              *make sure the _output var is filled
@@ -473,7 +479,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             /**
              *CHEAT CODES
              */
-            $ver = '$Id: crimp.php,v 1.15 2007-04-29 23:22:27 diddledan Exp $';
+            $ver = '$Id: crimp.php,v 1.16 2007-04-30 00:01:57 diddledan Exp $';
             $this->_output = preg_replace('/<!--VERSION-->/i', $ver, $this->_output);
         }
 
