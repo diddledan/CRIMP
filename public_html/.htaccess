@@ -1,12 +1,10 @@
-# USE REWRITE ENGINE INSTEAD OF THE ERRORDOCUMENT DIRECTIVES #
-#Options -Indexes
-#ErrorDocument 403 /cgi-bin/index.pl
-#ErrorDocument 404 /cgi-bin/index.pl
 
 <ifModule mod_rewrite.c>
-rewriteengine on
 
-RewriteRule ^/_crimp /_crimp/index.php?crimpq=/ [L]
+RewriteEngine on
+
+RewriteRule ^index.php$ _crimp/index.php?crimpq=%2F [L,QSA]
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ /_crimp/index.php?crimpq=$1 [L,QSA]
+RewriteRule ^(.+)$ _crimp/index.php?crimpq=$1 [L,QSA]
+
 </ifModule>
