@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.20 2007-04-30 23:15:52 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.21 2007-04-30 23:37:50 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -170,7 +170,7 @@ class Crimp {
         $this->debug = new PHP_Debug;
         $this->parseConf();
         
-        $this->defaultHTML          = "$defaultHTMLHeader\n$defaultHTMLContent\n$defaultHTMLFooter";
+        $this->defaultHTML          = implode("\n", array($this->defaultHTMLHeader,$this->defaultHTMLContent,$this->defaultHTMLFooter));
         
         $this->_output              = $this->defaultHTMLContent;
         $this->remoteHost           = $_ENV['REMOTE_ADDR'];
@@ -178,8 +178,10 @@ class Crimp {
         $this->serverSoftware       = $_ENV['SERVER_SOFTWARE'];
         $this->serverProtocol       = $_ENV['SERVER_PROTOCOL'];
         $this->userAgent            = $_ENV['HTTP_USER_AGENT'];
-        $this->_HTTPRequest         = $_GET['crimpq'];
-        unset($_GET['crimpq']);
+        if (isset($_GET['crimpq'])) {
+            $this->_HTTPRequest     = $_GET['crimpq'];
+            unset($_GET['crimpq']);
+        } else $this->_HTTPRequest  = '/';
         
         define('REMOTE_HOST',       $this->remoteHost);
         define('SERVER_NAME',       $this->serverName);
@@ -511,7 +513,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                 /**
                  *CHEAT CODES
                  */
-                $version = '$Id: crimp.php,v 1.20 2007-04-30 23:15:52 diddledan Exp $';
+                $version = '$Id: crimp.php,v 1.21 2007-04-30 23:37:50 diddledan Exp $';
                 $this->_output = preg_replace('/<!--VERSION-->/i', $version, $this->_output);
             }
             
