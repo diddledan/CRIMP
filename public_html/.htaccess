@@ -1,10 +1,5 @@
 
-<ifModule mod_rewrite.c>
-
 RewriteEngine on
 
-RewriteRule ^index.php$ _crimp/index.php?crimpq=%2F [L,QSA]
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.+)$ _crimp/index.php?crimpq=$1 [L,QSA]
-
-</ifModule>
+RewriteRule ^(.+)$ index.php?crimpq=$1 [L,QSA]
