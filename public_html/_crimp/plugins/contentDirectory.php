@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: contentDirectory.php,v 1.7 2007-04-29 23:22:31 diddledan Exp $
+ * Revision info: $Id: contentDirectory.php,v 1.8 2007-04-30 23:15:54 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -29,7 +29,7 @@ class contentDirectory implements iPlugin {
 
         $pluginName = 'contentDirectory';
 
-        if ( !($config = $crimp->Config('directory', $this->scope, 'contentDirectory')) ) {
+        if ( !($config = $crimp->Config('directory', $this->scope, $pluginName)) ) {
             $dbg->addDebug('Please specify a <directory /> setting in the config file', WARN);
             return;
         }
@@ -48,7 +48,7 @@ class contentDirectory implements iPlugin {
         $path = preg_replace('|\.\.|', '', $path);
         $dbg->addDebug("Requested document: $path", PASS);
 
-        if ( !$path ) $path = '/index.html';
+        if ( !$path ) $path = 'index.html';
 
         $requested = "$config/$path";
 

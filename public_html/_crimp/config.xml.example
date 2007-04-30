@@ -3,10 +3,7 @@
     starting with the plugins defined in the requested section, followed by the globals -->
 <crimp>
     <!-- root namespace declarations - these are GLOBAL to ALL of CRIMP -->
-    <debug>
-        <switch>on</switch>
-        <mode>inline</mode><!-- 'inline' or 'javascript' -->
-    </debug>
+    <debug>on</debug><!-- 'on' or 'off'. can appear in a <section> -->
     <!-- this ADDs to the title set in the template you choose, so best to
     either use this, and leave the template with an empty <title></title> or
     set the title in the <title> tags inside your template and leave this blank
@@ -14,10 +11,10 @@
     <sitetitle></sitetitle>
     <!--<titleorder>forward</titleorder>-->
     <!--<titleseparator> - </titleseparator>-->
-    <vardir>./var</vardir>
-    <errordir>./errordocs</errordir>
+    <vardir>./_crimp/var</vardir>
+    <errordir>./_crimp/errordocs</errordir>
     <defaultlanguage>en</defaultlanguage>
-    <template>./templates/default-crimp.html</template>
+    <template>./_crimp/templates/default-crimp.html</template>
     <plugin name="breadCrumbs">
         <position>top</position><!-- either 'top', 'bottom' or 'both' -->
     </plugin>
@@ -41,7 +38,7 @@
     <!-- below here goes the individual section declarations -->
     <section name="/">
         <plugin name="contentDirectory">
-            <directory>./docs</directory>
+            <directory>./crimp/docs</directory>
         </plugin>
         <plugin name="fileList">
             <!-- fileList relies upon there being a contentDirectory plugin
