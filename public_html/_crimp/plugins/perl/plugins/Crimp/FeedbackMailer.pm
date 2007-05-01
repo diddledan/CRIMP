@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: FeedbackMailer.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $
+# Revision info: $Id: FeedbackMailer.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@ package Crimp::FeedbackMailer;
 sub new {
 	my ($class, $crimp) = @_;
 	my $self = {
-		id => q$Id: FeedbackMailer.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $,
+		id => q$Id: FeedbackMailer.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $,
 		crimp => $crimp,
 		sendmail => '/usr/sbin/sendmail -t',
 		errImg => '<img src="/crimp_assets/pics/error.gif" alt="error" title="error" style="vertical-align: middle;" />',

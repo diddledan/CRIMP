@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: fileList.php,v 1.7 2007-04-29 23:22:31 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.1 2007-05-01 20:17:31 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */

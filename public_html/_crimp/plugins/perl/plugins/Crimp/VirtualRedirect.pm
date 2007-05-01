@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: VirtualRedirect.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $
+# Revision info: $Id: VirtualRedirect.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $
 #
 # This file is Licensed under the LGPL.
 
@@ -13,7 +13,7 @@ package Crimp::VirtualRedirect;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: VirtualRedirect.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $, crimp => $crimp, };
+	my $self = { id => q$Id: VirtualRedirect.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $, crimp => $crimp, };
 	bless $self, $class;
 }
 

@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: Snow.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $
+# Revision info: $Id: Snow.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $
 #
 # This file is Licensed under the LGPL.
 
@@ -27,7 +27,7 @@ sub new {
   # this variable will also hold our crimp object, so that any crimp subs or variables can be called
   # with $varname->{crimp}->sub(); or $varname->{crimp}->{variable};. we call this $self for
   # decriptiveness sake as it referrs to this module.
-  my $self = { id => q$Id: Snow.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $, crimp => $crimp, };
+  my $self = { id => q$Id: Snow.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $, crimp => $crimp, };
   bless $self, $class;
   #the bless command makes the variable part of the namespace.
 }
