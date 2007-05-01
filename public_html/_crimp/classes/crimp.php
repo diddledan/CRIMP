@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.22 2007-05-01 17:37:01 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.23 2007-05-01 19:48:27 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -162,6 +162,11 @@ class Crimp {
     );
     
     /**
+     *are we ajaxed of not?
+     */
+    public $ajax = false;
+    
+    /**
      *constructor
      */
     function __construct() {
@@ -173,13 +178,18 @@ class Crimp {
         $this->serverSoftware       = $_ENV['SERVER_SOFTWARE'];
         $this->serverProtocol       = $_ENV['SERVER_PROTOCOL'];
         $this->userAgent            = $_ENV['HTTP_USER_AGENT'];
-        if (isset($_POST['crimpPostback']) && isset($_POST['crimpURL'])) {
-            $this->_HTTPRequest     = $_POST['crimpURL'];
-        } else if (isset($_GET['crimpq'])) {
-            $this->_HTTPRequest     = $_GET['crimpq'];
-        } else $this->_HTTPRequest  = '/';
         
+        if (isset($_GET['crimpq'])) {
+            $this->_HTTPRequest = $_GET['crimpq'];
+        }
         unset($_GET['crimpq']);
+        
+        if (isset($_POST['crimpPostback']) && isset($_POST['crimpURL']) && ($_POST['crimpURL'] != '')) {
+            $this->_HTTPRequest = $_POST['crimpURL'];
+            $this->ajax = true;
+        }
+        
+        if (!$this->_HTTPRequest) $this->_HTTPRequest = '/';
         
         $me = $_SERVER['PHP_SELF'];
         
@@ -189,7 +199,7 @@ class Crimp {
         $this->contentHeader = <<<contentheader
 <form id='crimp' action='$me'>
 <input type='hidden' name='crimpPostback' value='true' />
-<input type='hidden' id='crimpURL' name='crimpURL' value='/' />
+<input type='hidden' id='crimpURL' name='crimpURL' value='' />
 <span id='crimpPageContent'>
 contentheader;
         
@@ -489,7 +499,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
              */
             if ($doDeferred && is_array($this->deferredPlugins)) $this->executeDeferredPlugins();
             
-            if (isset($_POST['crimpPostback'])) {
+            if ($this->ajax) {
                 /**
                  * Note001: exit code fixed to 200 for ajax. This is due to the
                  * fact that we need the javascript engine to work with the
@@ -528,7 +538,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                 /**
                  *CHEAT CODES
                  */
-                $version = '$Id: crimp.php,v 1.22 2007-05-01 17:37:01 diddledan Exp $';
+                $version = '$Id: crimp.php,v 1.23 2007-05-01 19:48:27 diddledan Exp $';
                 $this->_output = preg_replace('/<!--VERSION-->/i', $version, $this->_output);
             }
             
