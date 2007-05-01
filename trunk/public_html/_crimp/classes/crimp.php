@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.21 2007-04-30 23:37:50 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.22 2007-05-01 17:37:01 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -44,7 +44,6 @@ class Crimp {
     protected $htmlheaders = array(
         '<script type="text/javascript" src="/crimp_assets/js/mootools.js" />',
         '<script type="text/javascript" src="/crimp_assets/js/html_div.js" />',
-        '<script type="text/javascript" src="/crimp_assets/js/ajax-click-handler.js" defer="true" />',
         '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-css/html_div.css" />',
         '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-css/html_table.css" />',
     );
@@ -126,19 +125,18 @@ class Crimp {
 <head>
 <title></title>
 </head>
-<body>
-<form id="crimp">
-<input type="hidden" name="crimpPostback" value="true" />
-<input type="hidden" id="crimpURL" name="crimpURL" value="/" />
-<span id="crimpPageContent">';
+<body>';
     /**
      *default footer
      */
-    public $defaultHTMLFooter = '
-</span>
-</form>
-</body>
-</html>';
+    public $defaultHTMLFooter = '</body></html>';
+    
+    /**
+     * default form headers and footers appended to every non-ajaxed page
+     */
+    public $contentHeader = '';
+    public $contentFooter = '</span></form><script type="text/javascript" src="/crimp_assets/js/ajax-click-handler.js" />';
+    
     /**
      *default page content
      */
@@ -170,18 +168,34 @@ class Crimp {
         $this->debug = new PHP_Debug;
         $this->parseConf();
         
-        $this->defaultHTML          = implode("\n", array($this->defaultHTMLHeader,$this->defaultHTMLContent,$this->defaultHTMLFooter));
-        
-        $this->_output              = $this->defaultHTMLContent;
         $this->remoteHost           = $_ENV['REMOTE_ADDR'];
         $this->serverName           = $_ENV['SERVER_NAME'];
         $this->serverSoftware       = $_ENV['SERVER_SOFTWARE'];
         $this->serverProtocol       = $_ENV['SERVER_PROTOCOL'];
         $this->userAgent            = $_ENV['HTTP_USER_AGENT'];
-        if (isset($_GET['crimpq'])) {
+        if (isset($_POST['crimpPostback']) && isset($_POST['crimpURL'])) {
+            $this->_HTTPRequest     = $_POST['crimpURL'];
+        } else if (isset($_GET['crimpq'])) {
             $this->_HTTPRequest     = $_GET['crimpq'];
-            unset($_GET['crimpq']);
         } else $this->_HTTPRequest  = '/';
+        
+        unset($_GET['crimpq']);
+        
+        $me = $_SERVER['PHP_SELF'];
+        
+        /**
+         * apply a form into the contentHeader with an action of the root index.php file
+         */
+        $this->contentHeader = <<<contentheader
+<form id='crimp' action='$me'>
+<input type='hidden' name='crimpPostback' value='true' />
+<input type='hidden' id='crimpURL' name='crimpURL' value='/' />
+<span id='crimpPageContent'>
+contentheader;
+        
+        $this->defaultHTML          = implode("\n", array($this->defaultHTMLHeader,$this->contentHeader,$this->defaultHTMLContent,$this->contentFooter,$this->defaultHTMLFooter));
+        
+        $this->_output              = $this->defaultHTMLContent;
         
         define('REMOTE_HOST',       $this->remoteHost);
         define('SERVER_NAME',       $this->serverName);
@@ -380,7 +394,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
 
         $this->addContent($content, true);
         $this->setTitle($title, true);
-        $this->_exitCode = $errorCode;
+        $this->exitCode($errorCode);
         $this->sendDocument(false);
     }
 
@@ -470,6 +484,11 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                 if ( $exitCode == HTTP_EXIT_NO_CONTENT ) $exitCode = HTTP_EXIT_OK;
             }
             
+            /**
+             *do the deferred plugin thing now that the template has been applied
+             */
+            if ($doDeferred && is_array($this->deferredPlugins)) $this->executeDeferredPlugins();
+            
             if (isset($_POST['crimpPostback'])) {
                 /**
                  * Note001: exit code fixed to 200 for ajax. This is due to the
@@ -479,17 +498,13 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                  * thinking that it is a server error page, and not what it's
                  * expecting.
                  */
-                $this->exitCode(200);
+                $this->debug->add('Forcing exit code to 200 for ajax request', PASS);
+                $exitCode = 200;
             } else {
                 /**
                  *apply the template
                  */
                 $this->applyTemplate();
-                
-                /**
-                 *do the deferred plugin thing now that the template has been applied
-                 */
-                if ($doDeferred && is_array($this->deferredPlugins)) $this->executeDeferredPlugins();
                 
                 /**
                  *set the title tags
@@ -513,7 +528,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                 /**
                  *CHEAT CODES
                  */
-                $version = '$Id: crimp.php,v 1.21 2007-04-30 23:37:50 diddledan Exp $';
+                $version = '$Id: crimp.php,v 1.22 2007-05-01 17:37:01 diddledan Exp $';
                 $this->_output = preg_replace('/<!--VERSION-->/i', $version, $this->_output);
             }
             
@@ -577,7 +592,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
             return;
         }
         
-	$this->_output = str_replace('@@PAGE_CONTENT@@', $this->_output, $template, $one = 1);
+	$this->_output = str_replace('@@PAGE_CONTENT@@', implode("\n", array($this->contentHeader,$this->_output,$this->contentFooter)), $template, $one = 1);
     }
 
     ##### HELPER FUNCTIONS #####
