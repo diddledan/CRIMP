@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: MosixStatus.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $
+# Revision info: $Id: MosixStatus.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $
 #
 # This file is Licensed under the LGPL.
 
@@ -15,7 +15,7 @@ use Fcntl;
 
 sub new {
   my $class = shift;my $crimp = shift;
-  my $self = bless {crimp=>$crimp, id=>q$Id: MosixStatus.pm,v 1.4 2007-04-29 23:22:32 diddledan Exp $}, $class;
+  my $self = bless {crimp=>$crimp, id=>q$Id: MosixStatus.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $}, $class;
   return $self;
 }
 

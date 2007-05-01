@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: FlatBlog.pm,v 1.9 2007-04-29 23:22:32 diddledan Exp $
+# Revision info: $Id: FlatBlog.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $
 #
 # This file is Licensed under the LGPL.
 
@@ -16,7 +16,7 @@ use Fcntl;
 
 sub new {
 	my ($class, $crimp) = @_;
-	my $self = { id => q$Id: FlatBlog.pm,v 1.9 2007-04-29 23:22:32 diddledan Exp $, crimp => $crimp, MenuList => [] };
+	my $self = { id => q$Id: FlatBlog.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $, crimp => $crimp, MenuList => [] };
 	bless $self, $class;
 }
 

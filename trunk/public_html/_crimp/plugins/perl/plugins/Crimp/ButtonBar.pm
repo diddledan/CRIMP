@@ -5,7 +5,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: ButtonBar.pm,v 1.6 2007-04-29 23:22:32 diddledan Exp $
+# Revision info: $Id: ButtonBar.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@ package Crimp::ButtonBar;
 sub new {
 	my $class = shift;
 	my $crimp = shift;
-	my $self = { id => q$Id: ButtonBar.pm,v 1.6 2007-04-29 23:22:32 diddledan Exp $, crimp => $crimp };
+	my $self = { id => q$Id: ButtonBar.pm,v 1.1 2007-05-01 20:17:31 diddledan Exp $, crimp => $crimp };
 	bless $self, $class;
 }
 
