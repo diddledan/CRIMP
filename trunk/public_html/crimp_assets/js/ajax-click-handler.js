@@ -15,5 +15,5 @@ for (i = 0; i < links.length; i++) {
 
 function ajaxClickHandler(url) {
     $('crimpURL').value = url;
-    $('crimp').send({update: $('crimpPageContent'), onComplete: alert(url+": loading complete")});
+    $('crimp').send({update: $('crimpPageContent')});
 }
