@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.23 2007-05-01 19:48:27 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.24 2007-05-01 20:24:27 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -420,7 +420,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
          */
         foreach ( $this->deferredPlugins as $plugin ) {
             $this->pluginSystem->execute($plugin['name'], $plugin['num'],
-                                         CRIMP_HOME."/plugins/{$plugin['name']}.php",
+                                         CRIMP_HOME."/plugins/{$plugin['name']}/plugin.php",
                                          $plugin['scope'], true);
         }
     }
@@ -466,7 +466,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                 if ( !preg_match('/^[\/]*\.\.[\/]+.*$/', $plugName) ) {
                     if ( !$this->pluginLock( $plugName ) ) {
                         $this->pluginSystem->execute($plugName, $this->executedPlugins[$scope][$plugName]++,
-                                                     CRIMP_HOME."/plugins/$plugName.php",
+                                                     CRIMP_HOME."/plugins/$plugName/plugin.php",
                                                      $scope, false);
                     }
                 } else $this->debug->addDebug("'$plugName' is a malformed plugin name", WARN);
@@ -538,7 +538,7 @@ Requested Document: {$this->_HTTPRequest}", PASS);
                 /**
                  *CHEAT CODES
                  */
-                $version = '$Id: crimp.php,v 1.23 2007-05-01 19:48:27 diddledan Exp $';
+                $version = '$Id: crimp.php,v 1.24 2007-05-01 20:24:27 diddledan Exp $';
                 $this->_output = preg_replace('/<!--VERSION-->/i', $version, $this->_output);
             }
             
