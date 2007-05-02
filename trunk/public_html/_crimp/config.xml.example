@@ -38,7 +38,7 @@
     <!-- below here goes the individual section declarations -->
     <section name="/">
         <plugin name="contentDirectory">
-            <directory>./crimp/docs</directory>
+            <directory>./_crimp/docs</directory>
         </plugin>
         <plugin name="fileList">
             <!-- fileList relies upon there being a contentDirectory plugin
