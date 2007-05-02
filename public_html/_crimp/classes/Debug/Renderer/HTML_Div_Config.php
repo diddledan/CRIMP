@@ -27,7 +27,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: HTML_Div_Config.php,v 1.1 2007-04-29 20:37:32 diddledan Exp $
+ * Revision info: $Id: HTML_Div_Config.php,v 1.2 2007-05-02 15:26:56 diddledan Exp $
  *
  * This file is released under the LGPL License under kind permission from Vernet Loïc.
  */
@@ -109,9 +109,9 @@ class PHP_Debug_Renderer_HTML_Div_Config
          * images
          */     
         self::$options['HTML_DIV_images_path'] = '/crimp_assets/images'; 
-        self::$options['HTML_DIV_image_info'] = '/crimp_assets/info.png'; 
-        self::$options['HTML_DIV_image_warning'] = '/crimp_assets/warning.png'; 
-        self::$options['HTML_DIV_image_error'] = '/crimp_assets/error.png'; 
+        self::$options['HTML_DIV_image_info'] = 'info.png'; 
+        self::$options['HTML_DIV_image_warning'] = 'warning.png'; 
+        self::$options['HTML_DIV_image_error'] = 'error.png'; 
 
         /** 
          * css path
