@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: plugin.php,v 1.7 2007-04-29 23:22:27 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.8 2007-05-29 23:20:31 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -30,23 +30,36 @@ class crimpPlugins {
             return;
         }
 
-        $newplugin = new $plugName( $this->crimp,
-                                    $scope,
-                                    $pluginNum,
-                                    $deferred );
+        $newplugin = new $plugName( );
         if (!$newplugin) {
             $this->crimp->debug->addDebug("Failed to instantiate an object for plugin '$plugName' class", WARN);
             return;
         }
+        $newplugin->setup( $this->crimp,
+                           $scope,
+                           $pluginNum,
+                           $deferred );
         $this->crimp->debug->addDebug("Calling '$plugName' plugin", PASS);
         $newplugin->execute();
     }
 }
 
 /**
- *this interface must be supported by all would-be plugins
+ *this class must be extended by all would-be plugins
  */
-interface iPlugin {
-    public function execute();
+abstract class Plugin {
+    protected $Crimp;
+    protected $ConfigurationScope;
+    protected $ExecutionCount;
+    protected $IsDeferred;
+    
+    public function setup(&$crimpObj, $scope, $num, $isDeferred) {
+        $this->Crimp = &$crimpObj;
+        $this->ConfigurationScope = $scope;
+        $this->ExecutionCount = $num;
+        $this->IsDeferred = $isDeferred;
+    }
+    
+    abstract public function execute();
 }
 ?>

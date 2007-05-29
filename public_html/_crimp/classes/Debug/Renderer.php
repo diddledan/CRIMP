@@ -27,9 +27,9 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: Renderer.php,v 1.6 2007-04-29 23:22:27 diddledan Exp $
+ * Revision info: $Id: Renderer.php,v 1.7 2007-05-29 23:20:31 diddledan Exp $
  *
- * This file is released under the LGPL License under kind permission from Vernet Loïc.
+ * This file is released under the LGPL License under kind permission from Vernet LoÃ¯c.
  */
 
 require_once 'Debug/Renderer/Common.php';

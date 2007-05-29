@@ -7,31 +7,20 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: plugin.php,v 1.1 2007-05-01 20:17:31 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.2 2007-05-29 23:19:02 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
 
-class perl implements iPlugin {
-    protected $deferred;
-    protected $pluginNum;
-    protected $scope;
-    protected $crimp;
-
-    function __construct(&$crimp, $scope = SCOPE_CRIMP, $pluginNum = false, $deferred = false) {
-        $this->deferred = $deferred;
-        $this->pluginNum = $pluginNum;
-        $this->scope = $scope;
-        $this->crimp = &$crimp;
-    }
-
+class perl extends Plugin {
     public function execute() {
-        $crimp = &$this->crimp;
+        $crimp = &$this->Crimp;
         $dbg = &$crimp->debug;
-        $pluginNum = $this->pluginNum;
+        $pluginNum = $this->ExecutionCount;
         $pluginName = 'perl';
-
-        if ( !($config = $crimp->Config('plugin', $this->scope, $pluginName, $pluginNum)) ) {
+        $scope = $this->ConfigurationScope;
+        
+        if ( !($config = $crimp->Config('plugin', $scope, $pluginName, $pluginNum)) ) {
             $dbg->addDebug('You need to set a "plugin" key in the config file for this plugin', WARN);
             return;
         }
@@ -39,22 +28,22 @@ class perl implements iPlugin {
             $dbg->addDebug("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'", WARN);
             return;
         }
-
+        
         /**
          *deferral check
          */
-        $defer = $crimp->Config('defer', $this->scope, $pluginName, $pluginNum);
-        if ( $defer == 'yes' &&  !$this->deferred ) {
-            $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
+        $defer = $crimp->Config('defer', $scope, $pluginName, $pluginNum);
+        if ( $defer == 'yes' &&  !$this->IsDeferred ) {
+            $crimp->setDeferral($pluginName, $pluginNum, $scope);
             return;
         }
-
+        
         $descriptorspec = array(
             0 => array('pipe', 'r'), // client's stdin
             1 => array('pipe', 'w'), // client's stdout
             /*2 => array('file', '/tmp/stderr', 'a'), // client's stderr*/
         );
-
+        
         $querystring = $postquery = $cookies = '';
         foreach($_GET as $key => $value)
             $querystring .= ($querystring) ? "&$key=$value" : "$key=$value";
@@ -62,7 +51,7 @@ class perl implements iPlugin {
             $postquery .= ($postquery) ? "&$key=$value" : "$key=$value";
         foreach($_COOKIE as $key => $value)
             $cookies .= ($cookies) ? "&$key=$value" : "$key=$value";
-
+        
         $env = array(
             'USERCONFIG'        => $crimp->userConfig(),
             'PLUGIN'            => $config,
@@ -79,7 +68,7 @@ class perl implements iPlugin {
             'CONTENT_LENGTH'    => strlen($postquery),
             'DOCUMENT_ROOT'     => (($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : CRIMP_HOME),
         );
-
+        
         /**
          *the following three 'if' constructs check if the path given is
          *relative or not.
@@ -100,16 +89,16 @@ class perl implements iPlugin {
         if (strpos(ERROR_DIR, './') === 0) $env['ERROR_DIR'] = '../.'.ERROR_DIR;
         elseif (strpos(ERROR_DIR, '../') === 0) $env['ERROR_DIR'] = '../../'.ERROR_DIR;
         else $env['ERROR_DIR'] = ERROR_DIR;
-
+        
         $cwd = CRIMP_HOME.'/plugins/perl_plugins';
-
+        
         $proc = proc_open(CRIMP_HOME.'/plugins/perl_plugins/perl-php-wrapper.pl', $descriptorspec, $pipes, $cwd, $env);
-
+        
         if ( !is_resource($proc) ) {
             $dbg->addDebug('could not spawn perl-php-wrapper.pl', WARN);
             return;
         }
-
+        
         fwrite($pipes[0], $postquery);
         fclose($pipes[0]);
         $returned = stream_get_contents($pipes[1]);
@@ -119,7 +108,7 @@ class perl implements iPlugin {
             $dbg->addDebug('error occurred while reading from subprocess');
             return;
         }
-
+        
         $level = ( $retval == 0 ) ? PASS : WARN;
         $dbg->addDebug("perl-php-wrapper.pl exited with code '$retval'", $level);
         eval($returned);
