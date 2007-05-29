@@ -27,9 +27,9 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: Javascript_Popup.php,v 1.5 2007-04-29 20:37:32 diddledan Exp $
+ * Revision info: $Id: Javascript_Popup.php,v 1.6 2007-05-29 23:20:31 diddledan Exp $
  *
- * This file is released under the LGPL License under kind permission from Vernet Loïc.
+ * This file is released under the LGPL License under kind permission from Vernet LoÃ¯c.
  */
 
 /**
