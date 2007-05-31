@@ -242,6 +242,12 @@
   color: blue;
 }
 
+.sfWebDebugLogFromSource
+{
+  padding: 5px 5px 5px 5px;
+  background-color: #DDD;
+}
+
 .ison
 {
   color: #3f3;
