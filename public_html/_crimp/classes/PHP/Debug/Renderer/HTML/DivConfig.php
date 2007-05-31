@@ -1,36 +1,4 @@
 <?php
-/**
- * This is a debugging routine developed for use with crimp based heavily on
- * PHP Debug (http://www.php-debug.com/)
- * 
- *---
- * 
- * PHP_Debug : A simple and fast way to debug your PHP code
- * 
- * The basic purpose of PHP_Debug is to provide assistance in debugging PHP
- * code, by "debug" i don't mean "step by step debug" but program trace,
- * variables display, process time, included files, queries executed, watch
- * variables... These informations are gathered through the script execution and
- * therefore are displayed at the end of the script (in a nice floating div or a
- * html table) so that it can be read and used at any moment. (especially
- * usefull during the development phase of a project or in production with a
- * secure key/ip)
- *
- * PHP version 5 only
- * 
- *---
- * 
- * CRIMP - Content Redirection Internet Management Program
- * Copyright (C) 2005-2007 The CRIMP Team
- * Authors:          The CRIMP Team
- * Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
- *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
- * HomePage:         http://crimp.sf.net/
- *
- * Revision info: $Id: HTML_Div_Config.php,v 1.2 2007-05-02 15:26:56 diddledan Exp $
- *
- * This file is released under the LGPL License under kind permission from Vernet Loïc.
- */
 
 /**
  * Configuration file for HTML_Div renderer
@@ -38,13 +6,13 @@
  * @package PHP_Debug
  * @category PHP
  * @author Loïc Vernet <qrf_coil at yahoo dot fr>
- * @since  29 march 2007
+ * @since V2.1.0 - 29 march 2007
  * 
  * @package PHP_Debug
  * @filesource
  */
 
-class PHP_Debug_Renderer_HTML_Div_Config
+class PHP_Debug_Renderer_HTML_DivConfig
 {    
     /**
      * Config container for Debug_Renderer_HTML_Div
@@ -52,7 +20,7 @@ class PHP_Debug_Renderer_HTML_Div_Config
      * @var array
      * @since V2.0.0 - 11 apr 2006
      */
-    static $options = array();
+    protected static $options = array();
 
     /**
      * Static Instance of class
@@ -60,14 +28,14 @@ class PHP_Debug_Renderer_HTML_Div_Config
      * @var array
      * @since V2.0.0 - 11 apr 2006
      */
-    static $instance = null;
+    protected static $instance = null;
         
     /**
      * Debug_Renderer_HTML_DIV_Config class constructor
      * 
      * @since V2.0.0 - 11 apr 2006
      */
-    private function __construct()
+    protected function __construct()
     {
         /**
          * Enable or disable Credits in debug infos 
@@ -93,7 +61,7 @@ class PHP_Debug_Renderer_HTML_Div_Config
         /** 
          * View source script file name
          */     
-        self::$options['HTML_DIV_view_source_script_name'] = /*'PHP_Debug_show_source.php'*/'';
+        self::$options['HTML_DIV_view_source_script_name'] = 'PHP_Debug_ShowSource.php'; 
 
         /** 
          * Tabsize for view source script
@@ -108,7 +76,7 @@ class PHP_Debug_Renderer_HTML_Div_Config
         /** 
          * images
          */     
-        self::$options['HTML_DIV_images_path'] = '/crimp_assets/images'; 
+        self::$options['HTML_DIV_images_path'] = '/crimp_assets/debug-images'; 
         self::$options['HTML_DIV_image_info'] = 'info.png'; 
         self::$options['HTML_DIV_image_warning'] = 'warning.png'; 
         self::$options['HTML_DIV_image_error'] = 'error.png'; 
@@ -121,15 +89,15 @@ class PHP_Debug_Renderer_HTML_Div_Config
         /** 
          * js path
          */     
-        self::$options['HTML_DIV_js_path'] = 'js'; 
+        self::$options['HTML_DIV_js_path'] = '/crimp_assets/js'; 
         
         /**
          * Class name of the debug info levels
          */
         self::$options['HTML_DIV_debug_level_classes'] = array(
-            PHP_DEBUGLINE_INFO_LEVEL     => 'sfWebDebugInfo',
-            PHP_DEBUGLINE_WARNING_LEVEL  => 'sfWebDebugWarning',
-            PHP_DEBUGLINE_ERROR_LEVEL    => 'sfWebDebugError',
+            PHP_DebugLine::INFO_LEVEL     => 'sfWebDebugInfo',
+            PHP_DebugLine::WARNING_LEVEL  => 'sfWebDebugWarning',
+            PHP_DebugLine::ERROR_LEVEL    => 'sfWebDebugError',
         );
 
         /**
@@ -149,11 +117,59 @@ class PHP_Debug_Renderer_HTML_Div_Config
             <li><a href="#" onclick="sfWebDebugShowDetailsFor(\'sfWebDebugConfig\'); return false;"><img src="{$imagesPath}/config.png" alt="Config" /> vars &amp; config</a></li>
             <li><a href="#" onclick="sfWebDebugShowDetailsFor(\'sfWebDebugLog\'); return false;"><img src="{$imagesPath}/comment.png" alt="Comment" /> logs &amp; msgs</a></li>
             <li><a href="#" onclick="sfWebDebugShowDetailsFor(\'sfWebDebugDatabaseDetails\'); return false;"><img src="{$imagesPath}/database.png" alt="Database" /> {$nb_queries}</a></li>
+            <li><a href="#" onclick="sfWebDebugShowDetailsFor(\'sfWebDebugW3CDetails\'); return false;">W3C</a></li>
             <li class="last"><a href="#" onclick="sfWebDebugShowDetailsFor(\'sfWebDebugTimeDetails\'); return false;"><img src="{$imagesPath}/time.png" alt="Time" /> {$exec_time} ms</a></li>
         </ul>
         <a href="#" onclick="document.getElementById(\'sfWebDebug\').style.display=\'none\'; return false;"><img src="{$imagesPath}/close.png" alt="Close" /></a>
     </div> <!-- End sfWebDebugBar -->
 
+';
+
+        /**
+         * HTML code for validation debug tab
+         */         
+         self::$options['HTML_DIV_sfWebDebugW3CDetails'] = '
+
+    <div id="sfWebDebugW3CDetails" class="top" style="display:none">
+        <h1>W3C validation</h1>
+        <p>Click on the WC3 logo to verify the validation or to check the errors</p>
+        <p>
+            <a href="http://validator.w3.org/check?uri=referer"><img
+                src="{$imagesPath}/w3c_home_nb.png"
+                alt="W3C Validator" /></a>
+        </p>
+        {$results}
+
+    </div> <!-- End sfWebDebugW3CDetails -->
+
+';
+
+        /**
+         * HTML code for a row of a validation error
+         */
+         self::$options['HTML_DIV_sfWebDebugW3CTableHeader'] = ' 
+    <h2>{$title}</h2>
+        <table class="sfWebDebugLogs" style="width:600px">
+            <tr>
+                <th>n°</th>
+                <th>Line</th>
+                <th>Col</th>
+                <th>Message</th>
+            </tr>
+';
+
+        /**
+         * HTML code for a row of a validation error
+         */
+         self::$options['HTML_DIV_sfWebDebugW3CErrorRow'] = '
+        <tr class="sfWebDebugLogLine {$type}">
+            <td class="sfWebDebugLogNumber">{$cpt}</td>
+            <td class="sfWebDebugLogLine">{$line}</td>
+            <td class="sfWebDebugLogCol">{$col}</td>
+            <td class="sfWebDebugLogMessage">
+                {$message}
+            </td>
+        </tr>
 ';
 
         /**
@@ -288,7 +304,7 @@ class PHP_Debug_Renderer_HTML_Div_Config
          * HTML code for credits 
          */         
          self::$options['HTML_DIV_credits'] = '
-        PHP_Debug ['. PHP_DEBUG_RELEASE .'] | By COil (2007) | 
+        PHP_Debug ['. PHP_Debug::RELEASE .'] | By COil (2007) | 
         <a href="http://www.coilblog.com">http://www.coilblog.com</a> | 
         <a href="http://phpdebug.sourceforge.net/">PHP_Debug Project Home</a> 
         ';
@@ -347,7 +363,7 @@ class PHP_Debug_Renderer_HTML_Div_Config
      * @since V2.0.0 - 07 apr 2006
      * @see PHP_Debug
      */
-    static function getConfig()
+    public static function getConfig()
     {
         return self::$options;
     }
@@ -357,10 +373,11 @@ class PHP_Debug_Renderer_HTML_Div_Config
      * 
      * @since V2.0.0 - 26 Apr 2006
      */
-    function __tostring()
+    public function __toString()
     {
-        return '<pre>'. PHP_Debug::dumpVar($this->singleton()->getConfig(), __CLASS__, PHP_DEBUG_DUMP_ARR_STR). '</pre>';
+        return '<pre>'. PHP_Debug::dumpVar(
+            $this->singleton()->getConfig(), 
+            __CLASS__, 
+            PHP_DEBUG_DUMP_ARR_STR). '</pre>';
     }   
 }
-
-?>

@@ -1,36 +1,4 @@
 <?php
-/**
- * This is a debugging routine developed for use with crimp based heavily on
- * PHP Debug (http://www.php-debug.com/)
- * 
- *---
- * 
- * PHP_Debug : A simple and fast way to debug your PHP code
- * 
- * The basic purpose of PHP_Debug is to provide assistance in debugging PHP
- * code, by "debug" i don't mean "step by step debug" but program trace,
- * variables display, process time, included files, queries executed, watch
- * variables... These informations are gathered through the script execution and
- * therefore are displayed at the end of the script (in a nice floating div or a
- * html table) so that it can be read and used at any moment. (especially
- * usefull during the development phase of a project or in production with a
- * secure key/ip)
- *
- * PHP version 5 only
- * 
- *---
- * 
- * CRIMP - Content Redirection Internet Management Program
- * Copyright (C) 2005-2007 The CRIMP Team
- * Authors:          The CRIMP Team
- * Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
- *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
- * HomePage:         http://crimp.sf.net/
- *
- * Revision info: $Id: HTML_Table_Config.php,v 1.6 2007-05-29 23:20:31 diddledan Exp $
- *
- * This file is released under the LGPL License under kind permission from Vernet Loïc.
- */
 
 /**
  * Configuration file for HTML_Table renderer
@@ -38,13 +6,13 @@
  * @package PHP_Debug
  * @category PHP
  * @author Loic Vernet <qrf_coil at yahoo dot fr>
- * @since 10 Apr 2006
+ * @since V2.0.0 - 10 Apr 2006
  * 
  * @package PHP_Debug
  * @filesource
  */
 
-class PHP_Debug_Renderer_HTML_Table_Config
+class PHP_Debug_Renderer_HTML_TableConfig
 {    
     /**
      * Config container for Debug_Renderer_HTML_Table
@@ -52,7 +20,7 @@ class PHP_Debug_Renderer_HTML_Table_Config
      * @var array
      * @since V2.0.0 - 11 apr 2006
      */
-    static $options = array();
+    protected static $options = array();
     
     /**
      * Static Instance of class
@@ -60,14 +28,14 @@ class PHP_Debug_Renderer_HTML_Table_Config
      * @var array
      * @since V2.0.0 - 11 apr 2006
      */
-    static $instance = null;
+    protected static $instance = null;
         
     /**
      * Debug_Renderer_HTML_Table_Config class constructor
      * 
      * @since V2.0.0 - 11 apr 2006
      */
-    private function __construct()
+    protected function __construct()
     {
         /**
          * Enable or disable Credits in debug infos 
@@ -103,7 +71,7 @@ class PHP_Debug_Renderer_HTML_Table_Config
         /** 
          * Enable or disable view of super arrays 
          */
-        self::$options['HTML_TABLE_show_super_array'] = false;
+        self::$options['HTML_TABLE_show_super_array'] = true;
 
         /** 
          * Enable or disable the use of $_REQUEST array instead of 
@@ -119,12 +87,12 @@ class PHP_Debug_Renderer_HTML_Table_Config
         /** 
          * View source script file name
          */     
-        self::$options['HTML_TABLE_view_source_script_name'] = /*'PHP_Debug_show_source.php'*/''; 
+        self::$options['HTML_TABLE_view_source_script_name'] = 'PHP_Debug_ShowSource.php'; 
 
         /** 
          * css path
          */     
-        self::$options['HTML_TABLE_css_path'] = '/crimp_assets/debug-css'; 
+        self::$options['HTML_TABLE_css_path'] = 'css'; 
 
         /** 
          * Tabsize for view source script
@@ -141,20 +109,20 @@ class PHP_Debug_Renderer_HTML_Table_Config
         * in search mode
         */
         self::$options['HTML_TABLE_search_forced_type'] = array( 
-            PHP_DEBUGLINE_STD         => false, 
-            PHP_DEBUGLINE_QUERY       => false, 
-            PHP_DEBUGLINE_QUERYREL    => false,
-            PHP_DEBUGLINE_ENV         => false,
-            PHP_DEBUGLINE_APPERROR    => false,
-            PHP_DEBUGLINE_CREDITS     => false,
-            PHP_DEBUGLINE_SEARCH      => true,
-            PHP_DEBUGLINE_DUMP        => false,
-            PHP_DEBUGLINE_PROCESSPERF => false,
-            PHP_DEBUGLINE_TEMPLATES   => false,
-            PHP_DEBUGLINE_PAGEACTION  => false,
-            PHP_DEBUGLINE_SQLPARSE    => false,
-            PHP_DEBUGLINE_WATCH       => false,
-            PHP_DEBUGLINE_PHPERROR    => false
+            PHP_DebugLine::TYPE_STD         => false, 
+            PHP_DebugLine::TYPE_QUERY       => false, 
+            PHP_DebugLine::TYPE_QUERYREL    => false,
+            PHP_DebugLine::TYPE_ENV         => false,
+            PHP_DebugLine::TYPE_APPERROR    => false,
+            PHP_DebugLine::TYPE_CREDITS     => false,
+            PHP_DebugLine::TYPE_SEARCH      => true,
+            PHP_DebugLine::TYPE_DUMP        => false,
+            PHP_DebugLine::TYPE_PROCESSPERF => false,
+            PHP_DebugLine::TYPE_TEMPLATES   => false,
+            PHP_DebugLine::TYPE_PAGEACTION  => false,
+            PHP_DebugLine::TYPE_SQLPARSE    => false,
+            PHP_DebugLine::TYPE_WATCH       => false,
+            PHP_DebugLine::TYPE_PHPERROR    => false
         );    
 
         /**
@@ -183,7 +151,7 @@ class PHP_Debug_Renderer_HTML_Table_Config
          * HTML code for footer 
          */         
          self::$options['HTML_TABLE_credits'] = '
-        PHP_Debug ['. PHP_DEBUG_RELEASE .'] | By COil (2007) &amp; The CRIMP Team (2007) | 
+        PHP_Debug ['. PHP_Debug::RELEASE .'] | By COil (2007) | 
         <a href="http://www.coilblog.com">http://www.coilblog.com</a> | 
         <a href="http://phpdebug.sourceforge.net/">PHP_Debug Project Home</a> 
         ';
@@ -279,7 +247,7 @@ class PHP_Debug_Renderer_HTML_Table_Config
      * @since V2.0.0 - 07 apr 2006
      * @see PHP_Debug
      */
-    static function getConfig()
+    public static function getConfig()
     {
         return self::$options;
     }
@@ -289,10 +257,11 @@ class PHP_Debug_Renderer_HTML_Table_Config
      * 
      * @since V2.0.0 - 26 Apr 2006
      */
-    function __tostring()
+    public function __toString()
     {
-        return '<pre>'. PHP_Debug::dumpVar($this->singleton()->getConfig(), __CLASS__, PHP_DEBUG_DUMP_ARR_STR). '</pre>';
+        return '<pre>'. PHP_Debug::dumpVar(
+            $this->singleton()->getConfig(), 
+            __CLASS__, 
+            PHP_DEBUG_DUMP_ARR_STR). '</pre>';
     }   
 }
-
-?>
