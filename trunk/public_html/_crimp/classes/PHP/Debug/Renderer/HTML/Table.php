@@ -1,42 +1,9 @@
 <?php
-/**
- * This is a debugging routine developed for use with crimp based heavily on
- * PHP Debug (http://www.php-debug.com/)
- * 
- *---
- * 
- * PHP_Debug : A simple and fast way to debug your PHP code
- * 
- * The basic purpose of PHP_Debug is to provide assistance in debugging PHP
- * code, by "debug" i don't mean "step by step debug" but program trace,
- * variables display, process time, included files, queries executed, watch
- * variables... These informations are gathered through the script execution and
- * therefore are displayed at the end of the script (in a nice floating div or a
- * html table) so that it can be read and used at any moment. (especially
- * usefull during the development phase of a project or in production with a
- * secure key/ip)
- *
- * PHP version 5 only
- * 
- *---
- * 
- * CRIMP - Content Redirection Internet Management Program
- * Copyright (C) 2005-2007 The CRIMP Team
- * Authors:          The CRIMP Team
- * Project Leads:    Martin "Deadpan110" Guppy <deadpan110@users.sourceforge.net>,
- *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
- * HomePage:         http://crimp.sf.net/
- *
- * Revision info: $Id: HTML_Table.php,v 1.6 2007-05-29 23:20:31 diddledan Exp $
- *
- * This file is released under the LGPL License under kind permission from Vernet Loïc.
- */
 
 /**
- * Configuration class for HTML_Table
+ * Class of the HTML_Table renderer
  */
-require_once 'Debug/Renderer/HTML_Table_Config.php';
-
+require_once 'PHP/Debug/Renderer/HTML/TableConfig.php';
 
 /**
  * A concrete renderer for Debug
@@ -46,7 +13,7 @@ require_once 'Debug/Renderer/HTML_Table_Config.php';
  * @package PHP_Debug
  * @category PHP
  * @author Loic Vernet <qrf_coil at yahoo dot fr>
- * @since 10 Apr 2006
+ * @since V2.0.0 - 10 Apr 2006
  * 
  * @package PHP_Debug
  * @filesource
@@ -62,24 +29,26 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     function __construct($DebugObject, $options)
     {
         $this->DebugObject = $DebugObject;
-        $this->defaultOptions = PHP_Debug_Renderer_HTML_Table_Config::singleton()->getConfig();
+        $this->defaultOptions = PHP_Debug_Renderer_HTML_TableConfig::singleton()->getConfig();
         $this->setOptions($options);
         
         // Now add in first the predefined debugline depending on the configuration
         if ($this->options['HTML_TABLE_enable_search'] == true)
-            $this->DebugObject->addDebugFirst(STR_N, PHP_DEBUGLINE_SEARCH);
+            $this->DebugObject->addDebugFirst('', PHP_DebugLine::TYPE_SEARCH);
 
         if ($this->options['HTML_TABLE_disable_credits'] == false)
-            $this->DebugObject->addDebugFirst($this->options['HTML_TABLE_credits'], PHP_DEBUGLINE_CREDITS);
+            $this->DebugObject->addDebugFirst(
+                $this->options['HTML_TABLE_credits'], 
+                PHP_DebugLine::TYPE_CREDITS);
 
         // Now add in last positions the others predefined debuglines
 
         // Add execution time 
-        $this->DebugObject->addDebug(STR_N, PHP_DEBUGLINE_PROCESSPERF);
+        $this->DebugObject->addDebug('', PHP_DebugLine::TYPE_PROCESSPERF);
         
         // Add templates 
         if ($this->options['HTML_TABLE_show_templates'] == true)
-            $this->DebugObject->addDebug(STR_N, PHP_DEBUGLINE_TEMPLATES);
+            $this->DebugObject->addDebug(STR_N, PHP_DebugLine::TYPE_TEMPLATES);
             
         // Add env variables
         $this->addSuperArray();
@@ -127,7 +96,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
         $buffer .= $this->displayFooter();
         
         // Output Buffer
-        print($buffer);        
+        echo $buffer;        
     }
 
     /**
@@ -142,13 +111,16 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     protected function highlight($debugLineStr)
     {   
         // Check if search is activated   
-        if (!empty($_GET['PHPDEBUG_SEARCH']) and trim($_GET['PHPDEBUG_SEARCH']) != '') {
+        if (!empty($_GET['PHPDEBUG_SEARCH']) && 
+              trim($_GET['PHPDEBUG_SEARCH']) != '') {
             if (!empty($_GET['PHPDEBUG_SEARCH_CS'])) {
                 $replaceFunction = 'str_replace';
             } else {
                 $replaceFunction = 'str_ireplace';
             }
-            return $replaceFunction($_GET['PHPDEBUG_SEARCH'], '<span class="pd-search-hl">'. $_GET['PHPDEBUG_SEARCH']. '</span>' , $debugLineStr);        
+            return $replaceFunction($_GET['PHPDEBUG_SEARCH'], 
+                '<span class="pd-search-hl">'. $_GET['PHPDEBUG_SEARCH']. 
+                '</span>' , $debugLineStr);        
         } else {
         	return $debugLineStr;
         }
@@ -166,7 +138,8 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     protected function checkSearch($debugLineStr)
     {        
         // Check if search is activated   
-        if (!empty($_GET['PHPDEBUG_SEARCH']) and trim($_GET['PHPDEBUG_SEARCH']) != '') {
+        if (!empty($_GET['PHPDEBUG_SEARCH']) && 
+              trim($_GET['PHPDEBUG_SEARCH']) != '') {
            
             if (!empty($_GET['PHPDEBUG_SEARCH_CS'])) {
             	$searchFunction = 'strstr';
@@ -183,7 +156,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * This function check if the user has chosen a filter in the debug type
      * combobox and it returns of the debug line is allowed to be output or no
      *
-     * @param Debug_Line $debugLine The debug line object to check
+     * @param DebugLine $debugLine The debug line object to check
      * @return boolean true type is allowed to be
      * 
      * @since V2.0.0 - 26 Apr 2006
@@ -211,7 +184,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     /**
      * Default render function for HTML_Table renderer
      *
-     * @since 11 Apr 2006
+     * @since V2.0.0 - 11 Apr 2006
      * @see Renderer
      */
     public function render()
@@ -222,7 +195,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     /**
      * Displays the header of the PHP_Debug object
      *
-     * @since 08 Apr 2006
+     * @since V2.0.0 - 08 Apr 2006
      * @see PHP_Debug
      */
     protected function displayHeader()
@@ -233,7 +206,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     /**
      * Diplays the footer of the PHP_Debug object
      *
-     * @since 08 Apr 2006
+     * @since V2.0.0 - 08 Apr 2006
      * @see PHP_Debug
      */
     protected function displayFooter()
@@ -251,13 +224,13 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * - Debug main information 
      * - Execution time
      * 
-     * @param Debug_Line DebugLine, the debug line to process
+     * @param DebugLine DebugLine, the debug line to process
      *
      * @since V2.0.0 - 07 Apr 2006
      */    
     protected function displayDebugLine($DebugLine)    
     {
-         // Debug_Line properties
+         // DebugLine properties
         $properties = $DebugLine->getProperties();
 
         // 1 - File
@@ -293,17 +266,19 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @return string Formatted string containing the main debug info
      * @since V2.0.0 - 28 Apr 2006
      */ 
-    private function processExecTime($properties)
+    protected function processExecTime($properties)
     {   
         // Lang
         $txtPHP = 'PHP';
         $txtSQL = 'SQL';
         $txtSECOND = 's';
-
         $buffer = $this->options['HTML_TABLE_interrow_time'];
         
         if (!empty($properties['endTime'])) {
-            $buffer .=  $this->span(PHP_Debug::getElapsedTime($properties['startTime'], $properties['endTime']), 'time');
+            $buffer .=  $this->span(PHP_Debug::getElapsedTime(
+                $properties['startTime'], 
+                $properties['endTime']), 
+                'time');
         } else {
             $buffer .= '&nbsp;';
         }
@@ -318,105 +293,102 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @return string Formatted string containing the main debug info
      * @since V2.0.0 - 28 Apr 2006
      */ 
-    private function processDebugInfo($properties)
+    protected function processDebugInfo($properties)
     {   
         
         switch($properties['type'])
         {
             // Case for each of the debug lines types
             // 1 : Standard
-            case PHP_DEBUGLINE_STD:
+            case PHP_DebugLine::TYPE_STD:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
-                $buffer .= $this->span(nl2br(htmlspecialchars($properties['info'])), 'std');
+                $buffer .= $this->span($properties['info'], 'std');
                 break;
             
             // 2 : Query
-            case PHP_DEBUGLINE_QUERY:
+            case PHP_DebugLine::TYPE_QUERY:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->span($properties['info'], 'query');
                 break;
 
             // 3 : Query related
-            case PHP_DEBUGLINE_QUERYREL:
+            case PHP_DebugLine::TYPE_QUERYREL:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->span($properties['info'], 'query');
                 break;
                 
             // 4 : Environment
-            case PHP_DEBUGLINE_ENV:
+            case PHP_DebugLine::TYPE_ENV:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->showSuperArray($properties['info']);
                 break;
 
             // 6 : User app error
-            case PHP_DEBUGLINE_APPERROR:
+            case PHP_DebugLine::TYPE_APPERROR:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
-                $buffer .= $this->span('/!\\<br />&nbsp;&nbsp;&nbsp;' . nl2br(htmlspecialchars($properties['info'])), 'app-error');
+                $buffer .= $this->span('/!\\ User error : '. 
+                    $properties['info'] . ' /!\\', 'app-error');
                 break;
                 
             // 7
-            case PHP_DEBUGLINE_CREDITS:
+            case PHP_DebugLine::TYPE_CREDITS:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->span($properties['info'], 'credits');            
                 break;
 
             // 8
-            case PHP_DEBUGLINE_SEARCH:
+            case PHP_DebugLine::TYPE_SEARCH:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->showSearch();
                 break;
 
             // 9
-            case PHP_DEBUGLINE_DUMP:
+            case PHP_DebugLine::TYPE_DUMP:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->showDump($properties);
                 break;
 
             // 10
-            case PHP_DEBUGLINE_PROCESSPERF:
+            case PHP_DebugLine::TYPE_PROCESSPERF:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->showProcessTime();
                 break;
 
             // 11
-            case PHP_DEBUGLINE_TEMPLATES:
+            case PHP_DebugLine::TYPE_TEMPLATES:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->showTemplates();
                 break;
 
             // 12 : Main Page Action
-            case PHP_DEBUGLINE_PAGEACTION;
+            case PHP_DebugLine::TYPE_PAGEACTION;
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $txtPageAction = 'Page Action';
-                $buffer .= $this->span("[ $txtPageAction : ". $properties['info']. ' ]', 'pageaction');
+                $buffer .= $this->span("[ $txtPageAction : ". 
+                    $properties['info']. ' ]', 'pageaction');
                 break;
 
             // 14 : SQL parse 
-            case PHP_DEBUGLINE_SQLPARSE:
+            case PHP_DebugLine::TYPE_SQLPARSE:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $properties['info'];
                 break;
 
             // 15 : Watches
-            case PHP_DEBUGLINE_WATCH:
+            case PHP_DebugLine::TYPE_WATCH:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $infos = $properties['info'];
                 $buffer .= 'Variable '. $this->span($infos[0], 'watch').
-                           ' changed from value '. $this->span($infos[1], 'watch-val'). ' ('. gettype($infos[1]). 
-                                    ') to value '. $this->span($infos[2], 'watch-val'). ' ('. gettype($infos[2]). ')';
+                           ' changed from value '. $this->span($infos[1], 'watch-val').
+                           ' ('. gettype($infos[1]). 
+                           ') to value '. $this->span($infos[2], 'watch-val'). 
+                           ' ('. gettype($infos[2]). ')';
                 break;
 
             // 16 : PHP errors
-            case PHP_DEBUGLINE_PHPERROR:                
+            case PHP_DebugLine::TYPE_PHPERROR:                
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= $this->showError($properties['info']);
-                break;
-            
-            // crimp conditions
-            case PHP_DEBUGLINE_PASS:
-            case PHP_DEBUGLINE_WARN:
-                $buffer = $this->options['HTML_TABLE_interrow_info'];
-                $buffer .= nl2br(htmlspecialchars($properties['info']));
                 break;
 
             default:
@@ -438,7 +410,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @return string Formatted string with style applied
      * @since V2.0.0 - 05 May 2006
      */ 
-    private function span($info, $class)
+    protected function span($info, $class)
     {   
         return '<span class="pd-'. $class .'">'. $info .'</span>'; 
     }
@@ -450,10 +422,10 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @return string Formatted string containing the debug type
      * @since V2.0.0 - 26 Apr 2006
      */ 
-    private function processType($properties)
+    protected function processType($properties)
     {   
         $buffer = $this->options['HTML_TABLE_interrow_type'];
-        $buffer .= PHP_Debug_Line::$debugLineLabels[$properties['type']];
+        $buffer .= PHP_DebugLine::$debugLineLabels[$properties['type']];
         return $buffer;
     }
 
@@ -464,23 +436,21 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @return string Formatted string containing the class
      * @since V2.0.0 - 26 Apr 2006
      */ 
-    private function processClass($properties)
+    protected function processClass($properties)
     {
         $buffer = '';
 
         switch ($properties['type'])
         {
-            case PHP_DEBUGLINE_STD:
-            case PHP_DEBUGLINE_QUERY:
-            case PHP_DEBUGLINE_QUERYREL:
-            case PHP_DEBUGLINE_APPERROR:             
-            case PHP_DEBUGLINE_PAGEACTION:
-            case PHP_DEBUGLINE_PHPERROR:
-            case PHP_DEBUGLINE_SQLPARSE:
-            case PHP_DEBUGLINE_WATCH:
-            case PHP_DEBUGLINE_DUMP:
-            case PHP_DEBUGLINE_PASS:
-            case PHP_DEBUGLINE_WARN:
+            case PHP_DebugLine::TYPE_STD:
+            case PHP_DebugLine::TYPE_QUERY:
+            case PHP_DebugLine::TYPE_QUERYREL:
+            case PHP_DebugLine::TYPE_APPERROR:             
+            case PHP_DebugLine::TYPE_PAGEACTION:
+            case PHP_DebugLine::TYPE_PHPERROR:
+            case PHP_DebugLine::TYPE_SQLPARSE:
+            case PHP_DebugLine::TYPE_WATCH:
+            case PHP_DebugLine::TYPE_DUMP:
                         
                 $buffer .= $this->options['HTML_TABLE_interrow_class'];
                 if (!empty($properties['class'])) {
@@ -491,11 +461,11 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
 
                 break;
                         
-            case PHP_DEBUGLINE_CREDITS: 
-            case PHP_DEBUGLINE_SEARCH:
-            case PHP_DEBUGLINE_PROCESSPERF:
-            case PHP_DEBUGLINE_TEMPLATES:
-            case PHP_DEBUGLINE_ENV:
+            case PHP_DebugLine::TYPE_CREDITS: 
+            case PHP_DebugLine::TYPE_SEARCH:
+            case PHP_DebugLine::TYPE_PROCESSPERF:
+            case PHP_DebugLine::TYPE_TEMPLATES:
+            case PHP_DebugLine::TYPE_ENV:
 
                 $buffer .= $this->options['HTML_TABLE_interrow_class'];
                 $buffer .= '&nbsp;';
@@ -516,23 +486,21 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @return string Formatted string containing the function
      * @since V2.0.0 - 26 Apr 2006
      */ 
-    private function processFunction($properties)
+    protected function processFunction($properties)
     {
         $buffer = '';
 
         switch ($properties['type'])
         {
-            case PHP_DEBUGLINE_STD:
-            case PHP_DEBUGLINE_QUERY:
-            case PHP_DEBUGLINE_QUERYREL:
-            case PHP_DEBUGLINE_APPERROR:             
-            case PHP_DEBUGLINE_PAGEACTION:
-            case PHP_DEBUGLINE_PHPERROR:
-            case PHP_DEBUGLINE_SQLPARSE:
-            case PHP_DEBUGLINE_WATCH:
-            case PHP_DEBUGLINE_DUMP:
-            case PHP_DEBUGLINE_PASS:
-            case PHP_DEBUGLINE_WARN:
+            case PHP_DebugLine::TYPE_STD:
+            case PHP_DebugLine::TYPE_QUERY:
+            case PHP_DebugLine::TYPE_QUERYREL:
+            case PHP_DebugLine::TYPE_APPERROR:             
+            case PHP_DebugLine::TYPE_PAGEACTION:
+            case PHP_DebugLine::TYPE_PHPERROR:
+            case PHP_DebugLine::TYPE_SQLPARSE:
+            case PHP_DebugLine::TYPE_WATCH:
+            case PHP_DebugLine::TYPE_DUMP:
                         
                 $buffer .= $this->options['HTML_TABLE_interrow_function'];
                 if (!empty($properties['function'])) {                	
@@ -547,11 +515,11 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
 
                 break;
                         
-            case PHP_DEBUGLINE_CREDITS: 
-            case PHP_DEBUGLINE_SEARCH:
-            case PHP_DEBUGLINE_PROCESSPERF:
-            case PHP_DEBUGLINE_TEMPLATES:
-            case PHP_DEBUGLINE_ENV:
+            case PHP_DebugLine::TYPE_CREDITS: 
+            case PHP_DebugLine::TYPE_SEARCH:
+            case PHP_DebugLine::TYPE_PROCESSPERF:
+            case PHP_DebugLine::TYPE_TEMPLATES:
+            case PHP_DebugLine::TYPE_ENV:
 
                 $buffer .= $this->options['HTML_TABLE_interrow_function'];
                 $buffer .= '&nbsp;';
@@ -573,23 +541,21 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @return string Formatted string containing the line number
      * @since V2.0.0 - 26 Apr 2006
      */ 
-    private function processLine($properties)
+    protected function processLine($properties)
     {
         $buffer = '';
 
         switch ($properties['type'])
         {
-            case PHP_DEBUGLINE_STD:
-            case PHP_DEBUGLINE_QUERY:
-            case PHP_DEBUGLINE_QUERYREL:
-            case PHP_DEBUGLINE_APPERROR:             
-            case PHP_DEBUGLINE_PAGEACTION:
-            case PHP_DEBUGLINE_PHPERROR:
-            case PHP_DEBUGLINE_SQLPARSE:
-            case PHP_DEBUGLINE_WATCH:
-            case PHP_DEBUGLINE_DUMP:
-            case PHP_DEBUGLINE_PASS:
-            case PHP_DEBUGLINE_WARN:
+            case PHP_DebugLine::TYPE_STD:
+            case PHP_DebugLine::TYPE_QUERY:
+            case PHP_DebugLine::TYPE_QUERYREL:
+            case PHP_DebugLine::TYPE_APPERROR:             
+            case PHP_DebugLine::TYPE_PAGEACTION:
+            case PHP_DebugLine::TYPE_PHPERROR:
+            case PHP_DebugLine::TYPE_SQLPARSE:
+            case PHP_DebugLine::TYPE_WATCH:
+            case PHP_DebugLine::TYPE_DUMP:
                         
                 $buffer.= $this->options['HTML_TABLE_interrow_line'];
                 if (!empty($properties['line'])) {
@@ -600,11 +566,11 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
 
                 break;
                         
-            case PHP_DEBUGLINE_CREDITS: 
-            case PHP_DEBUGLINE_SEARCH:
-            case PHP_DEBUGLINE_PROCESSPERF:
-            case PHP_DEBUGLINE_TEMPLATES:
-            case PHP_DEBUGLINE_ENV:
+            case PHP_DebugLine::TYPE_CREDITS: 
+            case PHP_DebugLine::TYPE_SEARCH:
+            case PHP_DebugLine::TYPE_PROCESSPERF:
+            case PHP_DebugLine::TYPE_TEMPLATES:
+            case PHP_DebugLine::TYPE_ENV:
 
                 $buffer.= $this->options['HTML_TABLE_interrow_line'];
                 $buffer.= '&nbsp;';
@@ -625,28 +591,27 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @return string Formatted string containing the file
      * @since V2.0.0 - 26 Apr 2006
      */ 
-    private function processFile($properties)
+    protected function processFile($properties)
     {
     	$buffer = '';
 
         switch ($properties['type'])
         {
-        	case PHP_DEBUGLINE_STD:
-            case PHP_DEBUGLINE_QUERY:
-            case PHP_DEBUGLINE_QUERYREL:
-            case PHP_DEBUGLINE_APPERROR:             
-            case PHP_DEBUGLINE_PAGEACTION:
-            case PHP_DEBUGLINE_PHPERROR:
-            case PHP_DEBUGLINE_SQLPARSE:
-            case PHP_DEBUGLINE_WATCH:
-            case PHP_DEBUGLINE_DUMP:
-            case PHP_DEBUGLINE_PASS:
-            case PHP_DEBUGLINE_WARN:
+        	case PHP_DebugLine::TYPE_STD:
+            case PHP_DebugLine::TYPE_QUERY:
+            case PHP_DebugLine::TYPE_QUERYREL:
+            case PHP_DebugLine::TYPE_APPERROR:             
+            case PHP_DebugLine::TYPE_PAGEACTION:
+            case PHP_DebugLine::TYPE_PHPERROR:
+            case PHP_DebugLine::TYPE_SQLPARSE:
+            case PHP_DebugLine::TYPE_WATCH:
+            case PHP_DebugLine::TYPE_DUMP:
 
                 $buffer .= $this->options['HTML_TABLE_interrow_file'];
                         
                 if (!empty($properties['file'])) {
-                    if (!empty($this->options['HTML_TABLE_view_source_script_path']) and !empty($this->options['HTML_TABLE_view_source_script_name'])) {
+                    if (!empty($this->options['HTML_TABLE_view_source_script_path']) &&
+                        !empty($this->options['HTML_TABLE_view_source_script_name'])) {
                         $buffer .= '<a href="'. $this->options['HTML_TABLE_view_source_script_path']
                                 . '/'. $this->options['HTML_TABLE_view_source_script_name']  
                                 .'?file='. urlencode($properties['file']);
@@ -662,11 +627,11 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
         
                 break;
                         
-            case PHP_DEBUGLINE_CREDITS: 
-            case PHP_DEBUGLINE_SEARCH:
-            case PHP_DEBUGLINE_PROCESSPERF:
-            case PHP_DEBUGLINE_TEMPLATES:
-            case PHP_DEBUGLINE_ENV:
+            case PHP_DebugLine::TYPE_CREDITS: 
+            case PHP_DebugLine::TYPE_SEARCH:
+            case PHP_DebugLine::TYPE_PROCESSPERF:
+            case PHP_DebugLine::TYPE_TEMPLATES:
+            case PHP_DebugLine::TYPE_ENV:
 
                 $buffer .= $this->options['HTML_TABLE_interrow_file'];
                 $buffer .=  '&nbsp;';
@@ -681,11 +646,11 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     }
 
     /**
-     * Print the dump of a variable
+     * Dump a variable
      * 
      * @since V2.0.0 - 26 Apr 2006
      */ 
-    private function showDump($properties)
+    protected function showDump($properties)
     {
     	$buffer = '';
 
@@ -712,7 +677,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
         }
         
         // Output
-        if ($properties['type'] != PHP_DEBUGLINE_ENV) { 
+        if ($properties['type'] != PHP_DebugLine::TYPE_ENV) { 
             $title = "dump of '";
         } 
         
@@ -722,9 +687,14 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
         
         if ($preDisplay == true){
             $buffer .= '<pre>';                   
-            $buffer .= PHP_Debug::dumpVar($properties['info'][1], '', false, PHP_DEBUG_DUMP_STR);
+            $buffer .= PHP_Debug::dumpVar($properties['info'][1], 
+                '', false, PHP_Debug::DUMP_STR);
         } else {
-            $buffer .= $this->span(PHP_Debug::dumpVar($properties['info'][1], '', false, PHP_DEBUG_DUMP_STR), 'dump-val');
+            $buffer .= $this->span(PHP_Debug::dumpVar(
+                $properties['info'][1], 
+                '', 
+                false, 
+                PHP_Debug::DUMP_STR), 'dump-val');
         }
 
         if ($preDisplay == true){
@@ -735,11 +705,11 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     }
 
     /**
-     * Print the search combo box
+     * Process the search combo box
      * 
      * @since V2.0.0 - 26 Apr 2006
      */ 
-    private function showSearch()
+    protected function showSearch()
     {
         // Repost all posted data
         $txtGo             = 'Go !';
@@ -771,8 +741,9 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
           <td class="pd-search">:</td>
           <td class="pd-search">
             <select class="pd-search" name="PHPDEBUG_SEARCH_TYPE">';
-                    foreach (PHP_Debug_Line::$debugLineLabels as $lkey => $lvalue) {
-                        $debugSearchTypeVal = (!empty($_REQUEST["PHPDEBUG_SEARCH_TYPE"]) && $lkey == $_REQUEST["PHPDEBUG_SEARCH_TYPE"]) ? ' selected="selected"' : '';
+                    foreach (PHP_DebugLine::$debugLineLabels as $lkey => $lvalue) {
+                        $debugSearchTypeVal = (!empty($_REQUEST["PHPDEBUG_SEARCH_TYPE"]) 
+                                           & $lkey == $_REQUEST["PHPDEBUG_SEARCH_TYPE"]) ? ' selected="selected"' : '';
                         $buffer .= "              <option value=\"$lkey\"$debugSearchTypeVal>&raquo; $lvalue</option>". CR;
                     }                                   
                     $buffer .= '
@@ -787,15 +758,15 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
         </table>
         </form>';
             
-            return $buffer;
+        return $buffer;
     }
 
     /**
-     * Print the templates
+     * Process the templates
      * 
      * @since V2.0.0 - 26 Apr 2006
      */ 
-    private function showTemplates()
+    protected function showTemplates()
     {
         $txtMainFile = 'MAIN File';
         $idx = 1;
@@ -805,11 +776,13 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
         	
         	$isToDisplay = true;
         	
-        	foreach ($this->options['HTML_TABLE_view_source_excluded_template'] as $template) {        		
-        		if (stristr($lvalue, $template)) {
-        			$isToDisplay = false;
-        		}
-        	}
+            if ($this->options['HTML_TABLE_view_source_excluded_template']) {
+            	foreach ($this->options['HTML_TABLE_view_source_excluded_template'] as $template) {        		
+            		if (stristr($lvalue, $template)) {
+            			$isToDisplay = false;
+            		}
+            	}
+            }
         	
         	if ($isToDisplay == true) {
         	
@@ -820,7 +793,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
 	                
 	            // Mark main file    
 	            if ($idx == 1) {
-	                $buffer .= $this->span("&laquo; $txtMainFile", 'main-file');
+	                $buffer .= $this->span('&laquo; '. $txtMainFile, 'main-file');
 	            }                       
 	            $idx++;
 	            $buffer .= '<br />'. CR;
@@ -832,7 +805,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
     }
     
     /**
-     * Print an error
+     * Process an error info
      * 
      * @param array $info Array containing information about the error
      * 
@@ -842,42 +815,45 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * the stricts errors
      * 
      */ 
-    private function showError($infos)    
+    protected function showError($infos)    
     {
-    	   
         $buffer = '';
         $infos[1] = str_replace("'", '"', $infos[1]);
-        $infos[1] = str_replace('href="function.', ' href="http://www.php.net/'. $this->options['DEBUG_lang']. '/', $infos[1]);
+        $infos[1] = str_replace('href="function.', ' href="http://www.php.net/'. $this->options['lang']. '/', $infos[1]);
 
         switch ($infos[0])
         {
             case E_WARNING:
                 $errorlevel = 'PHP WARNING : ';
-                $buffer .= '<span class="pd-php-warning"> /!\\ '. $errorlevel. $infos[1] . ' /!\\ </span>';                
+                $buffer .= '<span class="pd-php-warning"> /!\\ '. 
+                    $errorlevel. $infos[1] . ' /!\\ </span>';                
                 break;
 
             case E_NOTICE:
                 $errorlevel = 'PHP notice : ';
-                $buffer .= '<span class="pd-php-notice">'. $errorlevel. $infos[1] . '</span>';
+                $buffer .= '<span class="pd-php-notice">'. 
+                    $errorlevel. $infos[1] . '</span>';
                 break;
 
             case E_USER_ERROR:
                 $errorlevel = 'PHP User error : ';
-                $buffer .= '<span class="pd-php-user-error"> /!\\ '. $errorlevel. $infos[1] . ' /!\\ </span>';
+                $buffer .= '<span class="pd-php-user-error"> /!\\ '. 
+                    $errorlevel. $infos[1] . ' /!\\ </span>';
                 break;
 
             case E_STRICT:
                 
                 $errorlevel = 'PHP STRICT error : ';
-                $buffer .= '<span class="pd-php-user-error"> /!\\ '. $errorlevel. $infos[1] . ' /!\\ </span>';
+                $buffer .= '<span class="pd-php-user-error"> /!\\ '. 
+                    $errorlevel. $infos[1] . ' /!\\ </span>';
                 break;
 
             default:
-                $errorlevel = "PHP errorlevel = ". $infos[0]. " : ";
-                $buffer .= $errorlevel. " is not implemented in PHP_Debug (". __FILE__. ",". __LINE__. ")";
+                $errorlevel = 'PHP errorlevel = '. $infos[0]. ' : ';
+                $buffer .= $errorlevel. ' is not implemented in PHP_Debug ('. 
+                    __FILE__. ','. __LINE__. ')';
                 break;
         }
-        
         return $buffer;
     }
 
@@ -887,28 +863,31 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @param string $SuperArrayType Type of super en array to add
      * @since V2.0.0 - 07 Apr 2006
      */ 
-    private function showSuperArray($SuperArrayType)    
+    protected function showSuperArray($SuperArrayType)    
     {
         // Lang
-        $txtVariable   = "Var";
-        $txtNoVariable = "NO VARIABLE";
-        $NoVariable    =  " -- $txtNoVariable -- ";
+        $txtVariable   = 'Var';
+        $txtNoVariable = 'NO VARIABLE';
+        $NoVariable    =  ' -- '. $txtNoVariable. ' -- ';
         $SuperArray    = null;
         $buffer        = '';
 
         $ArrayTitle = PHP_Debug::$globalEnvConstantsCorresp[$SuperArrayType];
-        $SuperArray = $GLOBALS["$ArrayTitle"];
-        $Title = "$ArrayTitle $txtVariable";
-        $SectionBasetitle = "<b>$Title (". count($SuperArray). ') :';
+        $SuperArray = $GLOBALS[$ArrayTitle];
+        $Title = $ArrayTitle. ' '. $txtVariable;
+        $SectionBasetitle = '<b>$Title ('. count($SuperArray). ') :';
 
         if (count($SuperArray)) {
             $buffer .= $SectionBasetitle. '</b>';
-            $buffer .= '<pre>'. PHP_Debug::dumpVar($SuperArray, $ArrayTitle, false, PHP_DEBUG_DUMP_STR). '</pre>';
+            $buffer .= '<pre>'. PHP_Debug::dumpVar(
+                $SuperArray, 
+                $ArrayTitle, 
+                false, 
+                PHP_Debug::DUMP_STR). '</pre>';
         }
         else {
             $buffer .= $SectionBasetitle. "$NoVariable</b>";
         }
-        
         return $buffer;
     }
 
@@ -917,32 +896,32 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      *
      * @since V2.0.0 - 18 apr 2006
      */
-    private function addSuperArray()
+    protected function addSuperArray()
     {
         if ($this->options['HTML_TABLE_show_super_array'] == true) {            
             
             // Divide Request tab
             if ($this->options['HTML_TABLE_use_request_arr'] == false) {
                 // Include Post Var
-                $this->DebugObject->addDebug(PHP_DEBUG_GLOBAL_POST, PHP_DEBUGLINE_ENV);
+                $this->DebugObject->addDebug(PHP_Debug::GLOBAL_POST, PHP_DebugLine::TYPE_ENV);
     
                 // Include Get Var
-                $this->DebugObject->addDebug(PHP_DEBUG_GLOBAL_GET, PHP_DEBUGLINE_ENV);
+                $this->DebugObject->addDebug(PHP_Debug::GLOBAL_GET, PHP_DebugLine::TYPE_ENV);
     
                 // Include File Var
-                $this->DebugObject->addDebug(PHP_DEBUG_GLOBAL_FILES, PHP_DEBUGLINE_ENV);
+                $this->DebugObject->addDebug(PHP_Debug::GLOBAL_FILES, PHP_DebugLine::TYPE_ENV);
                 
                 // Include Cookie Var
-                $this->DebugObject->addDebug(PHP_DEBUG_GLOBAL_COOKIE, PHP_DEBUGLINE_ENV);
+                $this->DebugObject->addDebug(PHP_Debug::GLOBAL_COOKIE, PHP_DebugLine::TYPE_ENV);
             }
             else {
                 // Only display Request Tab
-                $this->DebugObject->addDebug(PHP_DEBUG_GLOBAL_REQUEST, PHP_DEBUGLINE_ENV);
+                $this->DebugObject->addDebug(PHP_Debug::GLOBAL_REQUEST, PHP_DebugLine::TYPE_ENV);
             }
     
             // Include sessions variabmes, check if we have any
             if (!empty($_SESSION)) {
-                $this->DebugObject->addDebug(PHP_DEBUG_GLOBAL_SESSION, PHP_DEBUGLINE_ENV);
+                $this->DebugObject->addDebug(PHP_Debug::GLOBAL_SESSION, PHP_DebugLine::TYPE_ENV);
             }
         }
     }
@@ -952,7 +931,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * 
      * @since V2.0.0 - 18 Apr 2006
      */ 
-    private function showProcessTime()
+    protected function showProcessTime()
     {
         // Lang
         $txtExecutionTime = 'Global execution time ';
@@ -992,18 +971,4 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
                       
         return $buffer;
     }
-
-    /**
-     * Return the style sheet of the HTML_TABLE debug object
-     * 
-     * @return string The stylesheet
-     *
-     * @since 13 Apr 2006
-     */    
-    public function getStyleSheet()
-    {
-        return $this->options['HTML_TABLE_stylesheet'];
-    }
 }
-
-?>
