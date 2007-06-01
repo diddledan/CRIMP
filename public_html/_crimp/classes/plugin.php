@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: plugin.php,v 1.9 2007-05-31 16:33:14 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.10 2007-06-01 21:35:14 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -18,7 +18,7 @@
 abstract class Plugin {
     protected $Crimp;
     protected $ConfigurationScope;
-    protected $ExecutionCount;
+    protected $ConfigurationIndex;
     protected $IsDeferred;
     
     public function setup($scope, $num, $isDeferred) {
