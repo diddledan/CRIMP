@@ -165,7 +165,8 @@ class PHP_Debug
         'errorHandlerCallback',
         'PASS',
         'WARN',
-        'FAIL'
+        'FAIL',
+        'DUMP'
     );
 
     /**
@@ -495,6 +496,14 @@ class PHP_Debug
         
         if ($details[0] != E_STRICT)                            
             $this->addDebug($details, PHP_DebugLine::TYPE_PHPERROR);
+            
+        if ($details[0] == E_ERROR ||
+            $details[0] == E_CORE_ERROR ||
+            $details[0] == E_COMPILE_ERROR ||
+            $details[0] == E_USER_ERROR) {
+            $this->options['render_mode'] = 'Table';
+            echo $this->render();
+        }
     }
 
     /**
