@@ -7,52 +7,39 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: plugin.php,v 1.1 2007-05-01 20:17:31 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.2 2007-06-01 21:57:49 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
 
-class breadCrumbs implements iPlugin {
-    protected $deferred;
-    protected $pluginNum;
-    protected $scope;
-    protected $crimp;
-
-    function __construct(&$crimp, $scope = SCOPE_CRIMP, $pluginNum = false, $deferred = false) {
-        $this->deferred = $deferred;
-        $this->pluginNum = $pluginNum;
-        $this->scope = $scope;
-        $this->crimp = &$crimp;
-    }
-
+class breadCrumbs extends Plugin {
     public function execute() {
-        $crimp = &$this->crimp;
-        $dbg = &$crimp->debug;
-        $pluginNum = $this->pluginNum;
+        $crimp = &$this->Crimp;
+        $pluginNum = $this->ConfigurationIndex;
         $pluginName = 'breadCrumbs';
-
-        if ( !($config = $crimp->Config('position', $this->scope, $pluginName)) ) {
-            $dbg->addDebug('Please define a <position /> tag in the config.xml file', WARN);
+	
+        if ( !($config = $crimp->Config('position', $this->ConfigurationScope, $pluginName, $pluginNum)) ) {
+            WARN('Please define a <position /> tag in the config.xml file');
             return;
         }
-
+	
         /**
          *this plugin should defer itself
          */
-        if ( !$this->deferred ) {
-            $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
+        if ( !$this->IsDeferred ) {
+            $crimp->setDeferral($pluginName, $pluginNum, $this->ConfigurationScope, $pluginNum);
             return;
         }
-
+	
         $position = $config;
         if ( $position != 'top' && $position != 'bottom' && $position != 'both' )
             $position = 'top';
-
-        $dbg->addDebug('Config: '.$position, PASS);
-
+	
+        PASS("$pluginName executing (position: $position)");
+	
         $BreadLink = '';
 	$BreadCrumbs = "<a href='/$BreadLink'>home</a>";
-
+	
         $HttpRequest = explode('/',$crimp->HTTPRequest());
 	foreach ( $HttpRequest as $requestPart ) {
 	    if ( $requestPart && $requestPart != 'index.html' ) {
@@ -61,7 +48,7 @@ class breadCrumbs implements iPlugin {
 		$BreadCrumbs = "$BreadCrumbs - <a href='$BreadLink'>$requestPart</a>";
 	    }
 	}
-
+	
         if ( $position == 'top' || $position == 'both' )
             $crimp->addContent("<div id='crimpBreadCrumbsTop'><b>Location: $BreadCrumbs</b></div>", 'top');
         if ( $position == 'bottom' || $position == 'both' )

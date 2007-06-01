@@ -3,12 +3,20 @@
     starting with the plugins defined in the requested section, followed by the globals -->
 <crimp>
     <!-- root namespace declarations - these are GLOBAL to ALL of CRIMP -->
-    <debug>on</debug><!-- 'on' or 'off'. can appear in a <section> -->
-    <!-- this ADDs to the title set in the template you choose, so best to
-    either use this, and leave the template with an empty <title></title> or
-    set the title in the <title> tags inside your template and leave this blank
-    -->
-    <sitetitle></sitetitle>
+    <debug><!-- <debug></debug> can appear in a <section> -->
+        <mode>Div</mode><!-- currently "Div" or "Table". case sensitive. -->
+        <switch>on</switch><!-- "on" or "off" with anything else meaning "off" -->
+    </debug>
+    
+    <fullajax>on</fullajax><!-- on or off, tells crimp whether to load a javascript
+    library that will force all likes to go through crimp's ajax system. this
+    facility is for demo purposes only -->
+    
+    <title></title><!-- this ADDs to the title set in the template you
+    choose, so best to either use this, and leave the template with an empty
+    <title></title> or set the title in the <title> tags inside your template
+    and leave this blank -->
+    
     <!--<titleorder>forward</titleorder>-->
     <!--<titleseparator> - </titleseparator>-->
     <vardir>./_crimp/var</vardir>
