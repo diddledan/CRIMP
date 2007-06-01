@@ -95,8 +95,8 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
         // Footer
         $buffer .= $this->displayFooter();
         
-        // Output Buffer
-        echo $buffer;        
+        // Return the Buffer
+        return $buffer;        
     }
 
     /**
@@ -189,7 +189,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      */
     public function render()
     {
-        $this->display();
+        return $this->display();
     }
 
     /**
@@ -391,6 +391,11 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
                 $buffer .= $this->showError($properties['info']);
                 break;
 
+            case PHP_DebugLine::TYPE_WARNING:
+                $buffer = $this->options['HTML_TABLE_interrow_info'];
+                $buffer .= $properties['info'];
+                break;
+
             default:
                 $buffer = $this->options['HTML_TABLE_interrow_info'];
                 $buffer .= "<b>Default(". $properties['type'].  
@@ -451,6 +456,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
                         
                 $buffer .= $this->options['HTML_TABLE_interrow_class'];
                 if (!empty($properties['class'])) {
@@ -501,6 +507,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
                         
                 $buffer .= $this->options['HTML_TABLE_interrow_function'];
                 if (!empty($properties['function'])) {                	
@@ -508,7 +515,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
                         $buffer .= $properties['function']. '()';
                     } else {
                         $buffer .= '&nbsp;';
-                }
+                    }
                 } else {
                     $buffer .= '&nbsp;';
                 }
@@ -556,6 +563,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
                         
                 $buffer.= $this->options['HTML_TABLE_interrow_line'];
                 if (!empty($properties['line'])) {
@@ -597,7 +605,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
 
         switch ($properties['type'])
         {
-        	case PHP_DebugLine::TYPE_STD:
+            case PHP_DebugLine::TYPE_STD:
             case PHP_DebugLine::TYPE_QUERY:
             case PHP_DebugLine::TYPE_QUERYREL:
             case PHP_DebugLine::TYPE_APPERROR:             
@@ -606,6 +614,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
 
                 $buffer .= $this->options['HTML_TABLE_interrow_file'];
                         

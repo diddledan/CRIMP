@@ -39,7 +39,8 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
         PHP_DebugLine::TYPE_CREDITS,
         PHP_DebugLine::TYPE_DUMP,
         PHP_DebugLine::TYPE_WATCH,
-        PHP_DebugLine::TYPE_PHPERROR
+        PHP_DebugLine::TYPE_PHPERROR,
+        PHP_DebugLine::TYPE_WARNING
     );
 
     // debug types for Database tab
@@ -304,11 +305,15 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_CREDITS:
             case PHP_DebugLine::TYPE_DUMP:
             case PHP_DebugLine::TYPE_WATCH:
-            break;
+                break;
+        
+            case PHP_DebugLine::TYPE_WARNING:
+                $level = PHP_DebugLine::WARNING_LEVEL;
+                break;
 
             case PHP_DebugLine::TYPE_APPERROR:
                 $level = PHP_DebugLine::ERROR_LEVEL;
-            break;
+                break;
 
             case PHP_DebugLine::TYPE_PHPERROR:
                 $level = $this->getPhpErrorLevel($properties);
@@ -332,26 +337,23 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
         $infos = $properties['info'];
 
         switch ($infos[0]) {
-            case E_ERROR:
-            case E_PARSE:
-            case E_CORE_ERROR:
-            case E_COMPILE_ERROR:
-            case E_USER_ERROR:
-                return PHP_DebugLine::ERROR_LEVEL;
-            break;                
-            
+            case E_NOTICE:
+            case E_USER_NOTICE:
             case E_WARNING:
             case E_CORE_WARNING:
-            case E_NOTICE:
             case E_COMPILE_WARNING:
             case E_USER_WARNING:
-            case E_USER_NOTICE:
             case E_ALL:
             case E_STRICT:
             case E_RECOVERABLE_ERROR:
                 return PHP_DebugLine::WARNING_LEVEL;
             break;                
 
+            case E_ERROR:
+            case E_PARSE:
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
+            case E_USER_ERROR:
             default:
                 return PHP_DebugLine::ERROR_LEVEL;
             break;                
@@ -742,6 +744,10 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_PHPERROR:                
                 $buffer .= $this->showError($properties['info']);
                 break;
+            
+            case PHP_DebugLine::TYPE_WARNING:
+                $buffer .= $properties['info'];
+                break;
 
             default:
                 $buffer .= '<b>Default('. $properties['type'].
@@ -801,6 +807,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
                         
                 if (!empty($properties['class'])) {
                     $buffer .= $properties['class'];
@@ -849,6 +856,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
                         
                 if (!empty($properties['function'])) {                	
                     if ($properties['function'] != 'unknown') { 
@@ -901,6 +909,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
                         
                 if (!empty($properties['line'])) {
                     $buffer.= '<span class="line">'. 
@@ -941,7 +950,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
 
         switch ($properties['type'])
         {
-        	case PHP_DebugLine::TYPE_STD:
+            case PHP_DebugLine::TYPE_STD:
             case PHP_DebugLine::TYPE_QUERY:
             case PHP_DebugLine::TYPE_QUERYREL:
             case PHP_DebugLine::TYPE_APPERROR:             
@@ -950,6 +959,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
 
                 if (!empty($properties['file'])) {
                     if (!empty($this->options['HTML_DIV_view_source_script_path']) && 
