@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: index.php,v 2.2 2007-04-30 23:22:21 diddledan Exp $
+ * Revision info: $Id: index.php,v 2.3 2007-06-01 21:57:48 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -22,10 +22,12 @@ define('CRIMP_HOME', dirname(__FILE__).'/_crimp');
  */
 set_include_path('./_crimp/classes');
 
+error_reporting(E_ALL);
+
 /**
  *debug routines
  */
-require_once('Debug.php');
+require_once('PHP/Debug.php');
 
 /**
  *negotiatelanguage
@@ -42,6 +44,9 @@ require_once('plugin.php');
  */
 require_once('crimp.php');
 $crimp = new Crimp;
+$crimp->setup();
+
+error_reporting(0);
 
 /**
  *do the plugin thing
@@ -53,4 +58,24 @@ $crimp->executePlugins();
  */
 $crimp->sendDocument();
 
+function PASS($message) {
+    global $crimp;
+    $crimp->PASS($message);
+}
+function WARN($message) {
+    global $crimp;
+    $crimp->WARN($message);
+}
+function FAIL($message) {
+    global $crimp;
+    $crimp->FAIL($message);
+}
+function DUMP($variable, $varname = '') {
+    global $crimp;
+    $crimp->DUMP($variable, $varname);
+}
+function StopTimer() {
+    global $crimp;
+    $crimp->StopTimer();
+}
 ?>
