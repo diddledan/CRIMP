@@ -8,35 +8,22 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  *                   HomePage:      http://crimp.sf.net/
  *
- * Revision info: $Id: plugin.php,v 1.4 2007-05-29 23:17:31 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.5 2007-06-04 12:03:59 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
 
-class [[%(ask0:Plugin Name)]] implements iPlugin {
-    protected $deferred;
-    protected $pluginNum;
-    protected $scope;
-    protected $crimp;
-
-    function __construct(&$crimp, $scope = SCOPE_CRIMP, $pluginNum = false, $deferred = false) {
-        $this->deferred = $deferred;
-        $this->pluginNum = $pluginNum;
-        $this->scope = $scope;
-        $this->crimp = &$crimp;
-    }
-
+class [[%(ask0:Plugin Name)]] extends Plugin {
     public function execute() {
-        $crimp = &$this->crimp;
-        $dbg = &$crimp->debug;
-        $pluginNum = $this->pluginNum;
+        $crimp = &$this->Crimp;
+        $pluginNum = $this->ConfigurationIndex;
         $pluginName = '[[%(ask0:Plugin Name)]]';
-
+        
         /**
          *should this plugin defer itself?
          */
         $defer = [[%(ask:Should this plugin defer itself? (true or false):false)]];
-
+        
         /**
          *check that we aren't locked
          */
@@ -44,25 +31,25 @@ class [[%(ask0:Plugin Name)]] implements iPlugin {
             $dbg->addDebug('Exiting, as we are locked.');
             return;
         }
-
+        
         /**
          *the value referenced by default configuration key, that you entered
          *in the komodo dialog, is stored in the variable $config
          */
-        if ( !($config = $crimp->Config('[[%(ask1:Default Configuration Key)]]', $this->scope, $pluginName, $pluginNum)) ) {
-            $dbg->addDebug('Please define a <[[%(ask1:Default Configuration Key)]]></[[%(ask1:Default Configuration Key)]]> tag in the config.xml file', WARN);
+        if ( !($config = $crimp->Config('[[%(ask1:Default Configuration Key)]]', $this->ConfigurationScope, $pluginName, $pluginNum)) ) {
+            WARN('Please define a &lt;[[%(ask1:Default Configuration Key)]]&gt&lt;/[[%(ask1:Default Configuration Key)]]&gt; tag in the config.xml file');
             return;
         }
-
+        
         /**
          *the actual deferral check
          */
         if ( $defer && !$this->deferred ) {
-            $dbg->addDebug('Deferring execution till later', PASS);
-            $crimp->setDeferral($pluginName, $pluginNum, $this->scope);
+            PASS('Deferring execution till later');
+            $crimp->setDeferral($pluginName, $pluginNum, $this->ConfigurationScope);
             return;
         }
-
+        
         /**
          *BEGIN CUSTOM PLUGIN CODE HERE
          */
