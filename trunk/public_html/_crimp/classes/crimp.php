@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.26 2007-06-01 21:57:48 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.27 2007-06-06 23:43:57 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -461,25 +461,24 @@ UserConfig: {$this->_userConfig}");
         /**
          *check if a <plugin> declaration has been made for this section
          */
-        if (   !$this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']")
-            || !$this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']/plugin")
-            || !$this->_config->xpath('/crimp/plugin') ) {
+         DUMP($this->_config);
+        if (   !$this->_config->xpath("/crimp/section[@url='{$this->userConfig()}']/plugin")
+            && !$this->_config->xpath('/crimp/plugin') ) {
             FAIL('You forgot to add at least one <plugin> section for this url.');
             return;
         }
         
-        if ( $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']")
-            && $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']/plugin") )
-            $this->doPluginsFromXpath("/crimp/section[@name='{$this->userConfig()}']/plugin", SCOPE_SECTION);
+        if ( $this->_config->xpath("/crimp/section[@url='{$this->userConfig()}']/plugin") )
+            $this->doPluginsFromXpath("/crimp/section[@url='{$this->userConfig()}']/plugin", SCOPE_SECTION);
         
         if ( $this->_config->xpath('/crimp/plugin') )
             $this->doPluginsFromXpath('/crimp/plugin', SCOPE_CRIMP);
     }
-    
+	
     protected function doPluginsFromXpath($xpath, $scope) {
         foreach ( $this->_config->xpath($xpath) as $plugin ) {
-            if ( $plugin['name'] ) {
-                $plugName = (string) $plugin['name'];
+            if ( $plugin->name ) {
+                $plugName = (string) $plugin->name;
                 
                 if (!isset($this->executedPlugins[$scope][$plugName]))
                     $this->executedPlugins[$scope][$plugName] = 0;
@@ -494,7 +493,9 @@ UserConfig: {$this->_userConfig}");
                                              $scope, false);
                     }
                 } else WARN("'$plugName' is a malformed plugin name");
-            } else WARN('the plugin declaration has no "name" attribute');
+            } else {
+                DUMP($plugin, 'No "name" attribute');
+            }
         }
     }
 
@@ -557,7 +558,7 @@ UserConfig: {$this->_userConfig}");
                 /**
                  *CHEAT CODES
                  */
-                $version = '$Id: crimp.php,v 1.26 2007-06-01 21:57:48 diddledan Exp $';
+                $version = '$Id: crimp.php,v 1.27 2007-06-06 23:43:57 diddledan Exp $';
                 $this->_output = preg_replace('/<!--VERSION-->/i', $version, $this->_output);
             }
             
@@ -583,6 +584,10 @@ UserConfig: {$this->_userConfig}");
                 WARN("HTTP Exit Code: $exitCode. This indicates a non successful transaction.");
             }
             
+            if (preg_match('/^on$/i', $this->Config('fullajax', SCOPE_CRIMP))) {
+                $this->_output = preg_replace('/<\/body>/i', '<script type="text/javascript">resetAjaxHandlers()</script></body>', $this->_output);
+            }
+            
             if ($dbg = $this->getDebugString()) {
                 $this->addContent($dbg);
             }
@@ -591,14 +596,11 @@ UserConfig: {$this->_userConfig}");
         /**
          *send the http headers
          */
-        $this->head($this->_contentType, $exitCode);
+        $this->head($this->_contentType, 200);
         
         /**
          *send the content to the browser
          */
-        if (preg_match('/^on$/i', $this->Config('fullajax', SCOPE_CRIMP))) {
-            $this->_output = preg_replace('/<\/body>/i', '<script type="text/javascript">resetAjaxHandlers()</script></body>', $this->_output);
-        }
         echo $this->_output;
         exit;
     }
@@ -606,7 +608,8 @@ UserConfig: {$this->_userConfig}");
     protected function getDebugString() {
         if ($this->debugSwitch) {
             return $this->debug->getOutput();
-        } else return;
+        }
+        return;
     }
     
     protected function applyTemplate() {
@@ -737,13 +740,18 @@ UserConfig: {$this->_userConfig}");
              */
             switch ($scope) {
                 case SCOPE_SECTION:
-                    if ( $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']") ) {
-                        if ($this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']/plugin[@name='$plugin']")) {
-                            $plugcfg = $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']/plugin[@name='$plugin']");
+                    if ( $this->_config->xpath("/crimp/section[@url='{$this->userConfig()}']") ) {
+                        if ($this->_config->xpath("/crimp/section[@url='{$this->userConfig()}']/plugin")) {
+							$plugs = $this->_config->xpath("/crimp/section[@url='{$this->userConfig()}']/plugin");
+							
+							$plugcfg = array();
+							foreach ($plugs as $plug) {
+								if ((string) $plug->name == $plugin) {
+									$plugcfg[] = $plug;
+								}
+							}
                             
-                            if ( !$pluginNum ) {
-                                $pluginNum = 0;
-                            }
+                            if ( !$pluginNum ) $pluginNum = 0;
                             if ( isset($plugcfg[$pluginNum]) ) {
                                 if ( $plugcfg[$pluginNum]->$key ) {
                                     if ($subkey !== false) {
@@ -761,11 +769,17 @@ UserConfig: {$this->_userConfig}");
                     }
                 case SCOPE_CRIMP:
                 default:
-                    if ( $this->_config->xpath("/crimp/plugin[@name='$plugin']") ) {
-                        $plugcfg = $this->_config->xpath("/crimp/plugin[@name='$plugin']");
-                        if ( !$pluginNum ) {
-                            $pluginNum = 0;
-                        }
+                    if ( $this->_config->xpath("/crimp/plugin") ) {
+                        $plugs = $this->_config->xpath("/crimp/plugin");
+                        
+                        $plugcfg = array();
+                    	foreach ($plugs as $plug) {
+							if ((string) $plug->name == $plugin) {
+								$plugcfg[] = $plug;
+							}
+						}
+                        
+                        if ( !$pluginNum ) $pluginNum = 0;
                         if ( isset($plugcfg[$pluginNum]) && $plugcfg[$pluginNum]->$key ) {
                             if ($subkey !== false) {
                                 if ($plugcfg[$pluginNum]->$key->$subkey) {
@@ -788,8 +802,8 @@ UserConfig: {$this->_userConfig}");
              */
             switch ($scope) {
                 case SCOPE_SECTION:
-                    if ( $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']") ) {
-                        $sectcfg = $this->_config->xpath("/crimp/section[@name='{$this->userConfig()}']");
+                    if ( $this->_config->xpath("/crimp/section[@url='{$this->userConfig()}']") ) {
+                        $sectcfg = $this->_config->xpath("/crimp/section[@url='{$this->userConfig()}']");
                         if ( isset($sectcfg[0]) && $sectcfg[0]->$key ) {
                             if ($subkey !== false) {
                                 if ($sectcfg[0]->$key->$subkey) {
@@ -914,40 +928,103 @@ UserConfig: {$this->_userConfig}");
     /**
      * plugin execution
      */
-    protected function executePlugin($plugName, $pluginNum, $scope, $deferred = false) {
-        $file = CRIMP_HOME."/plugins/$plugName/plugin.php";
-        if ( file_exists($file) || is_readable($file) ) {
-            $this->executePHPPlugin($file, $plugName, $pluginNum, $scope, $deferred);
-            return;
-        }
-        
-        $file = CRIMP_HOME."/plugins/$plugName/plugin.pm";
-        if ( file_exists($file) || is_readable($file) ) {
-            $this->executePerlPlugin($file, $plugName, $pluginNum, $scope, $deferred);
-            return;
-        }
-        
-        WARN("Plugin file for '$plugName' inaccessible, or plugin type unsupported by this version of CRIMP.");
-    }
-    
-    protected function executePHPPlugin($file, $plugName, $pluginNum, $scope, $deferred = false) {
+    protected function executePHPPlugin($file, $name, $num, $scope, $deferred = false) {
         if (!include_once($file)) {
             WARN("Could not include($file)");
             return;
         }
         
-        if (!$newplugin = new $plugName( )) {
-            WARN("Failed to instantiate an object for plugin '$plugName' class");
+        if (!$newplugin = new $name( )) {
+            WARN("Failed to instantiate an object for plugin '$name' class");
             return;
         }
         
         $newplugin->setup( $scope,
-                           $pluginNum,
+                           $num,
                            $deferred );
         
-        PASS("Calling '$plugName' plugin");
+        PASS("Calling '$name' plugin");
         $newplugin->execute();
     }
+    
+    protected function executePlugin($plugName, $pluginNum, $scope, $deferred = false) {
+        $file = CRIMP_HOME."/plugins/$plugName/plugin";
+        if ( file_exists("$file.php") && is_readable("$file.php")) {
+			$this->executePHPPlugin("$file.php", $plugName, $pluginNum, $scope, $deferred);
+		}
+        if ( !file_exists($file) || !is_readable($file) ) {
+            WARN("Plugin file for '$plugName' inaccessible");
+            return;
+        }
+        
+        $proc = proc_open(CRIMP_HOME."/plugins/$pluginName/$file", $descriptorspec, $pipes, CRIMP_HOME);
+        
+        if ( !is_resource($proc) ) {
+            $dbg->addDebug('could not spawn perl-php-wrapper.pl', WARN);
+            return;
+        }
+        
+        fwrite($pipes[0], $postquery);
+        while (!feof($pipes[1])) {
+            $xml = stream_get_line($pipes[1], 1000000000, '</crimprequests>');
+            $xml .= '</crimprequests>';
+            
+            try {
+                $SimpleXML = new SimpleXMLElement($xml);
+            } catch(Exception $ex) {
+                WARN("Failed to read xml config data from perl plugin: $ex");
+                continue;
+            }
+            
+            $XML = '<crimpresults></crimpresults>';
+            $resXML = new SimpleXMLElement($XML);
+            unset($XML);
+            foreach($SimpleXML->request as $request) {
+                if ($request->name) {
+                    switch ((string) $request->name) {
+                        case 'Config':
+                            $reqKey = '';
+                            $reqSubkey = '';
+                            $reqScope = '';
+                            $reqPluginName = '';
+                            if ($request->key) {
+                                $reqKey = (string) $request->key;
+                            }
+                            if ($request->subkey) {
+                                $reqSubkey = (string) $request->subkey;
+                            }
+                            if ($request->pluginName) {
+                                $reqPluginName = (string) $request->pluginName;
+                            }
+                            if ($request->pluginNum) {
+                                $reqPluginNum = (int) $request->pluginNum;
+                            }
+                            if ($request->scope) {
+                                $reqScope = (string) $request->scope;
+                            }
+                            
+                            $cfgres = $crimp->Config($reqKey, $reqScope, $reqPluginName, $reqPluginNum, $reqSubkey);
+                            
+                            $resXML->addChild('name', 'Config');
+                            $resXML->addChild('key', $reqKey);
+                            $resXML->addChild('subkey', $reqSubkey);
+                            $resXML->addChild('scope', $reqScope);
+                            $resXML->addChild('pluginName', $reqPluginName);
+                            $resXML->addChild('pluginNum', $reqPluginNum);
+                            $resXML->addChild('data', $cfgres);
+                            break;
+                        default:
+                    }
+                }
+            }
+        }
+        fclose($pipes[1]);
+        fclose($pipes[0]);
+        $retval = proc_close($proc);
+        
+        $level = ( $retval == 0 ) ? PASS : WARN;
+    }
+
 }
 
 ?>
