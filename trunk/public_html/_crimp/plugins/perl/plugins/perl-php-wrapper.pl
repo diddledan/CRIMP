@@ -17,7 +17,7 @@
 #                Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
 # HomePage:      http://crimp.sf.net/
 #
-# Revision info: $Id: perl-php-wrapper.pl,v 1.1 2007-05-01 20:17:31 diddledan Exp $
+# Revision info: $Id: perl-php-wrapper.pl,v 1.2 2007-06-07 21:29:26 diddledan Exp $
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -320,10 +320,10 @@ sub printdebug {
 
     $message = $self->AddSlashes($message);
 
-    if ($status eq 'pass') { print "\$dbg->addDebug(stripslashes('$message'), PASS);\n" }
-    elsif ($status eq 'warn') { print "\$dbg->addDebug(stripslashes('$message'), WARN);\n" }
-    elsif ($status eq 'fail') { print "\$dbg->addDebug(stripslashes('$message'), FAIL);\n\$crimp->errorPage('$package', '500');\n"; exit }
-    else { print "\$dbg->addDebug('$message');\n" }
+    if ($status eq 'pass') { print "PASS(stripslashes('$message'));\n" }
+    elsif ($status eq 'warn') { print "WARN(stripslashes('$message'));\n" }
+    elsif ($status eq 'fail') { print "FAIL(stripslashes('$message'));\n\$crimp->errorPage('$package', '500');\n"; exit }
+    else { print "PASS('$message');\n" }
 }
 
 ####################################################################
