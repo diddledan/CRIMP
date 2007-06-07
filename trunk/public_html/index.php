@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: index.php,v 2.3 2007-06-01 21:57:48 diddledan Exp $
+ * Revision info: $Id: index.php,v 2.4 2007-06-07 21:33:56 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -15,14 +15,13 @@
 /**
  *this sets the CRIMP_HOME constant to the directory containing this very file
  */
-define('CRIMP_HOME', dirname(__FILE__).'/_crimp');
+define('DOC_ROOT', dirname(__FILE__));
+define('CRIMP_HOME', DOC_ROOT.'/_crimp');
 
 /**
  *tell php where to look for our classes
  */
 set_include_path('./_crimp/classes');
-
-error_reporting(E_ALL);
 
 /**
  *debug routines
@@ -45,8 +44,6 @@ require_once('plugin.php');
 require_once('crimp.php');
 $crimp = new Crimp;
 $crimp->setup();
-
-error_reporting(0);
 
 /**
  *do the plugin thing
