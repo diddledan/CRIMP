@@ -7,25 +7,24 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: plugin.php,v 1.2 2007-05-29 23:19:02 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.3 2007-06-07 21:31:04 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
 
 class perl extends Plugin {
-    public function execute() {
+	public function execute() {
         $crimp = &$this->Crimp;
-        $dbg = &$crimp->debug;
-        $pluginNum = $this->ExecutionCount;
-        $pluginName = 'perl';
+        $pluginNum = (int)$this->ConfigurationIndex;
         $scope = $this->ConfigurationScope;
+        $pluginName = 'perl';
         
         if ( !($config = $crimp->Config('plugin', $scope, $pluginName, $pluginNum)) ) {
-            $dbg->addDebug('You need to set a "plugin" key in the config file for this plugin', WARN);
+            WARN('You need to set a "plugin" key in the config file for this plugin');
             return;
         }
-        if ( !($parameter = $crimp->Config('parameter', $this->scope, $pluginName, $pluginNum)) ) {
-            $dbg->addDebug("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'", WARN);
+        if ( !($parameter = $crimp->Config('parameter', $scope, $pluginName, $pluginNum)) ) {
+            WARN("You need to set a \"parameter\" key in the config file for the perl plugin declaration of '$config'");
             return;
         }
         
@@ -66,7 +65,7 @@ class perl extends Plugin {
             'USER_AGENT'        => USER_AGENT,
             'HTTP_REQUEST'      => HTTP_REQUEST,
             'CONTENT_LENGTH'    => strlen($postquery),
-            'DOCUMENT_ROOT'     => (($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : CRIMP_HOME),
+            'DOCUMENT_ROOT'     => CRIMP_HOME,
         );
         
         /**
@@ -83,34 +82,32 @@ class perl extends Plugin {
         if (strpos(VAR_DIR, './') === 0) $env['VAR_DIR'] = '../.'.VAR_DIR;
         elseif (strpos(VAR_DIR, '../') === 0) $env['VAR_DIR'] = '../../'.VAR_DIR;
         else $env['VAR_DIR'] = VAR_DIR;
-        if (strpos(TEMPLATE_DIR, './') === 0) $env['TEMPLATE_DIR'] = '../.'.TEMPLATE_DIR;
-        elseif (strpos(TEMPLATE_DIR, '../') === 0) $env['TEMPLATE_DIR'] = '../../'.TEMPLATE_DIR;
-        else $env['TEMPLATE_DIR'] = TEMPLATE_DIR;
         if (strpos(ERROR_DIR, './') === 0) $env['ERROR_DIR'] = '../.'.ERROR_DIR;
         elseif (strpos(ERROR_DIR, '../') === 0) $env['ERROR_DIR'] = '../../'.ERROR_DIR;
         else $env['ERROR_DIR'] = ERROR_DIR;
         
-        $cwd = CRIMP_HOME.'/plugins/perl_plugins';
+        $cwd = CRIMP_HOME.'/plugins/perl/plugins/';
         
-        $proc = proc_open(CRIMP_HOME.'/plugins/perl_plugins/perl-php-wrapper.pl', $descriptorspec, $pipes, $cwd, $env);
+        $proc = proc_open(CRIMP_HOME.'/plugins/perl/plugins/perl-php-wrapper.pl', $descriptorspec, $pipes, $cwd, $env);
         
         if ( !is_resource($proc) ) {
-            $dbg->addDebug('could not spawn perl-php-wrapper.pl', WARN);
+            WARN('could not spawn perl-php-wrapper.pl');
             return;
         }
         
-        fwrite($pipes[0], $postquery);
+		fwrite($pipes[0], $postquery);
+		$returned = stream_get_contents($pipes[1]);
         fclose($pipes[0]);
-        $returned = stream_get_contents($pipes[1]);
         fclose($pipes[1]);
+        
         $retval = proc_close($proc);
         if ( $returned === false ) {
-            $dbg->addDebug('error occurred while reading from subprocess');
+            WARN('Error occurred while reading from subprocess. We received: '.$returned);
             return;
         }
-        
-        $level = ( $retval == 0 ) ? PASS : WARN;
-        $dbg->addDebug("perl-php-wrapper.pl exited with code '$retval'", $level);
+
+        $level = ( $retval == 0 ) ? 'PASS' : 'WARN';
+        $level("perl-php-wrapper.pl for $config exited with code '$retval'");
         eval($returned);
     }
 }
