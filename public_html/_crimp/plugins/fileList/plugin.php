@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: plugin.php,v 1.2 2007-06-01 21:57:49 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.3 2007-06-23 19:45:53 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -27,21 +27,21 @@ class fileList extends Plugin {
         }
 
         $DirList = '<b>Directories</b><br />&nbsp;&nbsp;&nbsp;';
-	$FileList = '<b>Documents</b><br />&nbsp;&nbsp;&nbsp;';
-	$DirCount = $FileCount = 0;
+		$FileList = '<b>Documents</b><br />&nbsp;&nbsp;&nbsp;';
+		$DirCount = $FileCount = 0;
 
         $DirList = '<b>Directories:</b>';
-	$FileList = '<b>Documents:</b>';
+		$FileList = '<b>Documents:</b>';
 
         if ( $crimp->Config('orientation', $this->ConfigurationScope, $pluginName, $pluginNum) == 'vertical') {
-	    $DirLayout = '<br />&nbsp;&nbsp;&nbsp;&nbsp;';
-	    $DirList = $DirList.'<br />&nbsp;&nbsp;&nbsp;&nbsp;';
-	    $FileList = $FileList.'<br />&nbsp;&nbsp;&nbsp;&nbsp;';
-	} else {
-            $DirLayout = ' | ';
-            $DirList = $DirList.' ';
-	    $FileList = $FileList.' ';
-	}
+			$DirLayout = '<br />&nbsp;&nbsp;&nbsp;&nbsp;';
+			$DirList = $DirList.'<br />&nbsp;&nbsp;&nbsp;&nbsp;';
+			$FileList = $FileList.'<br />&nbsp;&nbsp;&nbsp;&nbsp;';
+		} else {
+			$DirLayout = ' | ';
+			$DirList = $DirList.' ';
+			$FileList = $FileList.' ';
+		}
 
         $FileDir = $config;
 
@@ -49,60 +49,60 @@ class fileList extends Plugin {
         $BaseUrl = '';
 
         foreach ($HttpRequest as $_) {
-	    if ( is_dir("$FileDir/$_") ) {
-		$FileDir = $FileDir.'/'.$_;
-		$BaseUrl = $BaseUrl.'/'.$_;
-	    }
-	}
+			if ( is_dir("$FileDir/$_") ) {
+				$FileDir = $FileDir.'/'.$_;
+				$BaseUrl = $BaseUrl.'/'.$_;
+			}
+		}
 
         if ( !preg_match("|^{$crimp->userConfig()}|", $BaseUrl) )
             $BaseUrl = $crimp->userConfig().'/'.$BaseUrl;
 
-	$BaseUrl = preg_replace('|/+|','/', $BaseUrl);
-	PASS("$pluginName executing: (FileDir: $FileDir, BaseUrl: $BaseUrl)");
+		$BaseUrl = preg_replace('|/+|','/', $BaseUrl);
+		PASS("$pluginName executing: (FileDir: $FileDir, BaseUrl: $BaseUrl)");
 
         if ( !is_dir($FileDir) ) {
-	    WARN('Directory does not exist, or we tried to open a file as a directory.');
-	    return;
-	}
-	
-	$DIR = opendir($FileDir);
-	if ( $DIR === false ) {
-	    WARN('Could not open the directory for reading (check permissions)');
-	    return;
-	}
-	
-	while ( ($file = readdir($DIR)) !== false )
-	    $DirChk[] = $file;
-	closedir($DIR);
-	
-	foreach ( $DirChk as $file ) {
-	    if (($file != '.') && ($file != '..') && ($file != 'index.html') && ($file != 'CVS')) {
-		if ( is_dir("$FileDir/$file") ) {
-		    $DirCount++;
-		    $newurl = $BaseUrl.'/'.$file;
-		    $newurl = preg_replace('|/+|', '/', $newurl);
-		    if ($DirCount != 1) $DirList = $DirList.$DirLayout;
-		    $DirList = "$DirList<a href='$newurl'>$file</a>\n";
-		} elseif ( preg_match('/\.html$/', $file) ) {
-		    $FileCount++;
-		    $file = preg_replace('/\.html$/', '', $file);
-		    $newurl = $BaseUrl.'/'.$file;
-		    $newurl = preg_replace('|/+|', '/', $newurl);
-		    $newurl = $newurl.'.html';
-		    if ($FileCount != 1) $FileList = $FileList.$DirLayout;
-		    $FileList="$FileList<a href='$newurl'>$file</a>\n";
+			WARN('Directory does not exist, or we tried to open a file as a directory.');
+			return;
 		}
-	    }
-	}
 	
-	$newhtml = '';
-	if ( $DirCount > 0 ) $newhtml = $newhtml.$DirList;
-	if ( ($DirCount > 0) && ($FileCount > 0) ) $newhtml = $newhtml.'<br />';
-	if ( $FileCount != 0 ) $newhtml = $newhtml.$FileList;
+		$DIR = opendir($FileDir);
+		if ( $DIR === false ) {
+			WARN('Could not open the directory for reading (check permissions)');
+			return;
+		}
 	
-	$crimp->addMenu($newhtml);
-	StopTimer();
+		while ( ($file = readdir($DIR)) !== false )
+			$DirChk[] = $file;
+			closedir($DIR);
+	
+		foreach ( $DirChk as $file ) {
+			if (($file != '.') && ($file != '..') && ($file != 'index.html') && ($file != 'CVS')) {
+				if ( is_dir("$FileDir/$file") ) {
+					$DirCount++;
+					$newurl = $BaseUrl.'/'.$file;
+					$newurl = preg_replace('|/+|', '/', $newurl);
+					if ($DirCount != 1) $DirList = $DirList.$DirLayout;
+					$DirList = "$DirList<a href='".$crimp->makeLink($newurl)."'>$file</a>\n";
+				} elseif ( preg_match('/\.html$/', $file) ) {
+					$FileCount++;
+					$file = preg_replace('/\.html$/', '', $file);
+					$newurl = $BaseUrl.'/'.$file;
+					$newurl = preg_replace('|/+|', '/', $newurl);
+					$newurl = $newurl.'.html';
+					if ($FileCount != 1) $FileList = $FileList.$DirLayout;
+					$FileList="$FileList<a href='".$crimp->makeLink($newurl)."'>$file</a>\n";
+				}
+			}
+		}
+	
+		$newhtml = '';
+		if ( $DirCount > 0 ) $newhtml = $newhtml.$DirList;
+		if ( ($DirCount > 0) && ($FileCount > 0) ) $newhtml = $newhtml.'<br />';
+		if ( $FileCount != 0 ) $newhtml = $newhtml.$FileList;
+		
+		$crimp->addMenu($newhtml);
+		StopTimer();
     }
 }
 
