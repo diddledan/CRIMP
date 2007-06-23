@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: plugin.php,v 1.2 2007-06-01 21:57:49 diddledan Exp $
+ * Revision info: $Id: plugin.php,v 1.3 2007-06-23 19:48:57 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -38,16 +38,16 @@ class breadCrumbs extends Plugin {
         PASS("$pluginName executing (position: $position)");
 	
         $BreadLink = '';
-	$BreadCrumbs = "<a href='/$BreadLink'>home</a>";
+		$BreadCrumbs = '<a href="'.$crimp->makeLink("/$BreadLink").'">home</a>';
 	
         $HttpRequest = explode('/',$crimp->HTTPRequest());
-	foreach ( $HttpRequest as $requestPart ) {
-	    if ( $requestPart && $requestPart != 'index.html' ) {
-		$BreadLink = "$BreadLink/$requestPart";
-		$requestPart = preg_replace('/\.html$/', '', $requestPart);
-		$BreadCrumbs = "$BreadCrumbs - <a href='$BreadLink'>$requestPart</a>";
-	    }
-	}
+		foreach ( $HttpRequest as $requestPart ) {
+			if ( $requestPart && $requestPart != 'index.html' ) {
+				$BreadLink = "$BreadLink/$requestPart";
+				$requestPart = preg_replace('/\.html$/', '', $requestPart);
+				$BreadCrumbs = "$BreadCrumbs - <a href='".$crimp->makeLink($BreadLink)."'>$requestPart</a>";
+			}
+		}
 	
         if ( $position == 'top' || $position == 'both' )
             $crimp->addContent("<div id='crimpBreadCrumbsTop'><b>Location: $BreadCrumbs</b></div>", 'top');
