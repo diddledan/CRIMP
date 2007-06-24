@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.28 2007-06-07 21:27:38 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.29 2007-06-24 13:43:49 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -558,7 +558,7 @@ UserConfig: {$this->_userConfig}");
                 /**
                  *CHEAT CODES
                  */
-                $version = '$Id: crimp.php,v 1.28 2007-06-07 21:27:38 diddledan Exp $';
+                $version = '$Id: crimp.php,v 1.29 2007-06-24 13:43:49 diddledan Exp $';
                 $this->_output = preg_replace('/<!--VERSION-->/i', $version, $this->_output);
             }
             
@@ -833,9 +833,9 @@ UserConfig: {$this->_userConfig}");
          *we've searched for it, now return it
          */
         if ($configVal !== false) {
-            PASS("Found config for key: $key (subkey: '$subkey') in scope $scope for plugin: $plugin($pluginNum)");
+            PASS("Found config for key: $key (subkey: '$subkey') in scope (see definitions at top of crimp.php) $scope for plugin: $plugin($pluginNum)");
         } else {
-            WARN("No config for key: $key (subkey: '$subkey') in scope $scope for plugin: $plugin($pluginNum)");
+            WARN("No config for key: $key (subkey: '$subkey') in scope (see definitions at top of crimp.php) $scope for plugin: $plugin($pluginNum)");
         }
         return $configVal;
     }
@@ -978,44 +978,67 @@ UserConfig: {$this->_userConfig}");
                 continue;
             }
             
-            $XML = '<crimpresults></crimpresults>';
-            $resXML = new SimpleXMLElement($XML);
-            unset($XML);
+            $xml = '<crimpresults></crimpresults>';
+            $resultset = new SimpleXMLElement($xml);
+            
             foreach($SimpleXML->request as $request) {
-                if ($request->name) {
+				$xml = '<crimpresult></crimpresult>';
+				$resXML = new SimpleXMLElement($xml);
+				
+                if ($request->type) {
 					$reqPluginName	= ($request->pluginName)	? (string) $request->pluginName	: '';
                     $reqPluginNum	= ($request->pluginNum)		? (int) $request->pluginNum		: 0;
                     $reqScope		= ($request->scope)			? (int) $request->scope			: 0;
                     
-                    switch ((string) $request->name) {
+                    $resXML->addChild('type', (string) $request->type);
+                    $resXML->addChild('pluginName', $reqPluginName);
+					$resXML->addChild('pluginNum', $reqPluginNum);
+					$resXML->addChild('scope', $reqScope);
+                    
+                    switch ((string) $request->type) {
                         case 'Config':
                             $reqKey		= ($request->key)		? (string) $request->key	: '';
                             $reqSubkey	= ($request->subkey)	? (string) $request->subkey	: '';
                             
                             $cfgres = $crimp->Config($reqKey, $reqScope, $reqPluginName, $reqPluginNum, $reqSubkey);
                             
-                            $resXML->addChild('name', 'Config');
                             $resXML->addChild('key', $reqKey);
                             $resXML->addChild('subkey', $reqSubkey);
-                            $resXML->addChild('scope', $reqScope);
-                            $resXML->addChild('pluginName', $reqPluginName);
-                            $resXML->addChild('pluginNum', $reqPluginNum);
                             $resXML->addChild('data', $cfgres);
-                            
                             break;
                         case 'PageRead':
 							$reqFile = ($request->file) ? (string) $request->file : '';
-							$resXML->addChild('name', 'PageRead');
 							$resXML->addChild('file', $reqFile);
 							$resXML->addChild('data', $this->PageRead($reqFile));
 							break;
 						case 'Defer':
-							
+							$this->setDeferral($reqPluginName, $reqPluginNum, $reqScope);
+							$resXML->addChild('data', 'done');
+							break;
+						case 'MakeLink':
+							$link = $this->makeLink((string) $request->url);
+							$resXML->addChild('url', (string) $request->url);
+							$resXML->addChild('data', $link);
+							break;
+						case 'ErrorCode':
+							$resXML->addChild('code', (int) $request->code);
+							$code = $this->errorCode((int) $request->code);
+							$resXML->addChild('ErrName', $code[0]);
+							$resXML->addChild('data', $code[1]);
+							break;
+						case 'HTTPRequest':
+							$resXML->addChild('data', $this->HTTPRequest());
+							break;
                         default:
+							$resXML->addChild('error', 'Action type unsupported');
                     }
-                }
+                } else {
+					$resXML->addChild('error', 'No Action Type specified');
+				}
+				$resultset->addChild($resXML);
             }
-            fputs($pipes[0], $resXML->asXML());
+            
+            fputs($pipes[0], $resultset->asXML());
         }
         fclose($pipes[1]);
         fclose($pipes[0]);
