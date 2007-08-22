@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>500 - Server Error</title>
+</head>
+<body>
+<h1>500 - Server Error</h1>
+<p align="center"><strong><em>A FATAL ERROR has occured, CRIMP cannot continue.</em></strong></p>
+<p>CRIMP could not read the config.xml file in public_html/_crimp/config.xml .</p>
+<h2>Possible Reasons and Solutions</h2>
+<ol>
+  <li>
+    This is a new install of CRIMP and the <strong>crimp.ini</strong> file is
+    missing.
+    <ul>
+      <li>
+        Copy the <strong>crimp.xml.example</strong> file to
+        <strong>crimp.xml</strong> within the <code>public_html/_crimp</code> directory.
+      </li>
+    </ul>
+  </li>
+  <li>
+  	The permissions on the config.xml file are incorrect.
+  	<ul>
+  		<li>
+  			If utilising Apache's mod_suphp or similar facility that allows the server to execute CRIMP as your local user id, then the file must at least be readable by your userid.
+		</li>
+		<li>
+			For all other scenarios, the config.xml file must be world readable (on *nix: <code>chmod 644 config.xml</code>)
+		</li>
+	</ul>
+  </li>
+</ol>
+<hr />
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+CRIMP [Content Redirection Internet Management Program]
+   Authors: The CRIMP Team
+   Project Leads:
+      Martin "Deadpan110" Guppy [deadpan110@users.sourceforge.net]
+      Daniel "Fremen" Llewellyn [diddledan@users.sourceforge.net]
+   Home Page: http://crimp.sourceforge.net/
+</pre>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">
+<img alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png" />
+</a>
+<br />This 
+<span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/Text" rel="dc:type">work</span> is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England & Wales License</a>.
+</body>
+</html>
