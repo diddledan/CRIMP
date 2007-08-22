@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: crimp.php,v 1.29 2007-06-24 13:43:49 diddledan Exp $
+ * Revision info: $Id: crimp.php,v 1.30 2007-08-22 12:38:49 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -73,10 +73,10 @@ class Crimp {
     protected $debugMode = 'Div';
     protected $debugSwitch = false;
     
-    public $_config;
+    public $_config = false;
     protected $varDir;
-    protected $errordir;
-    protected $defaultLang;
+    protected $errorDir = './_crimp/errordocs/';
+    protected $defaultLang = 'en';
     public $friendlyUrls;
     /**
      *the deepest URL path that has been defined in the config file which
@@ -109,7 +109,7 @@ class Crimp {
     /**
      *debug object
      */
-    protected $debug;
+    protected $debug = false;
     /**
      *default header
      */
@@ -226,27 +226,27 @@ UserConfig: {$this->_userConfig}");
     }
     
     public function PASS($message) {
-        if (isset($this->debug)) {
+        if ($this->debug) {
             $this->debug->add($message);
         }
     }
     public function WARN($message) {
-        if (isset($this->debug)) {
+        if ($this->debug) {
             $this->debug->add($message, PHP_DebugLine::TYPE_WARNING);
         }
     }
     public function FAIL($message) {
-        if (isset($this->debug)) {
+        if ($this->debug) {
             $this->debug->error($message);
         }
     }
     public function DUMP($variable, $varname = '') {
-        if (isset($this->debug)) {
+        if ($this->debug) {
             $this->debug->dump($variable, $varname);
         }
     }
     public function StopTimer() {
-        if (isset($this->debug)) {
+        if ($this->debug) {
             $this->debug->stopTimer();
         }
     }
@@ -263,7 +263,7 @@ UserConfig: {$this->_userConfig}");
         define('DEFAULT_LANG', $this->defaultLang);
         $this->setTitle( ( $cfg = $this->Config('title', SCOPE_SECTION) ) ? $cfg : '', true );
         
-        $this->friendlyUrls = (preg_match('/^on$/i', $this->Config('friendlyUrls', SCOPE_CRIMP))) ? 'on' : 'off';
+        $this->friendlyUrls = (preg_match('/^\s*on\s*$/i', $this->Config('friendlyUrls', SCOPE_CRIMP))) ? 'on' : 'off';
         PASS("Frienly URL System is turned {$this->friendlyUrls}");
     }
     
@@ -318,7 +318,7 @@ UserConfig: {$this->_userConfig}");
         $loc = $location;
         if ($loc === true) $loc = 'overwrite';
         PASS("Adding content ($loc)");
-        
+
         $br = "\n<br />\n";
         
         if ( !$this->_output || $this->_output == $this->defaultHTMLContent ) {
@@ -338,7 +338,7 @@ UserConfig: {$this->_userConfig}");
             $this->_output = str_replace('<!--endPageContent-->',"$br$htmlcontent<!--endPageContent-->",$this->_output, $var);
         }
         
-        $this->debug->stopTimer();
+        StopTimer();
     }
     
     /**
@@ -376,35 +376,37 @@ UserConfig: {$this->_userConfig}");
     public function errorPage($package, $errorCode = '500') {
         PASS("errorPage(): package: $package; errorCondition: $errorCode");
 
-        if ( $package ) $package = "-$package";
         $languages = array();
         $errordir = $this->errorDir;
         if ( $dir = @opendir($errordir) ) {
             while ( ($file = readdir($dir)) !== false ) if ($file != "." && $file != "..") {
-                if ( is_dir("$dir/$file") ) $languages[$file] = true;
+                if ( is_dir("$errordir/$file") ) $languages[$file] = true;
             }
-            closedir($dir);unset($file);
+            closedir($dir);unset($file, $dir);
         }
-        
+
         $deflang = $this->defaultLang;
         $clientLang = HTTP::negotiateLanguage($languages, $deflang);
-        
+
         if ( isset($_COOKIE['preferred_language']) ) $clientLang = $_COOKIE['preferred_language'];
         
-        $errorFiles = array(
-            "$errordir/$clientLang/$errorCode$package.html",
-            "$errordir/$clientLang/$errorCode.html",
-            "$errordir/$deflang/$errorCode$package.html",
-            "$errordir/$deflang/$errorCode.html",
-            "$errordir/en/$errorCode$package.html",
-            "$errordir/en/$errorCode.html",
-        );
-        unset($errordir, $clientLang, $deflang, $plugin);
+        $errorFiles = array();
+        if ( $clientLang ) { array_push($errorFiles, "$errordir/$clientLang/$errorCode-$package.html"); }
+        if ( $defLang && $defLang != $clientLang ) { array_push($errorFiles, "$errordir/$deflang/$errorCode-$package.html"); }
         
+		if ( $clientLang ) { array_push($errorFiles, "$errordir/$clientLang/$errorCode.html"); }
+		if ( $defLang && $defLang != $clientLang ) { array_push($errorFiles, "$errordir/$deflang/$errorCode.html"); }
+        unset($errordir, $clientLang, $deflang);
+
         $content = false;
         foreach ( $errorFiles as $file ) {
-            if ( $content ) next;
-            if ( file_exists($file) ) list($title, $content) = $this->stripHeaderFooter($this->pageRead($file));
+            if ( file_exists($file) ) {
+            	$ret = $this->stripHeaderFooter($this->pageRead($file));
+            	$title = $ret[0];
+            	$content = $ret[1];
+            	unset ( $ret );
+            	break;
+            }
         }
         unset($errorFiles, $file);
         
@@ -420,12 +422,12 @@ UserConfig: {$this->_userConfig}");
             }
             $content = "
 <h1>Error '$errorCode': $errorName</h1>
-<p>$errorDescription</p>
+<p>$errorDescription (Package: $package)</p>
 <p>Additionally, a 404: Not Found error was encountered while trying to use a 'friendly' error document for this request.</p>
 ";
         }
-        
-        $this->debug->stopTimer();
+
+		StopTimer();
         $this->addContent($content, true);
         $this->setTitle($title, true);
         $this->exitCode($errorCode);
@@ -558,7 +560,7 @@ UserConfig: {$this->_userConfig}");
                 /**
                  *CHEAT CODES
                  */
-                $version = '$Id: crimp.php,v 1.29 2007-06-24 13:43:49 diddledan Exp $';
+                $version = '$Id: crimp.php,v 1.30 2007-08-22 12:38:49 diddledan Exp $';
                 $this->_output = preg_replace('/<!--VERSION-->/i', $version, $this->_output);
             }
             
@@ -697,12 +699,12 @@ UserConfig: {$this->_userConfig}");
         try {
             $xml = file_get_contents(CRIMP_HOME.'/config.xml');
         } catch (Exception $e) {
-            $this->errorPage('config.xml');
+            $this->errorPage('Config.xml');
         }
         try {
             $SimpleXML = new SimpleXMLElement($xml);
         } catch (Exception $e) {
-            $this->errorPage('config.xml');
+            $this->errorPage('Config.xml');
         }
         $this->_config = $SimpleXML;
         
