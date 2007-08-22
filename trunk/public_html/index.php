@@ -7,7 +7,7 @@
  *                   Daniel "Fremen" Llewellyn <diddledan@users.sourceforge.net>
  * HomePage:         http://crimp.sf.net/
  *
- * Revision info: $Id: index.php,v 2.4 2007-06-07 21:33:56 diddledan Exp $
+ * Revision info: $Id: index.php,v 2.5 2007-08-22 12:38:49 diddledan Exp $
  *
  * This file is released under the LGPL License.
  */
@@ -29,7 +29,7 @@ set_include_path('./_crimp/classes');
 require_once('PHP/Debug.php');
 
 /**
- *negotiatelanguage
+ *negotiate language
  */
 require_once('HTTP.php');
 
