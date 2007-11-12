@@ -4,7 +4,8 @@
 <crimp>
   <!-- root namespace declarations - these are GLOBAL to ALL of CRIMP -->
   <debug><!-- <debug></debug> can appear in a <section> -->
-    <mode>Div</mode><!-- currently "Div" or "Table". case sensitive. -->
+    <type>HTML</type><!-- currently only "HTML". case sensitive. defaults to "HTML" if undefined -->
+    <mode>Div</mode><!-- currently "Div" or "Table". case sensitive. defaults to "Div" if not defined-->
     <switch>on</switch><!-- "on" or "off" with anything else meaning "off" -->
   </debug>
 
@@ -41,12 +42,12 @@
     <parameter>on</parameter>
     <defer>no</defer>
   </plugin> -->
-  <plugin>
+  <!--<plugin>
     <name>perl</name>
     <plugin>PageVote</plugin>
     <parameter>Default</parameter>
     <defer>no</defer>
-  </plugin>
+  </plugin>--><!-- this one is disabled until I can design a bi-directional perlplugin system -->
   <plugin>
     <name>perl</name>
     <plugin>ButtonBar</plugin>
