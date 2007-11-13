@@ -13,48 +13,8 @@
  */
 
 /**
- *this sets the CRIMP_HOME constant to the directory containing this very file
+ *debugging helper routines
  */
-define('DOC_ROOT', dirname(__FILE__));
-define('CRIMP_HOME', DOC_ROOT.'/_crimp');
-
-/**
- *tell php where to look for our classes
- */
-set_include_path('./_crimp/classes');
-
-/**
- *debug routines
- */
-require_once('PHP/Debug.php');
-
-/**
- *negotiate language
- */
-require_once('HTTP.php');
-
-/**
- *plugin architecture
- */
-require_once('plugin.php');
-
-/**
- *Main class - this is where the bulk of the app resides
- */
-require_once('crimp.php');
-$crimp = new Crimp;
-$crimp->setup();
-
-/**
- *do the plugin thing
- */
-$crimp->executePlugins();
-
-/**
- *send the completed page
- */
-$crimp->sendDocument();
-
 function PASS($message) {
     global $crimp;
     $crimp->PASS($message);
@@ -75,4 +35,32 @@ function StopTimer() {
     global $crimp;
     $crimp->StopTimer();
 }
+
+/**
+ *-----------------
+ */
+
+/**
+ *this sets the CRIMP_HOME constant to the directory containing this very file
+ */
+define('DOC_ROOT', dirname(__FILE__));
+define('CRIMP_HOME', DOC_ROOT.'/_crimp');
+
+/**
+ *tell php where to look for our classes
+ */
+set_include_path('./_crimp/classes');
+
+/**
+ *import crimp
+ */
+require_once('crimp.php');
+/**
+ *initialise the app
+ */
+$crimp = new Crimp;
+/**
+ *run the program
+ */
+$crimp->run();
 ?>

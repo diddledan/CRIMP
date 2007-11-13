@@ -269,6 +269,16 @@ class PHP_Debug
         $this->setWatchCallback();
         $this->setErrorHandler();
     }
+    
+    /**
+     * Update options
+     *
+     * @param array $options    Array containing updated options
+     */
+    function updateOptions($options = array())
+    {
+        $this->options = array_merge($this->options, $options);
+    }
 
     /**
      * Add a debug information
