@@ -17,23 +17,23 @@
  */
 function PASS($message) {
     global $crimp;
-    $crimp->PASS($message);
+    if ($crimp) $crimp->PASS($message);
 }
 function WARN($message) {
     global $crimp;
-    $crimp->WARN($message);
+    if ($crimp) $crimp->WARN($message);
 }
 function FAIL($message) {
     global $crimp;
-    $crimp->FAIL($message);
+    if ($crimp) $crimp->FAIL($message);
 }
 function DUMP($variable, $varname = '') {
     global $crimp;
-    $crimp->DUMP($variable, $varname);
+    if ($crimp) $crimp->DUMP($variable, $varname);
 }
 function StopTimer() {
     global $crimp;
-    $crimp->StopTimer();
+    if ($crimp) $crimp->StopTimer();
 }
 
 /**
@@ -49,7 +49,7 @@ define('CRIMP_HOME', DOC_ROOT.'/_crimp');
 /**
  *tell php where to look for our classes
  */
-set_include_path('./_crimp/classes');
+set_include_path(CRIMP_HOME.'/classes');
 
 /**
  *import crimp
