@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>FTP Install</title>
+</head>
+
+<body>
+<h1>FTP Install </h1>
+<p>For this type of install, your downloaded module in either <span
+ style="font-weight: bold;">ZIP (.zip extension)</span> or <span
+ style="font-weight: bold;">TARBALL (.tar.bz2 extension)</span> format needs to be extracted
+into a temporary directory on your local machine before uploading to
+your web server.</p>
+
+<h2>From Windows</h2>
+<p>Using your favorite compression utility (example: <a
+ href="http://www.winzip.com/downwz.htm">Winzip</a>) extract all the
+files to a temporary directory. Then open your FTP client and connect to
+your server host (or use windows file manager by typing
+'ftp://[username]@[server-host.com]' into the address bar, you will be
+prompted for your password.).
+Select your extracted CRIMP directory and upload it in its entirety
+into your remote webserver home directory on your server host.<br />
+<span style="font-style: italic;">* please note, connection problems are
+not discussed in this document. Please check your firewall settings!</span></p>
+
+<p>Once CRIMP is uploaded, you will need to check the <a href="file permissions.html">file permissions</a> on the uploaded files.</p>
+
+<h2>From Linux</h2>
+<p><ol><li>Untar the tarball into a temprary directory:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+mkdir /tmp/crimp
+tar -xjpvf Crimp-[VERSION].tar.bz2 -C /tmp/crimp
+</pre></li>
+<li>Use your FTP client to upload the extracted CRIMP files into your
+  remote webserver home directory.</li>
+<li>Once CRIMP is uploaded, you will need to check the <a href="file permissions.html">file permissions</a> on the uploaded files.</li>
+</ol></p>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">
+<img alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png" />
+</a>
+<br />This 
+<span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/Text" rel="dc:type">work</span> is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England & Wales License</a>.
+</body>
+</html>

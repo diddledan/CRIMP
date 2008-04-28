@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Configuration</title>
+</head>
+
+<body>
+<h1>CRIMP Configuration</h1>
+<p>Configuring CRIMP  is all done within its easy to use crimp.ini file.</p>
+<p>There are 2 main sections to think about when configuring a CRIMP website,</p>
+<ol>
+  <li>What modules you want to use globally.</li>
+  <li>What modules you would like to use on a per web directory basis.</li>
+</ol>
+<p>By using the examples within <strong>../cgi-bin/crimp.ini</strong>, it is possible to create page layouts to suit your needs.</p>
+<h2>The Global Section </h2>
+<p>This section is at the top of the crimp.ini file and allows you to add modules to your entire site. </p>
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+# Global Options
+# all files must default to standard redirection
+# default options configure files for the local server on
+ 
+# Print debug output at the bottom of the page [on/off/page]
+DebugMode = on
+ 
+# Plugin Execution Order
+# LEAVE OUT DocumentTemplate - this will automatically be called last
+PluginOrder = UserAuth,ContentDirectory,ContentDatabase,BreadCrumbs,FileList,SiteMenu
+ 
+# The template used for the entire site
+DocumentTemplate = ../template/default-crimp.html
+</pre>
+
+<p>Lines starting with a # are comments and are there to assist you in the configuration of CRIMP.</p>
+<h2>The Directory Sections  </h2>
+<p>These sections allow you to set specific parts of your website to use different modules to create content and will overide any global options if needed.</p>
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+# Website root (http://your-site/)
+[/]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = horizontal
+BreadCrumbs = top
+ContentDirectory = ../content/
+
+# Website docs (http://your-site/docs/)
+[/docs]
+PluginOrder = ContentDirectory,FileList,BreadCrumbs
+FileList = horizontal
+BreadCrumbs = top
+ContentDirectory = ../cgi-bin/Crimp/docs/
+</pre>
+
+<h2><a name="CallingModules" id="CallingModules"></a>Calling Modules</h2>
+<p>Modules are called within the crimp.ini file from the relevent sections by using the following format:</p>
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">ModuleName = Module Value</pre>
+
+<p>The most important module within the crimp.ini file is called Debug, this is a <a href="../configuration/modules/BuiltIn">built in module</a> and will assist you in configuring your CRIMP website. The Debug module is explicitly set within the global section of the crimp.ini file and has 3 settings: </p>
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+# permanently activate debug throughout the website
+Debug = on
+ 
+# view debug by appending ?debug=on to your URL
+# eg http://my-site?debug=on
+Debug = page
+
+# switch debug off throughout your website
+Debug = off
+</pre>
+
+<p>A complete list of all  modules that are not built in and are available to CRIMP can be seen within the output of CRIMP Debug. You can find instructions on howto configure these plugin modules for use in your site by selecting the module name within the <a href="../configuration/modules">CRIMP  modules</a> section.</p>
+<div style="width: 100%; background-color: #eeeeee; color: #000;">
+    <pre># Debug View Example</pre>
+    <ul>
+        <li>
+          <pre>Available Plugins 
+  ContentDatabase,BreadCrumbs,ContentDirectory,ContentListing,CrimpAdmin,FileList
+  FlatBlog,RandomContent,SiteMenu,Snow,UserAuth,VirtualRedirect,DocumentTemplate</pre>
+        </li>
+    </ul>
+</div>
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">
+<img alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png" />
+</a>
+<br />This 
+<span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/Text" rel="dc:type">work</span> is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England & Wales License</a>.
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>File Permissions</title>
+</head>
+
+<body>
+<h1>File Permissions</h1>
+<p>Depending on how CRIMP was installed, it is recomended that you check the file and directory permissions and set them according to your webservers requirements.
+The following is an example only, and your requirements may differ. (This scenario
+is from the XYZ Network, Daniel &quot;Fremen&quot; Llewellyn's Webhosting provider.
+The webserver runs as user <em>apache</em>, group <em>apache</em>. The apache user
+is added to every user's primary group, which is unique to that user. Apache then
+utilises mod_suexec to run CGI and PHP scripts with the permissions of the owning
+user. The static files are served as the apache user and group. This means that
+every file inside the public_html and cgi-bin directories must be readable by
+the user's primary group. As the apache user is a member of every user's primary
+group no permissions need to be assigned for the <em>other</em> security context.)
+<ul>
+    <li>All folders should have the permissions 750, or [rwxr-x---].</li>
+    <li>All files in public_html should be 640, or [rw-r-----].</li>
+    <li>All files in cgi-bin should be executable thus 750, or [rwxr-x---].</li>
+</ul>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">
+<img alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png" />
+</a>
+<br />This 
+<span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/Text" rel="dc:type">work</span> is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England & Wales License</a>.
+</body>
+</html>

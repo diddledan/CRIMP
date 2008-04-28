@@ -1,0 +1,11 @@
+#mainMenu {
+	font-family: Helvetica,Arial,sans-serif;
+	text-align: center;
+}
+
+#crimpFileList {
+	text-align: left;
+	position: relative;
+	top: 0px;
+	left: auto;
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>ButtonBar</title>
+</head>
+
+<body>
+<h1>ButtonBar</h1>
+<h2>Description</h2>
+<p>This plugin module was originally intended for use with the default CRIMP setup and allows users to select view modes, view debug information, quickly access the CRIMP documentation and edit local content.
+To use the CRIMP ButtonBar on your CRIMP site, just add it to the section you require within the crimp.ini file along with a minor edit to your template.</p>
+<h2>Installation</h2>
+<p>This module is included within the default CRIMP installation and only
+needs to be configured within the crimp.ini configuration file and within the users DocumentTemplate.</p>
+<h2>Configuration</h2>
+<p>This module can be used either globally or on a per directory basis and requires the DocumentTemplate module.
+Edit crimp.ini for the following settings:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+# Global Options
+ButtonBar = [Name of ButtonBar style]
+
+# Per Directory Options
+[/]
+ButtonBar = [Name of ButtonBar style]
+</pre>
+Edit your template with the following somewhere between the &lt;body&gt; and &lt;/body&gt; tags as to where you would like the ButtonBar to appear:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+&lt;!--BUTTONBAR--&gt;
+</pre>
+If the ButtonBar style does not exist, then ButtonBar = Default will be used.</p>
+<h2>Examples</h2>
+<p>This uses the default DocumentTemplate with the default ButtonBar for the docs section of your CRIMP website:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+[/docs]
+DocumentTemplate = ../template/default-crimp.html
+ButtonBar = Default
+</pre></p>
+<p>This uses a users custom DocumentTemplate with the BlackRounded ButtonBar (included with this module) in the global section of a CRIMP website:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+# Global Options
+DocumentTemplate = ../template/myBlog.html
+ButtonBar = BlackRounded
+</pre>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">
+<img alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png" />
+</a>
+<br />This 
+<span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/Text" rel="dc:type">work</span> is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England & Wales License</a>.
+</body>
+</html>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- the order of plugins is important. they are executed in the same order defined here,
+  starting with the plugins defined in the requested section, followed by the globals -->
+<crimp>
+  <!-- root namespace declarations - these are GLOBAL to ALL of CRIMP -->
+  <debug><!-- <debug></debug> can appear in a <section> -->
+    <type>HTML</type><!-- currently only "HTML". case sensitive. defaults to "HTML" if undefined -->
+    <mode>Div</mode><!-- currently "Div" or "Table". case sensitive. defaults to "Div" if not defined-->
+    <switch>on</switch><!-- "on" or "off" with anything else meaning "off" -->
+  </debug>
+
+  <friendlyUrls>off</friendlyUrls><!-- defaults to off, can be 'on' (requires apache,
+    .htaccess support and for http://<yourdomain>/index.php to be crimp's index.php) -->
+  
+  <fullajax>on</fullajax><!-- on or off, tells crimp whether to load a javascript
+    library that will force all likes to go through crimp's ajax system. this
+    facility is for demo purposes only, and only works on the Firefox browser -->
+  
+  <title></title><!-- this ADDs to the title set in the template you
+    choose, so best to either use this, and leave the template with an empty
+    <title></title> or set the title in the <title> tags inside your template
+    and leave this blank -->
+  
+  <titleorder>forward</titleorder><!-- forward (for "site | page") or backward
+    (for "page | site") defaulting to backward.-->
+  <titleseparator> - </titleseparator>
+  <vardir>./_crimp/var</vardir><!-- like linux's /var dir, this is for variable
+    data like a blog file or caches -->
+  <errordir>./_crimp/errordocs</errordir><!-- the directory where error documents
+    are stored. unless you have a reason to, this default shouldn't be changed -->
+  <defaultlanguage>en</defaultlanguage><!-- default language for error docs -->
+  <template>./_crimp/templates/default-crimp.html</template><!-- either full or
+    relative path to template file. relative paths are all from index.php's dir -->
+  
+  <plugin>
+    <name>breadCrumbs</name>
+    <position>top</position><!-- either 'top', 'bottom' or 'both' -->
+  </plugin>
+  <!-- <plugin>
+    <name>perl</name>
+    <plugin>Snow</plugin>
+    <parameter>on</parameter>
+    <defer>no</defer>
+  </plugin> -->
+  <!--<plugin>
+    <name>perl</name>
+    <plugin>PageVote</plugin>
+    <parameter>Default</parameter>
+    <defer>no</defer>
+  </plugin>--><!-- this one is disabled until I can design a bi-directional perlplugin system -->
+  <plugin>
+    <name>perl</name>
+    <plugin>ButtonBar</plugin>
+    <parameter>Default</parameter>
+    <defer>yes</defer>
+  </plugin>
+  <!-- end root namespace declarations -->
+  
+  <!-- below here goes the individual section declarations -->
+  <section baseuri="/">
+    <plugin>
+      <name>contentDirectory</name>
+      <directory>./_crimp/docs</directory>
+    </plugin>
+    <plugin>
+      <name>fileList</name>
+      <!-- fileList relies upon there being a contentDirectory plugin
+        defined for the same section or in the root namespace -->
+      <orientation>horizontal</orientation><!-- horizontal or vertical -->
+    </plugin>
+  </section>
+  
+  <section baseuri="/blog">
+    <plugin>
+      <name>perl</name>
+      <plugin>FlatBlog</plugin>
+      <parameter>flatblog.example.html</parameter>
+      <defer>no</defer>
+    </plugin>
+  </section>
+</crimp>

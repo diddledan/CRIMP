@@ -1,0 +1,94 @@
+Welcome to CRIMP, the Content Redirection Internet Management Programme
+
+Configuration is all done in the cgi-bin/crimp.ini file when using the
+perl version of CRIMP, but we are upgrading to PHP, so the configuration
+goes in public_html/_crimp/config.xml.
+Configuration examples are in *.example files
+
+--------------
+PRE-REQUISITES
+--------------
+You need a php enabled host. We try to include everything you need in the
+distribution, so there's no reason to worry about whether it will work.
+
+---------
+TEMPLATES
+---------
+A template file is essentially a standard HTML file (the kind of file that
+you view with your Internet browser) with a special 'tag' that is replaced
+with the output from the CRIMP engine. This enables you to create a
+customised look and feel for your entire web-site with just one file. All
+you need to do, is create your desired layout in a web-page editor, then
+find the spot where you want CRIMP's content to appear, and type in
+the text "@@PAGE_CONTENT@@" without the quotes. Then save the file and
+upload to your web-space.
+
+The <template></template> tag looks for the file you specify relative to the
+'./public_html/_crimp' directory, so if you put your template in
+'_crimp/templates', you would specify in your crimp.xml file:
+    ...
+    <template>./templates/yourtemplate.html</template>
+    ...
+and if you put it at './templates':
+    ...
+    <template>../../templates/yourtemplate.html</template>
+    ...
+(WARNING: This behavior is subject to change: check this document for
+updates as to where CRIMP will look for your template, and what it looks
+for inside the template - one thought I have already had is replacing the
+<!--PAGE_CONTENT--> tag with something easier for people with no knowledge
+of HTML.)
+
+
+-----------------
+PHP MODULES (new)
+-----------------
+
+breadCrumbs
+Designed to add a backwards navigation system so that users know where
+they are in relation to the home-page, this module can be configured to
+output breadcrumbs at either the top or bottom of the page, or both.
+
+contentDirectory
+This module is configured with the path to the directory which contains
+the content that you want to be visible within the section. The default
+is ./docs. Paths must either be absolute or relative to the _crimp
+dir. The module will automatically use a file by the name of index.html
+for any directories (eg. request for / will result in the page at
+location ../content/index.html, and a request for /wibble will use
+../content/wibble/index.html if wibble is a directory, or just the file
+by the name wibble.html if not, and a 404 error if neither applies.).
+
+
+------------------
+PERL MODULES (old)
+------------------
+
+ContentDatabase
+This module must be configured with a database on an accessible server.
+You can use any database that Perl supports via the DBI module. The most
+common database you'll use is mySQL. A ContentDatabase provided section
+must have certain options in the crimp.ini. The database must have a
+'path' field of a textual type, a 'title' field which contains the page's
+title as it should appear in the <title></title> tags (minus the site
+name, as this is added automatically) and a 'content' field of a textual
+type that can hold all of your page's data. The 'path' field will contain
+the relative path (minus any preceding slashes or dots, e.g. ./) of the
+page you want to display, or 'root' for the base file. The 'root' page
+will display (for our example configuration below) for either /db, /db/
+or /db/root. The 'content' field must contain either pure (x)HTML or
+pure Perl code with "#PERL" on the first line with no spaces beforehand.
+you cannot mix and match (x)HTML and Perl within the same section. You
+CAN, however, use (x)HTML on one page, and Perl code on another.
+
+
+---
+FAQ
+---
+
+Q. the Perl code in my database is printed out as is, instead of being
+interpreted by CRIMP's Perl-based ContentDatabase plugin.
+
+A. make sure that the first line of your page(s) reads "#PERL" with nothing
+before it (and nothing else on the same line, as it will be interpreted as
+a Perl comment).

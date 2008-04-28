@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>WordLink</title>
+</head>
+<body>
+<h2>WordLink</h2>
+<p>This is a concept idea for a module yet to be developed by the crimp
+team.</p>
+<p>
+WordLink parses the chosen page content and makes links of certain key
+words (similar to wiki words).</p>
+<p>Firstly, the module would have to appear directly above whatever module
+is being used to grab the page within the config file.</p>
+
+<h3>example crimp.ini</h3>
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+[/docs]
+WordLink = [path to writable text file]
+ContentDirectory = ../cgi-bin/Crimp/docs
+</pre>
+
+<p>Secondly, for users that have minimum knowlege of their website, a text
+file should be included to take care of the initial setup.</p>
+
+<h3>example wordlink.txt (probably in 'var' and set to chmod 755)</h3>
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+CRIMP = http://crimp.sourceforge.net
+WordLink = http://crimp.sourceforge.net/docs/modules/WordLink
+IND-Web = http://www.ind-web.com/
+XYZ = http://www.xyz-network.com/
+</pre>
+
+<p>Now the crimp.ini file and initial writable text file has been set, any
+pages that contain the word CRIMP (within the chosen section of the
+crimp.ini) will be have that word replaced with &lt;a
+href='http://crimp.sourceforge.net'&gt;CRIMP&lt;/a&gt;</p>
+
+<p>There are several ways to add words to the list:
+<ol>
+    <li>Edit the text file manually</li>
+    <li>Let the module do it for you</li>
+</ol>
+</p>
+<p>To let the module add words to the list, all the user would have to do
+is enter the word into a page as follows:
+<pre style="width: 100%; background-color: #eeeeee; color: #000;">
+[[CRIMP|http://crimp.sourceforge.net]]
+[[my computer|http://my.site.net/my-computer.html]]
+</pre>
+Any pages containing these terms will then have the link automatically
+inserted.</p>
+
+<h3>Possible problems and solutions</h3>
+<p>The initial users page with the WordLink may not be writable and so the
+WordLink will always be in the file as written by the user.
+WordLink should be able to overcome this by rewriting the text on the
+fly and not entering the word twice into the WordLink text file.</p>
+<p>There will be a page slowdown as WordLink has to check every word in
+its file against the page that has been grabbed.
+I dont think that this will be too noticable on todays servers and if a
+user doesnt like the slowdown, then they shouldnt use the module.</p>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">
+<img alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png" />
+</a>
+<br />This 
+<span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/Text" rel="dc:type">work</span> is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England & Wales License</a>.
+</body>
+</html>
