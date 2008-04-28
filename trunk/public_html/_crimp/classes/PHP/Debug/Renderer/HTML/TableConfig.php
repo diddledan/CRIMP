@@ -10,6 +10,8 @@
  * 
  * @package PHP_Debug
  * @filesource
+ * 
+ * @version    CVS: $Id:$
  */
 
 class PHP_Debug_Renderer_HTML_TableConfig
@@ -151,7 +153,7 @@ class PHP_Debug_Renderer_HTML_TableConfig
          * HTML code for footer 
          */         
          self::$options['HTML_TABLE_credits'] = '
-        PHP_Debug ['. PHP_Debug::RELEASE .'] | By COil (2007) | 
+        PHP_Debug ['. PHP_Debug::PEAR_RELEASE .'] | By COil (2007) | 
         <a href="http://www.coilblog.com">http://www.coilblog.com</a> | 
         <a href="http://phpdebug.sourceforge.net/">PHP_Debug Project Home</a> 
         ';
@@ -262,6 +264,7 @@ class PHP_Debug_Renderer_HTML_TableConfig
         return '<pre>'. PHP_Debug::dumpVar(
             $this->singleton()->getConfig(), 
             __CLASS__, 
+            false,
             PHP_DEBUG_DUMP_ARR_STR). '</pre>';
     }   
 }

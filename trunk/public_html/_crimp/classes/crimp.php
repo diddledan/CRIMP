@@ -55,13 +55,13 @@ class Crimp {
         '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-css/html_div.css" />',
         '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug-css/html_table.css" />',
     );
-    
+
     /**
      *this is for all the content that will be sent to the user's browser
      *upon completion of execution of all plugins.
      */
     public $_output;
-    
+
     /**
      *the title of the page - appended to by setTitle()
      */
@@ -85,7 +85,7 @@ class Crimp {
     protected $serverSoftware;
     protected $serverProtocol;
     protected $userAgent;
-    
+
     public $_config = false;
     protected $varDir;
     protected $errorDir = './_crimp/errordocs/';
@@ -124,7 +124,7 @@ class Crimp {
      */
     protected $debug = false;
     protected $debugSwitch = true;
-    
+
     /**
      *default header
      */
@@ -138,13 +138,13 @@ class Crimp {
      *default footer
      */
     public $defaultHTMLFooter = '</body></html>';
-    
+
     /**
      * default form headers and footers appended to every non-ajaxed page
      */
     public $contentHeader = '';
     public $contentFooter = '</span></form>';
-    
+
     /**
      *default page content
      */
@@ -156,7 +156,7 @@ class Crimp {
      *default full html page
      */
     public $defaultHTML = '';
-    
+
     /**
      *HTTP status indicator codes and their names/descriptions
      */
@@ -168,33 +168,36 @@ class Crimp {
         HTTP_EXIT_NOT_FOUND     => array('text' => 'Not Found', 'desc' => 'The file you were trying to view cannot be found.'),
         HTTP_EXIT_SERVER_ERROR  => array('text' => 'Internal Server Error', 'desc' => 'The server encountered an error with your request. Please try again.')
     );
-    
+
     /**
      *are we ajaxed of not?
      */
     public $ajax = false;
-    
+
     /**
      *constructor
      */
     function __construct() {
         $this->debug = new PHP_Debug(array('render_type' => 'HTML',
                                            'render_mode' => 'Table',
-                                           'replace_errorhandler' => true));
+                                           'replace_errorhandler' => true,
+                                           'HTML_DIV_images_path' => '/crimp_assets/debug-images',
+                                           'HTML_DIV_css_path' => '/crimp_assets/debug-css',
+                                           'HTML_DIV_js_path' => '/crimp_assets/js'));
         if (isset($_GET['crimpq'])) {
             $this->_HTTPRequest = $_GET['crimpq'];
         }
         unset($_GET['crimpq']);
-        
+
         if (isset($_POST['crimpPostback']) && isset($_POST['crimpURL']) && ($_POST['crimpURL'] != '')) {
             $this->_HTTPRequest = urldecode($_POST['crimpURL']);
             $this->ajax = true;
         }
-        
+
         if (!$this->_HTTPRequest) $this->_HTTPRequest = '/';
-        
+
         $me = $_SERVER['PHP_SELF'];
-        
+
         /**
          * apply a form into the contentHeader with an action of the root index.php file
          */
@@ -204,16 +207,16 @@ class Crimp {
 <input type='hidden' id='crimpURL' name='crimpURL' value='' />
 <span id='crimpPageContent'>
 contentheader;
-        
+
         $this->defaultHTML          = implode("\n", array($this->defaultHTMLHeader,$this->contentHeader,$this->defaultHTMLContent,$this->contentFooter,$this->defaultHTMLFooter));
-        
+
         $this->_output              = $this->defaultHTMLContent;
-        
+
         /**
          *initialise the executedPlugins array of arrays
          */
         for($i = 0; $i <= MAX_SCOPE_VALUE; $i++) $this->executedPlugins[$i] = array();
-        
+
         /**
          *stuff imported from the setup() function
          */
@@ -224,7 +227,7 @@ contentheader;
         } else {
             $this->debugSwitch = false;
         }
-        
+
         if (!$dbgtype = $this->Config('debug',SCOPE_SECTION,false,false,'type')) {
             $dbgtype = 'HTML';
         }
@@ -233,20 +236,20 @@ contentheader;
         }
         $this->DebugMode($dbgtype,$dbgmode);
         $this->applyConfig();
-        
+
         $this->remoteHost           = isset($_ENV['REMOTE_ADDR'])?$_ENV['REMOTE_ADDR']:'unset';
         $this->serverName           = isset($_ENV['SERVER_NAME'])?$_ENV['SERVER_NAME']:'unset';
         $this->serverSoftware       = isset($_ENV['SERVER_SOFTWARE'])?$_ENV['SERVER_SOFTWARE']:'unset';
         $this->serverProtocol       = isset($_ENV['SERVER_PROTOCOL'])?$_ENV['SERVER_PROTOCOL']:'unset';
         $this->userAgent            = isset($_ENV['HTTP_USER_AGENT'])?$_ENV['HTTP_USER_AGENT']:'unset';
-        
+
         define('REMOTE_HOST',       $this->remoteHost);
         define('SERVER_NAME',       $this->serverName);
         define('SERVER_SOFTWARE',   $this->serverSoftware);
         define('PROTOCOL',          $this->serverProtocol);
         define('USER_AGENT',        $this->userAgent);
         define('HTTP_REQUEST',      $this->_HTTPRequest);
-        
+
         $this->PASS("Remote Host: {$this->remoteHost}
 Server Name: {$this->serverName}
 Server Software: {$this->serverSoftware}
@@ -254,7 +257,7 @@ User Agent: {$this->userAgent}
 Requested Document: {$this->_HTTPRequest}
 UserConfig: {$this->_userConfig}");
     }
-    
+
     public function PASS($message) {
         if ($this->debug) {
             $this->debug->add($message);
@@ -280,7 +283,7 @@ UserConfig: {$this->_userConfig}");
             $this->debug->stopTimer();
         }
     }
-    
+
     /**
      *run
      */
@@ -288,7 +291,7 @@ UserConfig: {$this->_userConfig}");
         $this->executePlugins();
         $this->sendDocument();
     }
-    
+
     /**
      *parse the configuration to set some values
      */
@@ -300,11 +303,11 @@ UserConfig: {$this->_userConfig}");
         $this->defaultLang  = ( $cfg = $this->Config('defaultlanguage', SCOPE_SECTION) ) ? $cfg : 'en';
         define('DEFAULT_LANG', $this->defaultLang);
         $this->setTitle( ( $cfg = $this->Config('title', SCOPE_SECTION) ) ? $cfg : '', true );
-        
+
         $this->friendlyUrls = (preg_match('/^\s*on\s*$/i', $this->Config('friendlyUrls', SCOPE_CRIMP))) ? 'on' : 'off';
         $this->PASS("Frienly URL System is turned {$this->friendlyUrls}");
     }
-    
+
     /**
      *figure out which <section> from the config file the requested document
      *falls under. this will find the most specific declaration, eg. if '/' and
@@ -320,17 +323,17 @@ UserConfig: {$this->_userConfig}");
          *remove the index.php from the request string
          */
         $this->_HTTPRequest = preg_replace('|^/?.*?index.php5?|', '', $this->_HTTPRequest, 1);
-        
+
         $req = explode('/', $this->_HTTPRequest);
         foreach( $req as $_ ) {
             if ( $_ ) $tmpstr = implode('/',array($tmpstr,$_));
             if ( $this->_config->xpath("/crimp/section[@baseuri='$tmpstr']") )
                 $userConfig = $tmpstr;
         }
-        
+
         $this->_userConfig = ($userConfig) ? $userConfig : '/';
     }
-    
+
     /**
      *set the document's title for inclusion in the <title></title> tags
      */
@@ -341,14 +344,14 @@ UserConfig: {$this->_userConfig}");
         } else {
             $sep = ' - ';
             if ( $conf = $this->Config('titleseparator', SCOPE_SECTION) ) $sep = $conf;
-            
+
             $cur = $this->pageTitle;
             $this->PASS("setTitle(): Adding '$title' to page title");
             $this->pageTitle = ( $this->Config('titleorder', SCOPE_SECTION) == 'forward' )
                 ? "$cur$sep$title" : "$title$sep$cur";
         }
     }
-    
+
     /**
      *add content to the html page
      */
@@ -358,7 +361,7 @@ UserConfig: {$this->_userConfig}");
         $this->PASS("Adding content ($loc)");
 
         $br = "\n<br />\n";
-        
+
         if ( !$this->_output || $this->_output == $this->defaultHTMLContent ) {
             $this->_output = $this->defaultHTMLContent;
             $location = 'top';
@@ -368,17 +371,17 @@ UserConfig: {$this->_userConfig}");
             $loc = 'top';
             $br = '';
         }
-        
+
         $var = 1;
         if ( $loc == 'top' ) {
             $this->_output = str_replace('<!--startPageContent-->',"<!--startPageContent-->$htmlcontent$br",$this->_output, $var);
         } else {
             $this->_output = str_replace('<!--endPageContent-->',"$br$htmlcontent<!--endPageContent-->",$this->_output, $var);
         }
-        
+
         StopTimer();
     }
-    
+
     /**
      *add content to the menu which appears above the page content,
      *eg. for fileList plugin
@@ -392,7 +395,7 @@ UserConfig: {$this->_userConfig}");
             $this->_output = preg_replace('|<!--endMenuContent-->|i', "<br />\n$menu\n$0", $this->_output);
         }
     }
-    
+
     /**
      *add a new header for inclusion into the final html document
      */
@@ -400,7 +403,7 @@ UserConfig: {$this->_userConfig}");
         $this->PASS("addHeader(): adding html header:\n$header");
         array_push($this->htmlheaders, $header);
     }
-    
+
     /**
      *if we get an error, call this function and it will negotiate a language
      *with the browser and send an error document in that language if one
@@ -427,11 +430,11 @@ UserConfig: {$this->_userConfig}");
         $clientLang = HTTP::negotiateLanguage($languages, $defLang);
 
         if ( isset($_COOKIE['preferred_language']) ) $clientLang = $_COOKIE['preferred_language'];
-        
+
         $errorFiles = array();
         if ( $clientLang ) { array_push($errorFiles, "$errordir/$clientLang/$errorCode-$package.html"); }
         if ( $defLang && $defLang != $clientLang ) { array_push($errorFiles, "$errordir/$deflang/$errorCode-$package.html"); }
-        
+
 	if ( $clientLang ) { array_push($errorFiles, "$errordir/$clientLang/$errorCode.html"); }
 	if ( $defLang && $defLang != $clientLang ) { array_push($errorFiles, "$errordir/$deflang/$errorCode.html"); }
         unset($errordir, $clientLang, $deflang);
@@ -447,7 +450,7 @@ UserConfig: {$this->_userConfig}");
             }
         }
         unset($errorFiles, $file);
-        
+
         if ( ! $content ) {
             global $http;
             $title = "Error '$errorCode'";
@@ -471,7 +474,7 @@ UserConfig: {$this->_userConfig}");
         $this->exitCode($errorCode);
         $this->sendDocument(false);
     }
-    
+
     /**
      *this one speaks for itself - iterates through the deferredPlugins array
      *executing the plugins that have manually set themselves to 'deferred'
@@ -490,7 +493,7 @@ UserConfig: {$this->_userConfig}");
             }
         }
     }
-    
+
     /**
      *this is the meat of the application. a simple routine that calls all the
      *defined plugins in the order listed in the config file. it starts with
@@ -507,22 +510,22 @@ UserConfig: {$this->_userConfig}");
             FAIL('You forgot to add at least one <plugin> section for this url.');
             return;
         }
-        
+
         if ( $this->_config->xpath("/crimp/section[@baseuri='{$this->userConfig()}']/plugin") )
             $this->doPluginsFromXpath("/crimp/section[@baseuri='{$this->userConfig()}']/plugin", SCOPE_SECTION);
-        
+
         if ( $this->_config->xpath('/crimp/plugin') )
             $this->doPluginsFromXpath('/crimp/plugin', SCOPE_CRIMP);
     }
-	
+
     protected function doPluginsFromXpath($xpath, $scope) {
         foreach ( $this->_config->xpath($xpath) as $plugin ) {
             if ( $plugin->name ) {
                 $plugName = (string) $plugin->name;
-                
+
                 if (!isset($this->executedPlugins[$scope][$plugName]))
                     $this->executedPlugins[$scope][$plugName] = 0;
-                
+
                 /**
                  *sanity check for instances where a plugin name may break out
                  *of the plugin directory.
@@ -544,11 +547,11 @@ UserConfig: {$this->_userConfig}");
      */
     public function sendDocument($doDeferred = true) {
         $this->PASS('Tidying up and exiting cleanly');
-        
+
         $exitCode = $this->exitCode();
-        
+
         if ( !$this->_contentType ) $this->_contentType = 'text/html';
-        
+
         if ( $this->_contentType == 'text/html' ) {
             /**
              *make sure the _output var is filled
@@ -557,7 +560,7 @@ UserConfig: {$this->_userConfig}");
                 $this->_output = $this->defaultHTMLContent;
                 if ( $exitCode == HTTP_EXIT_NO_CONTENT ) $exitCode = HTTP_EXIT_OK;
             }
-            
+
             if ($this->ajax) {
                 /**
                  * Note 'AJAX200':
@@ -574,7 +577,7 @@ UserConfig: {$this->_userConfig}");
                  *apply the template
                  */
                 $this->applyTemplate();
-                
+
                 /**
                  *set the title tags
                  */
@@ -586,7 +589,7 @@ UserConfig: {$this->_userConfig}");
                  */
                 $one = 1;
                 $this->_output = str_ireplace('<title>', '<title>'.$this->pageTitle, $this->_output, $one);
-                
+
                 /**
                  *add headers to the actual output
                  */
@@ -594,21 +597,21 @@ UserConfig: {$this->_userConfig}");
                     $this->_output = str_ireplace('</head>',implode("\n",array($header,'</head>')), $this->_output, $one);
                 }
                 unset ($one);
-                
+
                 /**
                  *CHEAT CODES
                  */
                 $version = '$Id: crimp.php,v 1.30 2007-08-22 12:38:49 diddledan Exp $';
                 $this->_output = preg_replace('/<!--VERSION-->/i', $version, $this->_output);
             }
-            
+
             /**
              *do the deferred plugin thing
              */
             if ($doDeferred) {
                 $this->executeDeferredPlugins();
             }
-            
+
             /**
              *apply the debug output
              */
@@ -621,35 +624,35 @@ UserConfig: {$this->_userConfig}");
             } else {
                 $this->WARN("HTTP Exit Code: $exitCode. This indicates a non successful transaction.");
             }
-            
+
             if (preg_match('/^on$/i', $this->Config('fullajax', SCOPE_CRIMP))) {
                 $this->_output = preg_replace('/<\/body>/i', '<script type="text/javascript">resetAjaxHandlers()</script></body>', $this->_output);
             }
-            
+
             if ($dbg = $this->getDebugString()) {
                 $this->addContent($dbg);
             }
         }
-        
+
         /**
          *send the http headers
          */
         $this->head($this->_contentType, 200);
-        
+
         /**
          *send the content to the browser
          */
         echo $this->_output;
         exit;
     }
-    
+
     protected function getDebugString() {
         if ($this->debugSwitch && $this->debug) {
             return $this->debug->getOutput();
         }
         return;
     }
-    
+
     protected function applyTemplate() {
         $templ = $this->Config('template', SCOPE_SECTION);
         if ( !isset($templ) || !$templ ) {
@@ -657,7 +660,7 @@ UserConfig: {$this->_userConfig}");
             $this->WARN('No template configuration value was found in runtime configuration. Check Config.xml file.');
             return;
         }
-        
+
         /**
          *if the user has explicitly turned off the template
          */
@@ -666,7 +669,7 @@ UserConfig: {$this->_userConfig}");
             $this->PASS("Template turned off. Not applying a template");
             return;
         }
-        
+
         /**
          *check that the template file is readable
          */
@@ -674,7 +677,7 @@ UserConfig: {$this->_userConfig}");
             $this->WARN("$templ is not readable by this program");
             return;
         }
-        
+
         /**
          *get the template content
          */
@@ -682,7 +685,7 @@ UserConfig: {$this->_userConfig}");
             $this->WARN('template file is empty');
             return;
         }
-        
+
         $one = 1;
 	    $this->_output = str_replace('@@PAGE_CONTENT@@', implode("\n", array($this->contentHeader,$this->_output,$this->contentFooter)), $template, $one);
     }
@@ -728,7 +731,7 @@ UserConfig: {$this->_userConfig}");
                                          'num' => $pluginNum,
                                          'scope' => $scope);
     }
-    
+
     /**
      *update the debugmode setting
      *
@@ -758,13 +761,13 @@ UserConfig: {$this->_userConfig}");
         }
         $this->_config = $SimpleXML;
     }
-    
+
     /**
      *get a configuration value
      */
     public function Config($key, $scope = SCOPE_SECTION, $plugin = false, $pluginNum = false, $subkey = false) {
         if ( ! $this->_config ) { return false; }
-        
+
         $configVal = false;
         /**
          *TODO: does this next variable actually do anything???? it certainly isn't named very well
@@ -785,14 +788,14 @@ UserConfig: {$this->_userConfig}");
                     if ( $this->_config->xpath("/crimp/section[@baseuri='{$this->userConfig()}']") ) {
                         if ($this->_config->xpath("/crimp/section[@baseuri='{$this->userConfig()}']/plugin")) {
                             $plugs = $this->_config->xpath("/crimp/section[@baseuri='{$this->userConfig()}']/plugin");
-                            
+
                             $plugcfg = array();
                             foreach ($plugs as $plug) {
                                 if ((string) $plug->name == $plugin) {
                                     $plugcfg[] = $plug;
                                 }
                             }
-                            
+
                             if ( !$pluginNum ) $pluginNum = 0;
                             if ( isset($plugcfg[$pluginNum]) ) {
                                 if ( $plugcfg[$pluginNum]->$key ) {
@@ -813,14 +816,14 @@ UserConfig: {$this->_userConfig}");
                 default:
                     if ( $this->_config->xpath("/crimp/plugin") ) {
                         $plugs = $this->_config->xpath("/crimp/plugin");
-                        
+
                         $plugcfg = array();
                     	foreach ($plugs as $plug) {
                             if ((string) $plug->name == $plugin) {
                                 $plugcfg[] = $plug;
                             }
 			}
-                        
+
                         if ( !$pluginNum ) $pluginNum = 0;
                         if ( isset($plugcfg[$pluginNum]) && $plugcfg[$pluginNum]->$key ) {
                             if ($subkey !== false) {
@@ -872,7 +875,7 @@ UserConfig: {$this->_userConfig}");
                     }
             }
         }
-        
+
         /**
          *we've searched for it, now return it
          */
@@ -883,7 +886,7 @@ UserConfig: {$this->_userConfig}");
         }
         return $configVal;
     }
-    
+
     /**
      *returns the calculated section name of the request
      *(may not be complete URL path)
@@ -897,7 +900,7 @@ UserConfig: {$this->_userConfig}");
     public function HTTPRequest() {
         return $this->_HTTPRequest;
     }
-    
+
     /**
      *get the short and long description of an HTTP exit code
      */
@@ -906,7 +909,7 @@ UserConfig: {$this->_userConfig}");
             return array($this->HTTP_EXIT_CODES['-1']['text'], $this->HTTP_EXIT_CODES['-1']['desc']);
         return array($this->HTTP_EXIT_CODES[$code]['text'], $this->HTTP_EXIT_CODES[$code]['desc']);
     }
-    
+
     /**
      *send the appropriate headers to the browser for the content-type and
      *http exit status code
@@ -916,14 +919,14 @@ UserConfig: {$this->_userConfig}");
          *check that the headers have not been sent already
          */
         if ( headers_sent() ) return false;
-        
+
         $status = ( isset($this->HTTP_EXIT_CODES[$exitCode]) ) ? $this->HTTP_EXIT_CODES[$exitCode]['text'] : 'Unknown';
         header("HTTP/1.1 $exitCode $status");
         header("Content-type: $contentType");
-        
+
         return true;
     }
-    
+
     /**
      *strips out everything before and after (inclusive of) the <body></body>
      *tags in the supplied html code. returns an array containing the content of
@@ -948,31 +951,31 @@ UserConfig: {$this->_userConfig}");
          */
         return array($title[1], $html);
     }
-    
+
     /**
      *read the contents of a file or returns an error document explaining that
      *the file was unavailable.
      */
     public function pageRead($file) {
         $this->PASS("pageRead(): File: $file");
-        
+
         if ( is_file($file) && is_readable($file) )
             return file_get_contents($file);
-        
+
         $this->WARN('File is either non-existant or unreadable (permissions?)');
-        
+
         $this->errorPage('PageRead', 404);
         return false;
     }
-    
+
     /**
 	 * create links (taking into account friendlyUrls setting)
 	 */
 	public function makeLink($link) {
 		return ($this->friendlyUrls == 'on') ? $link : './index.php?crimpq='.urlencode($link);
 	}
-    
-    
+
+
     /**
      * plugin execution
      */
@@ -983,69 +986,69 @@ UserConfig: {$this->_userConfig}");
 				$this->WARN("Could not include($file.php)");
 				return;
 	        }
-			
+
 			if (!$newplugin = new $plugName()) {
 				$this->WARN("Failed to instantiate an object for plugin '$plugName' class");
 				return;
 			}
-			
+
 			$newplugin->setup( $scope,
 				               $pluginNum,
 				               $deferred );
-			
+
 			$this->PASS("Calling '$plugName' plugin");
 			$newplugin->execute();
 			return;
 		}
-		
+
         if ( !file_exists($file) || !is_readable($file) ) {
             $this->WARN("Plugin file for '$plugName' inaccessible");
             return;
         }
-        
+
         $proc = proc_open(CRIMP_HOME."/plugins/$pluginName/$file", $descriptorspec, $pipes, CRIMP_HOME);
-        
+
         if ( !is_resource($proc) ) {
             $this->WARN('could not spawn perl-php-wrapper.pl');
             return;
         }
-        
+
         fwrite($pipes[0], $postquery);
         while (!feof($pipes[1])) {
             $xml = stream_get_line($pipes[1], 1000000000, '</crimprequests>');
             $xml .= '</crimprequests>';
-            
+
             try {
                 $SimpleXML = new SimpleXMLElement($xml);
             } catch(Exception $ex) {
                 $this->WARN("Failed to read xml config data from perl plugin: $ex");
                 continue;
             }
-            
+
             $xml = '<crimpresults></crimpresults>';
             $resultset = new SimpleXMLElement($xml);
-            
+
             foreach($SimpleXML->request as $request) {
 				$xml = '<crimpresult></crimpresult>';
 				$resXML = new SimpleXMLElement($xml);
-				
+
                 if ($request->type) {
 					$reqPluginName	= ($request->pluginName)	? (string) $request->pluginName	: '';
                     $reqPluginNum	= ($request->pluginNum)		? (int) $request->pluginNum		: 0;
                     $reqScope		= ($request->scope)			? (int) $request->scope			: 0;
-                    
+
                     $resXML->addChild('type', (string) $request->type);
                     $resXML->addChild('pluginName', $reqPluginName);
 					$resXML->addChild('pluginNum', $reqPluginNum);
 					$resXML->addChild('scope', $reqScope);
-                    
+
                     switch ((string) $request->type) {
                         case 'Config':
                             $reqKey		= ($request->key)		? (string) $request->key	: '';
                             $reqSubkey	= ($request->subkey)	? (string) $request->subkey	: '';
-                            
+
                             $cfgres = $crimp->Config($reqKey, $reqScope, $reqPluginName, $reqPluginNum, $reqSubkey);
-                            
+
                             $resXML->addChild('key', $reqKey);
                             $resXML->addChild('subkey', $reqSubkey);
                             $resXML->addChild('data', $cfgres);
@@ -1081,15 +1084,15 @@ UserConfig: {$this->_userConfig}");
 				}
 				$resultset->addChild($resXML);
             }
-            
+
             fputs($pipes[0], $resultset->asXML());
         }
         fclose($pipes[1]);
         fclose($pipes[0]);
         $retval = proc_close($proc);
-        
+
         $level = ( $retval == 0 ) ? PASS : WARN;
-        
+
         $level("Plugin subprocess returned $retval");
     }
 }
