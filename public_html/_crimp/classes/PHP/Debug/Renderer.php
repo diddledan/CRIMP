@@ -12,7 +12,6 @@ require_once 'PHP/Debug/Renderer/Common.php';
  * 
  * @package PHP_Debug
  * @filesource
- * @version    CVS: $Id:$
  */
 
 class PHP_Debug_Renderer

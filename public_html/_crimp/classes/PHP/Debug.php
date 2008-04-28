@@ -44,9 +44,9 @@
  * @link       http://pear.php.net/package/PHP_Debug
  * @link       http://phpdebug.sourceforge.net
  * @link       http://www.php-debug.com
- * @see 	     Text_Highlighter, Services_W3C_HTMLValidator 
+ * @see        Text_Highlighter, Services_W3C_HTMLValidator 
  * @see        Var_Dump, SQL_Parser
- * @since      1.0.0RC1
+ * @since      1.0.0
  * @version    CVS: $Id:$
  */
 
@@ -78,7 +78,7 @@ class PHP_Debug
     const VERSION_PEAR       = 1;
     const VERSION_DEFAULT    = self::VERSION_STANDALONE;
     const VERSION            = self::VERSION_STANDALONE;
-    const RELEASE            = 'V2.1.2';
+    const RELEASE            = 'V2.1.1';
     const PEAR_RELEASE       = 'V1.0.0';
 
     /**
@@ -845,7 +845,8 @@ class PHP_Debug
      */ 
     public function stopTimer()
     {
-        $this->debugLineBuffer[count($this->debugLineBuffer)-1]->setEndTime();
+        $this->debugLineBuffer[count($this->debugLineBuffer)-1]->setEndTime(
+            PHP_Debug::getMicroTimeNow());
     }
 
     /**
@@ -859,6 +860,9 @@ class PHP_Debug
      * @param   integer     $mode       Mode of function
      * @param   boolean     $stopExec   Stop the process after display of debug
      * @return  mixed                   Nothing or string depending on the mode
+     * 
+     * @todo I don't know if it is a good practice to have static properties
+     * for static functions, to check
      * 
      * @since V2.0.0 - 25 Apr 2006
      */ 
@@ -970,8 +974,8 @@ class PHP_Debug
     {
         return '<pre>'. PHP_Debug::dumpVar(
             $this, 
-            __CLASS__. ' class instance',
-            false, 
+            __CLASS__. 
+            ' class instance', 
             PHP_Debug::DUMP_STR
         ). '</pre>';  
     }

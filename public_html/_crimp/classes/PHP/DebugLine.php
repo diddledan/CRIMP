@@ -1,18 +1,5 @@
 <?php
 
-/**
- * A loader class for the renderers.
- *
- * @package PHP_Debug
- * @category PHP
- * @author Loic Vernet <qrf_coil at yahoo dot fr>
- * @since V2.0.0 - 10 Apr 2006
- * 
- * @package PHP_Debug
- * @filesource
- * @version    CVS: $Id:$
- */
-
 class PHP_DebugLine
 {
 
@@ -164,7 +151,7 @@ class PHP_DebugLine
      */
     public function __construct($info, $type = self::TYPE_DEFAULT)
     {
-        $this->setStartTime();
+        $this->startTime = PHP_Debug::getMicroTimeNow();
         $this->info = $info;
         $this->type = $type;
         $this->setTraceback();
@@ -224,21 +211,9 @@ class PHP_DebugLine
      * 
      * @since V2.0.0 - 19 apr 2006
      */
-    public function setEndTime($endTime = '')
+    public function setEndTime($endTime)
     {
-        $this->endTime = $endTime ? $endTime : PHP_Debug::getMicroTimeNow();
-    }
-
-    /**
-     * setter of startTime
-     * 
-     * @see pear bug http://pear.php.net/bugs/10919
-     * 
-     * @since V2.1.2 - 04 may 2006
-     */
-    public function setStartTime($startTime = '')
-    {
-        $this->startTime = $startTime ? $startTime : PHP_Debug::getMicroTimeNow();
+        $this->endTime = $endTime;
     }
 
     /**
@@ -253,7 +228,6 @@ class PHP_DebugLine
             PHP_Debug::dumpVar(
                 $this, 
                 __CLASS__, 
-                false,
                 PHP_DEBUG_DUMP_ARR_STR
             )
         . '</pre>';

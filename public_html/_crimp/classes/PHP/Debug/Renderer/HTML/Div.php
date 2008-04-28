@@ -3,16 +3,9 @@
 /**
  * Class of the HTML_Div renderer
  * 
- * Idea from the debug system of the symfony PHP framework 
+ * Idea from the debug system of the Symfony PHP framework 
  * @see http://www.symfony-project.com
- * @author Fabien Potencier
- * @author François Zaninotto
- * 
- * @author  Vernet Loïc
- * 
- * @version CVS: $Id:$
  */
-
 require_once 'PHP/Debug/Renderer/HTML/DivConfig.php';
 
 
@@ -92,7 +85,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
 
         // Infos
         $debugInfos = $this->DebugObject->getDebugBuffer(); 
-             
+            
         // Vars & config
         $buffer .= $this->showVarsAndConfig($debugInfos);
 
@@ -139,24 +132,18 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
                 if ($res->isValid()) {
                     $results = '<h2><img src="{$imagesPath}/info.png" alt="Valid"/> The output is valid</h2>';
                 } else {
-                    $results = '<h2><img src="{$imagesPath}/error.png" alt="Not valid" /> The output is <b>NOT</b> valid</h2>';
+                    $results = '<h2><img src="{$imagesPath}/error.png"alt="Not valid" /> The output is <b>NOT</b> valid</h2>';
         
-                    if ($res->errors || $res->warnings) {
-                    
-                      // Validation errors
-                      if ($res->errors) {
-                          $key = 'errors';
-                          $results.= $this->addW3CErrorInfos($res, $key);
-                      }
-      
-                      // Validation warnings
-                      if ($res->warnings) {
-                          $key = 'warnings';
-                          $results.= $this->addW3CErrorInfos($res, $key);
-                      }
-                    } else {
-                      $results = '<h2><img src="{$imagesPath}/warning.png" alt="warning" /> Validation results can\'t be retrieved (localhost source ?)</h2>
-                      ';
+                    // Validation errors
+                    if ($res->errors) {
+                        $key = 'errors';
+                        $results.= $this->addW3CErrorInfos($res, $key);
+                    }
+    
+                    // Validation warnings
+                    if ($res->warnings) {
+                        $key = 'warnings';
+                        $results.= $this->addW3CErrorInfos($res, $key);
                     }
                 }
             } else {
@@ -192,9 +179,9 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
         $type = 'sfW3C'. $title;
         $errorCpt = 1;
         $results = str_replace(
-          '{$title}', 
-          $title, 
-          $this->options['HTML_DIV_sfWebDebugW3CTableHeader']
+                '{$title}', 
+                $title, 
+                $this->options['HTML_DIV_sfWebDebugW3CTableHeader']
         );
 
         foreach ($res->$key as $error) {
@@ -241,7 +228,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
         foreach ($debugInfos as $debugInfo) {
             $properties = $debugInfo->getProperties();
             if (in_array($properties['type'], self::$databaseTypes)) {                
-                $buffer.= '<li>['. $this->processExecTime($properties). '] '. 
+                $buffer.= '<li>['. $this->processExecTime($properties). ' ms] '. 
                     $this->processDebugInfo($properties) .'</li>'. CR;
             }
         }
@@ -318,15 +305,15 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_CREDITS:
             case PHP_DebugLine::TYPE_DUMP:
             case PHP_DebugLine::TYPE_WATCH:
-            break;
+                break;
         
             case PHP_DebugLine::TYPE_WARNING:
                 $level = PHP_DebugLine::WARNING_LEVEL;
-            break;
+                break;
 
             case PHP_DebugLine::TYPE_APPERROR:
                 $level = PHP_DebugLine::ERROR_LEVEL;
-            break;
+                break;
 
             case PHP_DebugLine::TYPE_PHPERROR:
                 $level = $this->getPhpErrorLevel($properties);
@@ -350,26 +337,23 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
         $infos = $properties['info'];
 
         switch ($infos[0]) {
-            case E_ERROR:
-            case E_PARSE:
-            case E_CORE_ERROR:
-            case E_COMPILE_ERROR:
-            case E_USER_ERROR:
-                return PHP_DebugLine::ERROR_LEVEL;
-            break;                
-            
+            case E_NOTICE:
+            case E_USER_NOTICE:
             case E_WARNING:
             case E_CORE_WARNING:
-            case E_NOTICE:
             case E_COMPILE_WARNING:
             case E_USER_WARNING:
-            case E_USER_NOTICE:
             case E_ALL:
             case E_STRICT:
             case E_RECOVERABLE_ERROR:
                 return PHP_DebugLine::WARNING_LEVEL;
             break;                
 
+            case E_ERROR:
+            case E_PARSE:
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
+            case E_USER_ERROR:
             default:
                 return PHP_DebugLine::ERROR_LEVEL;
             break;                
@@ -632,9 +616,9 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             ),
             array(
                 $this->DebugObject->getQueryCount(), 
-                $this->DebugObject->getProcessTime() * 1000,
+                $this->DebugObject->getProcessTime()*1000,
                 $this->options['HTML_DIV_images_path'],
-                PHP_Debug::PEAR_RELEASE
+                PHP_Debug::RELEASE
             ),        
             $this->options['HTML_DIV_header']);  
     }        
@@ -665,16 +649,14 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
         $txtSECOND = 's';
 
         if (!empty($properties['endTime'])) {
-
-            $time = round(PHP_Debug::getElapsedTime(
-                $properties['startTime'], 
-                $properties['endTime']
-            ) * 1000);
-
-            $buffer = $this->span($time > 1 ? $time. ' ms' : '&lt; 1 ms', 'time');
-
+            $buffer .= $this->span(
+                PHP_Debug::getElapsedTime(
+                    $properties['startTime'], 
+                    $properties['endTime'])*1000, 
+                    'time'
+                );
         } else {
-            $buffer = '&nbsp;';
+            $buffer .= '&nbsp;';
         }
 
         return $buffer; 
@@ -874,6 +856,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
             case PHP_DebugLine::TYPE_SQLPARSE:
             case PHP_DebugLine::TYPE_WATCH:
             case PHP_DebugLine::TYPE_DUMP:
+            case PHP_DebugLine::TYPE_WARNING:
                         
                 if (!empty($properties['function'])) {                	
                     if ($properties['function'] != 'unknown') { 
@@ -967,7 +950,7 @@ class PHP_Debug_Renderer_HTML_Div extends PHP_Debug_Renderer_Common
 
         switch ($properties['type'])
         {
-        	case PHP_DebugLine::TYPE_STD:
+            case PHP_DebugLine::TYPE_STD:
             case PHP_DebugLine::TYPE_QUERY:
             case PHP_DebugLine::TYPE_QUERYREL:
             case PHP_DebugLine::TYPE_APPERROR:             

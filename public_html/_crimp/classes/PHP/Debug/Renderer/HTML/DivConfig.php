@@ -10,8 +10,6 @@
  * 
  * @package PHP_Debug
  * @filesource
- * 
- * @version    CVS: $Id:$
  */
 
 class PHP_Debug_Renderer_HTML_DivConfig
@@ -78,7 +76,7 @@ class PHP_Debug_Renderer_HTML_DivConfig
         /** 
          * images
          */     
-        self::$options['HTML_DIV_images_path'] = 'images'; 
+        self::$options['HTML_DIV_images_path'] = '/crimp_assets/debug-images'; 
         self::$options['HTML_DIV_image_info'] = 'info.png'; 
         self::$options['HTML_DIV_image_warning'] = 'warning.png'; 
         self::$options['HTML_DIV_image_error'] = 'error.png'; 
@@ -86,12 +84,12 @@ class PHP_Debug_Renderer_HTML_DivConfig
         /** 
          * css path
          */     
-        self::$options['HTML_DIV_css_path'] = 'css'; 
+        self::$options['HTML_DIV_css_path'] = '/crimp_assets/debug-css'; 
 
         /** 
          * js path
          */     
-        self::$options['HTML_DIV_js_path'] = 'js'; 
+        self::$options['HTML_DIV_js_path'] = '/crimp_assets/js'; 
         
         /**
          * Class name of the debug info levels
@@ -141,7 +139,6 @@ class PHP_Debug_Renderer_HTML_DivConfig
                 alt="W3C Validator" /></a>
         </p>
         {$results}
-        or copy paste the source here <a href="http://validator.w3.org/#validate_by_input">http://validator.w3.org/#validate_by_input</a>
 
     </div> <!-- End sfWebDebugW3CDetails -->
 
@@ -307,10 +304,9 @@ class PHP_Debug_Renderer_HTML_DivConfig
          * HTML code for credits 
          */         
          self::$options['HTML_DIV_credits'] = '
-        PHP_Debug ['. PHP_Debug::PEAR_RELEASE .'] | By COil (2008) | 
+        PHP_Debug ['. PHP_Debug::RELEASE .'] | By COil (2007) | 
         <a href="http://www.coilblog.com">http://www.coilblog.com</a> | 
-        <a href="http://phpdebug.sourceforge.net/">PHP_Debug Project Home</a> | 
-        Idea from <a href="http://www.symfony-project.com/">symfony framework</a>        
+        <a href="http://phpdebug.sourceforge.net/">PHP_Debug Project Home</a> 
         ';
 
         /**
@@ -382,7 +378,6 @@ class PHP_Debug_Renderer_HTML_DivConfig
         return '<pre>'. PHP_Debug::dumpVar(
             $this->singleton()->getConfig(), 
             __CLASS__, 
-            false,
             PHP_DEBUG_DUMP_ARR_STR). '</pre>';
     }   
 }

@@ -17,8 +17,6 @@ require_once 'PHP/Debug/Renderer/HTML/TableConfig.php';
  * 
  * @package PHP_Debug
  * @filesource
- * 
- * @version    CVS: $Id:$
  */
 
 class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
@@ -107,6 +105,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * @param string $debugLineStr The formatted debug line object to check
      * @return string Formatted string with keyword highligthed
      * 
+     * @todo nice ereg replace call to avoid HTML & attribue breaking 
      * @since V2.0.0 - 2 May 2006
      */
     protected function highlight($debugLineStr)
@@ -516,7 +515,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
                         $buffer .= $properties['function']. '()';
                     } else {
                         $buffer .= '&nbsp;';
-                }
+                    }
                 } else {
                     $buffer .= '&nbsp;';
                 }
@@ -606,7 +605,7 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
 
         switch ($properties['type'])
         {
-        	case PHP_DebugLine::TYPE_STD:
+            case PHP_DebugLine::TYPE_STD:
             case PHP_DebugLine::TYPE_QUERY:
             case PHP_DebugLine::TYPE_QUERYREL:
             case PHP_DebugLine::TYPE_APPERROR:             
@@ -821,6 +820,9 @@ class PHP_Debug_Renderer_HTML_Table extends PHP_Debug_Renderer_Common
      * 
      * @since V2.0.0 - 25 Apr 2006
      * @see PHP_DEBUGLINE_PHPERROR
+     * @todo Implement the strict error level, add an option to display or not
+     * the stricts errors
+     * 
      */ 
     protected function showError($infos)    
     {

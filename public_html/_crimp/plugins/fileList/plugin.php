@@ -65,19 +65,19 @@ class fileList extends Plugin {
 			WARN('Directory does not exist, or we tried to open a file as a directory.');
 			return;
 		}
-
+	
 		$DIR = opendir($FileDir);
 		if ( $DIR === false ) {
 			WARN('Could not open the directory for reading (check permissions)');
 			return;
 		}
-
+	
 		while ( ($file = readdir($DIR)) !== false )
 			$DirChk[] = $file;
 			closedir($DIR);
-
+	
 		foreach ( $DirChk as $file ) {
-			if (($file != '.') && ($file != '..') && ($file != 'index.html') && ($file != 'CVS') && (preg_match('/^[^.]/', $file))) {
+			if (($file != '.') && ($file != '..') && ($file != 'index.html') && ($file != 'CVS')) {
 				if ( is_dir("$FileDir/$file") ) {
 					$DirCount++;
 					$newurl = $BaseUrl.'/'.$file;
@@ -95,12 +95,12 @@ class fileList extends Plugin {
 				}
 			}
 		}
-
+	
 		$newhtml = '';
 		if ( $DirCount > 0 ) $newhtml = $newhtml.$DirList;
 		if ( ($DirCount > 0) && ($FileCount > 0) ) $newhtml = $newhtml.'<br />';
 		if ( $FileCount != 0 ) $newhtml = $newhtml.$FileList;
-
+		
 		$crimp->addMenu($newhtml);
 		StopTimer();
     }
