@@ -10,6 +10,7 @@
  * 
  * @package PHP_Debug
  * @filesource
+ * @version    CVS: $Id:$
  */
 
 class PHP_Debug_Renderer_Common
