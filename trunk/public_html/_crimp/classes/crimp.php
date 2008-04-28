@@ -50,8 +50,8 @@ class Crimp {
      */
     protected $htmlheaders = array(
         '<script type="text/javascript" src="/crimp_assets/js/mootools.js"></script>',
-        '<script type="text/javascript" src="/crimp_assets/js/html_div.js"></script>',
         '<script type="text/javascript" src="/crimp_assets/js/ajax-click-handler.js"></script>',
+        '<script type="text/javascript" src="/crimp_assets/debug/js/html_div.js"></script>',
         '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug/css/html_div.css" />',
         '<link rel="stylesheet" type="text/css" href="/crimp_assets/debug/css/html_table.css" />',
     );
