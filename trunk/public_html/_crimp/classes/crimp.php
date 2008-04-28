@@ -181,9 +181,10 @@ class Crimp {
         $this->debug = new PHP_Debug(array('render_type' => 'HTML',
                                            'render_mode' => 'Table',
                                            'replace_errorhandler' => true,
-                                           'HTML_DIV_images_path' => '/crimp_assets/debug-images',
-                                           'HTML_DIV_css_path' => '/crimp_assets/debug-css',
-                                           'HTML_DIV_js_path' => '/crimp_assets/js'));
+                                           'HTML_DIV_images_path' => '/crimp_assets/debug/images',
+                                           'HTML_DIV_css_path' => '/crimp_assets/debug/css',
+                                           'HTML_DIV_js_path' => '/crimp_assets/debug/js',
+                                           'HTML_TABLE_css_path' => '/crimp_assets/debug/css'));
         if (isset($_GET['crimpq'])) {
             $this->_HTTPRequest = $_GET['crimpq'];
         }
